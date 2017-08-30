@@ -30,7 +30,9 @@
  *               Buddha Bless:  "No Bugs"
  *
  * ========================================================= */
- 
+.error {
+  font-size: 11px !important;
+}
 .button-modal {
 	width:95px !important;
 }

@@ -14,7 +14,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-4 col-sm-6 col-md-offset-4 col-sm-offset-3">
-                        <form method="#" action="#">
+                        <form id ="loginForm" class="form">
                             <div class="card card-login card-hidden">
                                 <div class="card-header text-center" data-background-color="purple">
                                     <h4 class="card-title"> <img style="width:150px;height100px;" src="../img/login.png"/></h4>
@@ -26,7 +26,7 @@
                                             </span>
                                         <div class="form-group label-floating">
                                             <label class="control-label">E-mail</label>
-                                            <input type="email" class="form-control">
+                                            <input type="email" name="email" id="email" email="true" required="true" class="form-control">
                                         </div>
                                     </div>
                                     <div class="input-group">
@@ -35,7 +35,7 @@
                                             </span>
                                         <div class="form-group label-floating">
                                             <label class="control-label">Senha</label>
-                                            <input type="password" class="form-control">
+                                            <input type="password" name="senha" id="senha" required="true" class="form-control">
                                         </div>
                                     </div>
                                 </div>
@@ -50,4 +50,58 @@
         </div>
         @include('template/include/footer')
     </div>
+@endsection
+
+@section('scripts')
+    <script type="text/javascript">
+
+        $(document).ready(function(){
+
+            /* Regras de validação do formulário*/
+            $("#loginForm" ).validate({
+                messages: {
+                    email: {
+                        required: "Campo de preenchimento obrigatório.",
+                        email: "Insira um e-mail válido."
+                    },
+                    senha: {
+                        required: "Campo de preenchimento obrigatório."
+                    }
+                },
+                errorPlacement: function(error, element) {
+                    $(element).parent('div').addClass('has-error');
+                    error.insertAfter(element);
+                }
+            });
+
+            /* Submita o formualário via Ajax*/
+            $( "#loginForm" ).submit(function( e ) {
+                var formData = new FormData($("#loginForm")[0]);
+                $.ajax({
+                    type: "POST",
+                    url: '{{route('criar.cadastro')}}',
+                    data: formData,
+                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                    dataType: 'json',
+                    processData: false,
+                    contentType: false,
+                    cache: false,
+                    beforeSend : function() {
+
+                    },
+                    success: function (data) {
+                        if (data.status=="success") {
+                            showSucessNotification(data.message);
+                        } else if (data.status=="error-form") {
+                            showErrorNotification(data.message);
+                        }
+                    },
+                    error: function (request, status, error) {
+                        showErrorNotification(error)
+                    }
+                });
+                e.preventDefault(); // avoid to execute the actual submit of the form.
+            });
+        });
+    </script>
 @endsection

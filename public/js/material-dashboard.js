@@ -63,6 +63,7 @@ var seq2 = 0, delays2 = 80, durations2 = 500;
 
 
 $(document).ready(function(){
+    $(".money-format").maskMoney();
 
     $sidebar = $('.sidebar');
 

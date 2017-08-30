@@ -55,6 +55,7 @@
 <script src="../js/perfect-scrollbar.jquery.min.js" type="text/javascript"></script>
 <!-- Forms Validations Plugin -->
 <script src="../js/jquery.validate.min.js"></script>
+<script src="../js/additional-methods.min.js"></script>
 <!--  Plugin for Date Time Picker and Full Calendar Plugin-->
 <script src="../js/moment.min.js"></script>
 <!--  Charts Plugin -->
