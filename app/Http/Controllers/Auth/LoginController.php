@@ -40,4 +40,33 @@ class LoginController extends Controller
     public function index(){
         return view('login');
     }
+
+    protected function doLogin(Request $request)
+    {
+        try {
+            $param = $request->all();
+            $login_exist = DB::table('usuario')->where([
+                ['email', '=', $param['email']],
+                ['senha', '=', md5($param['senha'])]
+            ])->first();
+            if (empty($login_exist)) {
+                throw new CustomException('E-mail ou senha inválidos!');
+            } else {
+                return response()->json([
+                    'status' => 'success',
+                    'message' =>  'Usuário Autenticado!'
+                ]);
+            }
+        }catch (CustomException $ex) {
+            return response()->json([
+                'status' => 'error',
+                'message' =>  $ex->getMessage()
+            ]);
+        }catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' =>  'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+            ]);
+        }
+    }
 }

@@ -103,7 +103,7 @@ class RegisterController extends Controller
 
                 return response()->json([
                     'status' => 'success',
-                    'message' =>  'ok'
+                    'message' =>  'categorias'
                 ]);
             } else {
                 throw new CustomException('Login já cadastrado no sistema');
@@ -112,11 +112,6 @@ class RegisterController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' =>  $ex->getMessage()
-            ]);
-        }catch (FormException $fx) {
-            return response()->json([
-                'status' => 'error-form',
-                'message' =>  $fx->getMessage()
             ]);
         }catch (Exception $e) {
             return response()->json([

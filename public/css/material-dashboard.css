@@ -30,6 +30,10 @@
  *               Buddha Bless:  "No Bugs"
  *
  * ========================================================= */
+
+.not-view {
+ display:none;
+}
 .error {
   font-size: 11px !important;
 }

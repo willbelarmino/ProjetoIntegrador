@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" href="../img/favicon.png" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Entrar - MoneyCash</title>
+    @yield('title')
     <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
     <meta name="viewport" content="width=device-width" />
     <!-- Bootstrap core CSS     -->
@@ -88,6 +88,8 @@
 <script src="../js/demo.js"></script>
 <!-- My functions! -->
 <script src="../js/functions.js"></script>
+<!-- Jquery Mask Money! -->
+<script src="../js/jquery.maskMoney.js"></script>
 <script type="text/javascript">
     $().ready(function() {
         demo.checkFullPageBackgroundImage();

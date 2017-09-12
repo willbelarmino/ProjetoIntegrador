@@ -1,5 +1,9 @@
 ﻿@extends('template/layout')
 
+@section('title')
+    <title>Registro - MoneyCash</title>
+@endsection
+
 @section('link')
     <a href="{{route('login')}}">
         <i class="material-icons">lock</i> Login
@@ -10,7 +14,7 @@
 @section('content')
     <div class="full-page register-page" filter-color="black" data-image="../img/register.jpeg">
         <div class="container">
-            <div class="row">
+            <div id="content-view" class="row">
                 <div class="col-md-10 col-md-offset-1">
                     <div class="card card-signup">
                         <h2 class="card-title text-center">Criar cadastro</h2>
@@ -59,7 +63,7 @@
                                         <div class="footer text-center">
                                             <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                                                 <div class="fileinput-new thumbnail img-circle">
-                                                    <img src="../img/placeholder.jpg" alt="...">
+                                                    <img title="A imagem deve ser no formato jpg, png ou gif e ser menor que 500Kb!" src="../img/placeholder.jpg" alt="...">
                                                 </div>
                                                 <div class="fileinput-preview fileinput-exists thumbnail img-circle"></div>
                                                 <div>
@@ -80,7 +84,7 @@
                                                 <span class="input-group-addon">
                                                     <i class="material-icons">face</i>
                                                 </span>
-                                            <input type="text" class="form-control" name="nome" id="nome" placeholder="Nome" required="true">
+                                            <input type="text" title="O nome deve conter até 20 caracteres" class="form-control" name="nome" id="nome" placeholder="Nome" required="true">
 
                                         </div>
 
@@ -88,7 +92,7 @@
                                                 <span class="input-group-addon">
                                                     <i class="material-icons">email</i>
                                                 </span>
-                                            <input type="email" class="form-control" email="true" required="true" name="email" id="email" placeholder="E-mail">
+                                            <input type="text" class="form-control" email="true" required="true" name="email" id="email" placeholder="E-mail">
                                             <label id="email-error"></label>
                                         </div>
 
@@ -104,7 +108,7 @@
                                         <div class="checkbox">
                                             <label>
                                                 <input type="checkbox" id="termos" name="optionsCheckboxes"> <span style="font-size:10px">Eu aceito os</span>
-                                                <a style="font-size:10px" data-toggle="modal" data-target="#modalTermos" >Termos de Uso e Política de Privacidade</a>.
+                                                <a style="font-size:10px" data-toggle="modal" data-target="#loading" >Termos de Uso e Política de Privacidade</a>.
                                             </label>
                                         </div>
                                     </div>
@@ -119,6 +123,15 @@
             </div>
         </div>
         @include('template/include/footer')
+    </div>
+
+    <!-- Loading Modal -->
+    <div style="margin-top: 10%;" class="modal fade" id="loading" tabindex="-1" role="dialog" aria-labelledby="myModalLoading">
+        <div class="modal-dialog">
+            <div class="col-md-10 col-md-offset-4">
+                <img src="../img/loading.gif" alt="..." style="width: 175px; height: 100px;">
+            </div>
+        </div>
     </div>
 
     <!-- Modal -->
@@ -248,30 +261,33 @@
 
             /* Submita o formualário via Ajax*/
             $( "#cadastroForm" ).submit(function( e ) {
-                var formData = new FormData($("#loginForm")[0]);
-                $.ajax({
-                    type: "POST",
-                    url: '{{route('criar.cadastro')}}',
-                    data: formData,
-                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                    dataType: 'json',
-                    processData: false,
-                    contentType: false,
-                    cache: false,
-                    beforeSend : function() {
-
-                    },
-                    success: function (data) {
-                        if (data.status=="success") {
-                            showSucessNotification(data.message);
-                        } else if (data.status=="error-form") {
-                            showErrorNotification(data.message);
+                if ($("#cadastroForm" ).valid()) {
+                    var formData = new FormData($("#cadastroForm")[0]);
+                    $.ajax({
+                        type: "POST",
+                        url: '{{route('criar.cadastro')}}',
+                        data: formData,
+                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                        dataType: 'json',
+                        processData: false,
+                        contentType: false,
+                        cache: false,
+                        beforeSend: function () {
+                            $("#loading").modal('toggle');
+                        },
+                        success: function (data) {
+                            if (data.status == "success") {
+                                window.location.href = "{{route('categorias')}}";
+                            } else {
+                                showErrorNotification(data.message);
+                            }
+                        },
+                        error: function (request, status, error) {
+                            $("#loading").modal('toggle');
+                            showErrorNotification(error)
                         }
-                    },
-                    error: function (request, status, error) {
-                        showErrorNotification(error)
-                    }
-                });
+                    });
+                }
                 e.preventDefault(); // avoid to execute the actual submit of the form.
             });
         });

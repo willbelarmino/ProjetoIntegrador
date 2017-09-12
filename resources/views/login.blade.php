@@ -1,5 +1,9 @@
 @extends('template/layout')
 
+@section('title')
+    <title>Entrar - MoneyCash</title>
+@endsection
+
 @section('link')
     <a href="{{route('registro')}}">
         <i class="material-icons">person_add</i> Registrar
@@ -76,30 +80,32 @@
 
             /* Submita o formualário via Ajax*/
             $( "#loginForm" ).submit(function( e ) {
-                var formData = new FormData($("#loginForm")[0]);
-                $.ajax({
-                    type: "POST",
-                    url: '{{route('criar.cadastro')}}',
-                    data: formData,
-                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                    dataType: 'json',
-                    processData: false,
-                    contentType: false,
-                    cache: false,
-                    beforeSend : function() {
+                if ($("#loginForm" ).valid()) {
+                    var formData = new FormData($("#loginForm")[0]);
+                    $.ajax({
+                        type: "POST",
+                        url: '{{route('autenticar.usuario')}}',
+                        data: formData,
+                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                        dataType: 'json',
+                        processData: false,
+                        contentType: false,
+                        cache: false,
+                        beforeSend: function () {
 
-                    },
-                    success: function (data) {
-                        if (data.status=="success") {
-                            showSucessNotification(data.message);
-                        } else if (data.status=="error-form") {
-                            showErrorNotification(data.message);
+                        },
+                        success: function (data) {
+                            if (data.status == "success") {
+                                window.location.href = "{{route('categorias')}}";
+                            } else {
+                                showErrorNotification(data.message);
+                            }
+                        },
+                        error: function (request, status, error) {
+                            showErrorNotification(error)
                         }
-                    },
-                    error: function (request, status, error) {
-                        showErrorNotification(error)
-                    }
-                });
+                    });
+                }
                 e.preventDefault(); // avoid to execute the actual submit of the form.
             });
         });
