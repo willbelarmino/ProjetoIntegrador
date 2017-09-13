@@ -126,10 +126,10 @@
     </div>
 
     <!-- Loading Modal -->
-    <div style="margin-top: 10%;" class="modal fade" id="loading" tabindex="-1" role="dialog" aria-labelledby="myModalLoading">
+    <div style="margin-top: 10%;" class="modal fade" data-backdrop="static" id="loading" tabindex="-1" role="dialog" aria-labelledby="myModalLoading">
         <div class="modal-dialog">
-            <div class="col-md-10 col-md-offset-4">
-                <img src="../img/loading.gif" alt="..." style="width: 175px; height: 100px;">
+            <div class="col-md-10 col-md-offset-5">
+                <img src="../img/loading.gif" alt="..." style="width: 70px; height: 40px;">
             </div>
         </div>
     </div>
@@ -279,12 +279,13 @@
                             if (data.status == "success") {
                                 window.location.href = "{{route('categorias')}}";
                             } else {
-                                showErrorNotification(data.message);
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                setTimeout(function(){ showErrorNotification(data.message); }, 2500);
                             }
                         },
                         error: function (request, status, error) {
-                            $("#loading").modal('toggle');
-                            showErrorNotification(error)
+                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                            setTimeout(function(){ showErrorNotification(error); }, 2500);
                         }
                     });
                 }

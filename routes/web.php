@@ -24,4 +24,5 @@ Route::group(['prefix'=>'categoria','where'=>['id'=>'[0-9]+']], function() {
     Route::get('categorias', ['as'=>'categorias', 'uses'=>'CategoriaController@index']);
     Route::post('criarCategoria', ['as'=>'criar.categoria', 'uses'=>'CategoriaController@create']);
     Route::post('alterarCategoria', ['as'=>'alterar.categoria', 'uses'=>'CategoriaController@edit']);
+    Route::post('deletarCategoria', ['as'=>'deletar.categoria', 'uses'=>'CategoriaController@delete']);
 });

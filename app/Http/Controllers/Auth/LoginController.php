@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Model\Usuario;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Exception;
+use App\Exceptions\CustomException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LoginController extends Controller
 {
@@ -52,6 +57,10 @@ class LoginController extends Controller
             if (empty($login_exist)) {
                 throw new CustomException('E-mail ou senha inválidos!');
             } else {
+
+                $request->session()->put('usuarioLogado', $login_exist);
+                $request->session()->put('periodoSelecionado', date('d/m/y'));
+
                 return response()->json([
                     'status' => 'success',
                     'message' =>  'Usuário Autenticado!'

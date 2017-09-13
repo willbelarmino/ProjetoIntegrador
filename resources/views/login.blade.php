@@ -21,7 +21,7 @@
                         <form id ="loginForm" class="form">
                             <div class="card card-login card-hidden">
                                 <div class="card-header text-center" data-background-color="purple">
-                                    <h4 class="card-title"> <img style="width:150px;height100px;" src="../img/login.png"/></h4>
+                                    <h4 class="card-title"> <img style="width:150px;height:100px;" src="../img/login.png"/></h4>
                                 </div>
                                 <div class="card-content">
                                     <div class="input-group">
@@ -53,6 +53,15 @@
             </div>
         </div>
         @include('template/include/footer')
+    </div>
+
+    <!-- Loading Modal -->
+    <div style="margin-top: 10%;" class="modal fade" data-backdrop="static" id="loading" tabindex="-1" role="dialog" aria-labelledby="myModalLoading">
+        <div class="modal-dialog">
+            <div class="col-md-10 col-md-offset-5">
+                <img src="../img/loading.gif" alt="..." style="width: 70px; height: 40px;">
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -92,17 +101,19 @@
                         contentType: false,
                         cache: false,
                         beforeSend: function () {
-
+                            $("#loading").modal('toggle');
                         },
                         success: function (data) {
                             if (data.status == "success") {
                                 window.location.href = "{{route('categorias')}}";
                             } else {
-                                showErrorNotification(data.message);
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                setTimeout(function(){ showErrorNotification(data.message); }, 2500);
                             }
                         },
                         error: function (request, status, error) {
-                            showErrorNotification(error)
+                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                            setTimeout(function(){ showErrorNotification(error); }, 2500);
                         }
                     });
                 }

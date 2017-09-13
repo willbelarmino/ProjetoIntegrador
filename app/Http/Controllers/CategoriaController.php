@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+
 use App\Http\Model\Categoria;
-use function GuzzleHttp\Psr7\_parse_message;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Exception;
@@ -16,34 +15,34 @@ class CategoriaController extends Controller
 
 
     public function index(Request $request){
-        $usuarioLogado = 3;//$request->session()->get('usuarioLogado');
-        $categorias = DB::table('categoria')->where('id_usuario', $usuarioLogado)->get();
+        $usuarioLogado = $request->session()->get('usuarioLogado');
+        $categorias = DB::table('categoria')->where('id_usuario', $usuarioLogado->id)->get();
         return view('categorias/categorias',['menuView'=>'categorias','page'=>'Categorias','categorias'=>$categorias]);
     }
 
     protected function create(Request $request){
         try {
 
-            //$usuarioLogado = $request->session()->get('usuarioLogado');
+            $usuarioLogado = $request->session()->get('usuarioLogado');
             $param = $request->all();
-            if (!empty($param['limite'])) {
+            if (!empty($param['limite']) && $param['limite']!="R$ 0,00") {
                 $limite = str_replace("R$", "", $param['limite']);
                 $limite = str_replace(".", "", $limite);
                 $limite = str_replace(",", ".", $limite);
                 $new_categoria = Categoria::create([
                     'nome' => $param['nome'],
                     'limite' => $limite,
-                    'id_usuario' => 3 //$usuarioLogado
+                    'id_usuario' => $usuarioLogado->id
                 ]);
             } else {
                 $new_categoria = Categoria::create([
                     'nome' => $param['nome'],
-                    'id_usuario' => 3 //$usuarioLogado
+                    'id_usuario' => $usuarioLogado->id
                 ]);
             }
 
             if (empty($new_categoria)) {
-                throw new CustomException('Erro ao cadastrar categoria. Tente novamente mais tarde.');
+                throw new CustomException('Ops. Erro ao cadastrar categoria. Tente novamente mais tarde.');
             }
 
             return response()->json([
@@ -64,34 +63,39 @@ class CategoriaController extends Controller
         }
     }
 
-    protected function delete(){
-
+    protected function delete(Request $request){
+        try {
+            $param = $request->all();
+            DB::table('categoria')->where('id',$param['id'])->delete();
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Categoria removida com sucesso.'
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Ops. Erro ao remover registro. Tente novamente mais tarde.'
+            ]);
+        }
     }
 
     protected function edit(Request $request){
         try {
             $param = $request->all();
-            if (empty($param['nome'])) {
-                throw new CustomException("nome vazio");
-            }
-
-            if (empty($param['id'])) {
-                throw new CustomException("id vazio");
-            }
 
             if (!empty($param['limite'])) {
                 $limite = str_replace("R$", "", $param['limite']);
                 $limite = str_replace(".", "", $limite);
                 $limite = str_replace(",", ".", $limite);
             } else {
-                $limite = 25.5;
+                $limite = null;
             }
 
             DB::table('categoria')
                 ->where('id', $param['id'])
                 ->update([
-                    ['nome' => $param['nome']],
-                    ['limite' => $limite]
+                    'nome' => $param['nome'],
+                    'limite' => $limite
                 ]);
 
             return response()->json([
@@ -106,7 +110,7 @@ class CategoriaController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  'Ops. Erro ao alterar registro. Tente novamente mais tarde.'
             ]);
         }
     }

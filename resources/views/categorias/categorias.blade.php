@@ -41,16 +41,18 @@
                                                 @endif
 
                                                 <td class="td-actions text-right">
-                                                    <button type="button" rel="tooltip" class="btn btn-info">
+                                                    <button type="button" rel="tooltip" class="btn btn-info"
+                                                            onclick="visualizar('{{$categoria->nome}}', '{{ 'R$ '.number_format($categoria->limite, 2, ',', '.')}}');">
                                                         <i class="material-icons">assignment</i>
                                                     </button>
                                                     <button type="button" rel="tooltip" class="btn btn-success"
-                                                            onclick="alterar({{$categoria->id}}, '{{$categoria->nome}}', '{{$categoria->limite}}');">
+                                                            onclick="alterar({{$categoria->id}}, '{{$categoria->nome}}', '{{ 'R$ '.number_format($categoria->limite, 2, ',', '.')}}');">
                                                         <i class="material-icons">edit</i>
                                                     </button>
-                                                    <button type="button" rel="tooltip" class="btn btn-danger">
+                                                    <button type="button" rel="tooltip" class="btn btn-danger" onclick="deletar({{$categoria->id}});">
                                                         <i class="material-icons">close</i>
                                                     </button>
+                                                </td>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -74,7 +76,7 @@
 @section('modal')
 
     <!-- Loading Modal -->
-    <div style="margin-top: 10%;" class="modal fade" id="loading" tabindex="-1" role="dialog" aria-labelledby="myModalLoading">
+    <div style="margin-top: 10%;" class="modal fade" data-backdrop="static" id="loading" tabindex="-1" role="dialog" aria-labelledby="myModalLoading">
         <div class="modal-dialog">
             <div class="col-md-10 col-md-offset-5">
                 <img src="../img/loading.gif" alt="..." style="width: 70px; height: 40px;">
@@ -103,7 +105,7 @@
                             <div class="checkbox">
                                 <label>
                                     <input type="checkbox" id="habilitar-limite" name="optionsCheckboxes">
-                                    <a style="font-size:12px" data-toggle="modal" data-target="#loading" >Inserir limite</a>.
+                                    <a style="font-size:12px"  >Inserir limite</a>.
                                 </label>
                             </div>
 
@@ -141,7 +143,7 @@
                             <div class="checkbox">
                                 <label>
                                     <input type="checkbox" id="habilitar-limite-edit" name="optionsCheckboxes">
-                                    <a style="font-size:12px" data-toggle="modal" data-target="#loading" >Inserir limite</a>.
+                                    <a style="font-size:12px"  >Inserir limite</a>.
                                 </label>
                             </div>
 
@@ -167,10 +169,59 @@
         </div>
     </div>
     <!-- /MODAL -->
+
+
+    <!-- MODAL -->
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal-panel-view">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="card">
+
+                    <label>Nome: <span id="nome-view"></span></label>
+                    <label>Limite: <span id="limite-view"></span></label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /MODAL -->
 @endsection
 
 @section('scripts')
     <script type="text/javascript">
+
+        function visualizar(nome,limite) {
+            $("#nome-view").html(nome);
+            $("#limite-view").html(limite);
+            $("#modal-panel-view").modal("toggle");
+        }
+
+        function deletar(id) {
+            $.ajax({
+                type: "POST",
+                url: '{{route('deletar.categoria')}}',
+                data: { id : id },
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                dataType: 'json',
+                cache: false,
+                beforeSend: function () {
+                    setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
+                },
+                success: function (data) {
+                    setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                    if (data.status == "success") {
+                        setTimeout(function(){ loadTable(); }, 2000);
+                        setTimeout(function(){ showSucessNotification(data.message); }, 2500);
+                    } else {
+                        setTimeout(function(){ showErrorNotification(data.message); }, 2500);
+                    }
+                },
+                error: function (request, status, error) {
+                    setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                    setTimeout(function(){ showErrorNotification(error); }, 2500);
+                }
+            });
+        }
+
 
         function alterar(id,nome,limite) {
             $("#formCategoria-edit").css("display","block");
@@ -182,10 +233,16 @@
             $(inputNome).removeClass('is-empty');
             $(inputNome).addClass('label-floating');
 
-            $("#limite-edit").val(limite);
-            var inputLimite = $("#limite-edit").parent()[0];
-            $(inputLimite).removeClass('is-empty');
-            $(inputLimite).addClass('label-floating');
+            if (limite!="R$ 0,00") {
+                $("#limite-edit").val(limite);
+                var inputLimite = $("#limite-edit").parent()[0];
+                $(inputLimite).removeClass('is-empty');
+                $(inputLimite).addClass('label-floating');
+
+                $("#habilitar-limite-edit").prop("checked", true);
+                $("#limite-edit").removeAttr('disabled');
+                $("#input-limite-edit").css("display", "block");
+            }
 
             $("#modal-panel").modal("toggle");
         }
@@ -224,13 +281,13 @@
             /* Habilitar input do limite*/
             $( ".check" ).click(function() {
                 setInterval(function(){
-                    if ($("#habilitar-limite-edit").is(':checked')==true) {
-                        $("#limite-edit").removeAttr('disabled');
-                        $("#input-limite-edit").css( "display", "block" );
+                    if ($("#habilitar-limite").is(':checked')==true) {
+                        $("#limite").removeAttr('disabled');
+                        $("#input-limite").css( "display", "block" );
 
                     }else {
-                        $("#limite-edit").attr('disabled','disabled');
-                        $("#input-limite-edit").css( "display", "none" );
+                        $("#limite").attr('disabled','disabled');
+                        $("#input-limite").css( "display", "none" );
                     }
 
                     if ($("#habilitar-limite-edit").is(':checked')==true) {
@@ -248,6 +305,10 @@
             $("#modal-panel").on("hide.bs.modal", function () {
                 $("#formCategoria-edit").css("display","none");
                 $("#formCategoria").css("display","block");
+                $("#limite").attr('disabled','disabled');
+                $("#input-limite").css("display", "none");
+                $("#limite-edit").attr('disabled','disabled');
+                $("#input-limite-edit").css("display", "none");
                 var form = $("#modal-panel").find("form")
                 $(form).each (function(){
                     var formID = $(this).attr("id");
