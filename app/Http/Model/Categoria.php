@@ -13,4 +13,8 @@ class Categoria extends Model
     protected $table = 'categoria';
 
     protected $fillable = ['nome', 'limite', 'id_usuario'];
+
+    public function usuario() {
+        return $this->belongsTo('App\Http\Model\Usuario','id_usuario', 'id');
+    }
 }

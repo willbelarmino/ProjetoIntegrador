@@ -46,13 +46,16 @@
                                                         <i class="material-icons">assignment</i>
                                                     </button>
                                                     <button type="button" rel="tooltip" class="btn btn-success"
-                                                            onclick="alterar({{$categoria->id}}, '{{$categoria->nome}}', '{{ 'R$ '.number_format($categoria->limite, 2, ',', '.')}}');">
+                                                            onclick="alterar(
+                                                                '{{$categoria->id}}',
+                                                                '{{$categoria->nome}}',
+                                                                '{{ 'R$ '.number_format($categoria->limite, 2, ',', '.')}}'
+                                                            );">
                                                         <i class="material-icons">edit</i>
                                                     </button>
                                                     <button type="button" rel="tooltip" class="btn btn-danger" onclick="deletar({{$categoria->id}});">
                                                         <i class="material-icons">close</i>
                                                     </button>
-                                                </td>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -108,6 +111,8 @@
                                     <a style="font-size:12px"  >Inserir limite</a>.
                                 </label>
                             </div>
+
+
 
                             <div class="form-group label-floating" id="input-limite" style="display:none;">
                                 <label class="control-label">Limite

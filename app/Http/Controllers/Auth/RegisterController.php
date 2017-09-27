@@ -99,7 +99,7 @@ class RegisterController extends Controller
                 }
 
                 $request->session()->put('usuarioLogado', $new_user);
-                $request->session()->put('periodoSelecionado', date('d/m/y'));
+                $request->session()->put('periodoSelecionado', date('Ymd'));
 
                 return response()->json([
                     'status' => 'success',
@@ -116,7 +116,7 @@ class RegisterController extends Controller
         }catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  $e->getMessage()
             ]);
         }
     }

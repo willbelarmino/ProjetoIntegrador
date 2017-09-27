@@ -26,3 +26,11 @@ Route::group(['prefix'=>'categoria','where'=>['id'=>'[0-9]+']], function() {
     Route::post('alterarCategoria', ['as'=>'alterar.categoria', 'uses'=>'CategoriaController@edit']);
     Route::post('deletarCategoria', ['as'=>'deletar.categoria', 'uses'=>'CategoriaController@delete']);
 });
+
+Route::group(['prefix'=>'despesa','where'=>['id'=>'[0-9]+']], function() {
+    Route::get('pendentes', ['as'=>'pendentes', 'uses'=>'DespesaPendenteController@index']);
+    Route::post('criarPendente', ['as'=>'criar.pendente', 'uses'=>'DespesaPendenteController@create']);
+    Route::post('alterarPendente', ['as'=>'alterar.pendente', 'uses'=>'DespesaPendenteController@edit']);
+    Route::post('deletarPendente', ['as'=>'deletar.pendente', 'uses'=>'DespesaPendenteController@delete']);
+
+});

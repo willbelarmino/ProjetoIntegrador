@@ -20,8 +20,8 @@
     <!--  CSS for Demo Purpose, don't include it in your project     -->
     <link href="../css/demo.css" rel="stylesheet" />
     <!--     Fonts and icons     -->
-    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" />
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="../css/css.css" />
 </head>
 
 <body>
@@ -78,7 +78,7 @@
                     </a>
                 </li>
                 <li class="@if ($menuView == 'pendentes') active @endif">
-                    <a href="./dashboard.html">
+                    <a href="{{route('pendentes')}}">
                         <i class="mdi mdi-credit-card-multiple"></i>
                         <p>Despesas Pendentes</p>
                     </a>
@@ -96,7 +96,7 @@
                     </a>
                 </li>
                 <li class="@if ($menuView == 'categorias') active @endif">
-                    <a href="./dashboard.html">
+                    <a href="{{route('categorias')}}">
                         <i class="mdi mdi-format-line-weight"></i>
                         <p>Categorias</p>
                     </a>
@@ -209,8 +209,6 @@
 <script src="../js/jquery-jvectormap.js"></script>
 <!-- Sliders Plugin -->
 <script src="../js/nouislider.min.js"></script>
-<!--  Google Maps Plugin    -->
-<script src="https://maps.googleapis.com/maps/api/js"></script>
 <!-- Select Plugin -->
 <script src="../js/jquery.select-bootstrap.js"></script>
 <!--  DataTables.net Plugin    -->

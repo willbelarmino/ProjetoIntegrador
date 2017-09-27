@@ -59,7 +59,7 @@ class LoginController extends Controller
             } else {
 
                 $request->session()->put('usuarioLogado', $login_exist);
-                $request->session()->put('periodoSelecionado', date('d/m/y'));
+                $request->session()->put('periodoSelecionado', date('Ymd'));
 
                 return response()->json([
                     'status' => 'success',
