@@ -47,8 +47,7 @@
                                                 <td>{{ $parcela->despesa->categoria->nome }}</td>
 
                                                 <td class="td-actions text-right">
-                                                    <button type="button" rel="tooltip" class="btn btn-info"
-                                                            onclick="visualizar('{{$parcela->despesa->nome}}', '{{ 'R$ '.number_format($parcela->valor, 2, ',', '.')}}');">
+                                                    <button type="button" rel="tooltip" class="btn btn-info" data-toggle="modal" data-target="#modal-panel-view">
                                                         <i class="material-icons">assignment</i>
                                                     </button>
                                                     <button type="button" rel="tooltip" class="btn btn-success"
@@ -99,7 +98,7 @@
         </div>
     </div>
 
-    <!-- MODAL -->
+    <!-- MODAL FORM -->
     <div class="modal fade" tabindex="-1" role="dialog" id="modal-panel">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
@@ -236,14 +235,58 @@
     <!-- /MODAL -->
 
 
-    <!-- MODAL -->
+    <!-- MODAL VIEW -->
     <div class="modal fade" tabindex="-1" role="dialog" id="modal-panel-view">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="card">
-
-                    <label>Nome: <span id="nome-view"></span></label>
-                    <label>Limite: <span id="limite-view"></span></label>
+                    <form class="form-horizontal">
+                        <div class="card-header card-header-text" data-background-color="purple">
+                            <h4 class="card-title">Stock Center</h4>
+                        </div>
+                        <div class="card-content">
+                            <div class="row">
+                                <label class="col-sm-3 label-on-left">Valor</label>
+                                <div class="col-sm-9">
+                                    <div class="form-group">
+                                        <p class="form-control-static">R$ 187,45</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <label class="col-sm-3 label-on-left">Data de vencimento</label>
+                                <div class="col-sm-9">
+                                    <div class="form-group">
+                                        <p class="form-control-static">20/09/2017</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <label class="col-sm-3 label-on-left">Parcela</label>
+                                <div class="col-sm-9">
+                                    <div class="form-group">
+                                        <p class="form-control-static">1/4</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <label class="col-sm-3 label-on-left">Categoria</label>
+                                <div class="col-sm-9">
+                                    <div class="form-group">
+                                        <p class="form-control-static">Alimentação</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <label class="col-sm-3 label-on-left">Cartão de crédito</label>
+                                <div class="col-sm-9">
+                                    <div class="form-group">
+                                        <p class="form-control-static">Itaú</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
