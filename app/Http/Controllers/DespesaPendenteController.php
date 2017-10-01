@@ -17,17 +17,18 @@ use App\Exceptions\CustomException;
 class DespesaPendenteController extends Controller
 {
 
-
-
     public function index(Request $request){
         $usuarioLogado = $request->session()->get('usuarioLogado');
         $periodoSelecionado = $request->session()->get('periodoSelecionado');
         $categorias = Categoria::from('categoria AS c')
-            ->where("c.id_usuario",$usuarioLogado->id)->get();
+            ->where("c.id_usuario",$usuarioLogado->id)
+            ->get();
 
         $cartoes = CartaoCredito::from('cartao_credito AS cc')
             ->where("c.id_usuario",$usuarioLogado->id)
-            ->join('categoria AS c','cc.id_conta','=','c.id')->get();
+            ->join('categoria AS c','cc.id_conta','=','c.id')
+            ->select('cc.*')
+            ->get();
 
         $parcelasPendentes = ParcelaPendente::with(['despesa.categoria' => function ($query) use ($usuarioLogado) {
             $query->where('categoria.id_usuario', '=', $usuarioLogado->id);
@@ -36,14 +37,22 @@ class DespesaPendenteController extends Controller
             date('Y-m-t', strtotime($periodoSelecionado))
         ])->get();
 
-            /*ParcelaPendente::from('parcela_pendente AS p')
-            ->join('despesa AS d','d.id','=','p.id_despesa')
-            ->join('categoria AS c','c.id','=','d.id_categoria')
-            ->whereBetween('p.dt_vencimento', [
-                date('Y-m-01', strtotime($periodoSelecionado)),
-                date('Y-m-t', strtotime($periodoSelecionado))])
-            ->where("c.id_usuario",$usuarioLogado->id)
-            ->get(); */
+        foreach($parcelasPendentes as $key => $subarray) {
+            $allParcelas = ParcelaPendente::with('despesa')
+                ->where('id_despesa', '=', 1)
+                ->orderBy('dt_vencimento', 'asc')
+                ->get();
+
+            $size = count($allParcelas);
+
+            foreach($allParcelas as $key2 => $subsubarray) {
+                if ( ($allParcelas[$key2]->id) == ($parcelasPendentes[$key]->id) ) {
+                    $parcelasPendentes[$key]->referencia=($key2+1).'/'.$size;
+                    break;
+                }
+            }
+
+        }
 
         return view('despesas/pendente',
             ['menuView'=>'pendentes',

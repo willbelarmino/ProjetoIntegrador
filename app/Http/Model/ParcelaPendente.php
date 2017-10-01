@@ -8,6 +8,8 @@ class ParcelaPendente extends Model
 {
     public $timestamps = false;
 
+    private $referencia;
+
     protected $guarded = ['id'];
 
     protected $table = 'parcela_pendente';

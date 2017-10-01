@@ -47,7 +47,15 @@
                                                 <td>{{ $parcela->despesa->categoria->nome }}</td>
 
                                                 <td class="td-actions text-right">
-                                                    <button type="button" rel="tooltip" class="btn btn-info" data-toggle="modal" data-target="#modal-panel-view">
+                                                    <button type="button" rel="tooltip" class="btn btn-info"
+                                                            (nome,valor,categoria,parcela,credito)
+                                                            onclick="visualizar(
+                                                                    '{{$parcela->despesa->nome}}',
+                                                                    '{{ 'R$ '.number_format($parcela->valor, 2, ',', '.')}}',
+                                                                    '{{$parcela->despesa->categoria->nome}}',
+                                                                    '{{$parcela->referencia}}',
+                                                                    '{{$credito}}'
+                                                            )">
                                                         <i class="material-icons">assignment</i>
                                                     </button>
                                                     <button type="button" rel="tooltip" class="btn btn-success"
@@ -242,14 +250,14 @@
                 <div class="card">
                     <form class="form-horizontal">
                         <div class="card-header card-header-text" data-background-color="purple">
-                            <h4 class="card-title">Stock Center</h4>
+                            <h4 class="card-title" id="view-despesa-nome">Stock Center</h4>
                         </div>
                         <div class="card-content">
                             <div class="row">
                                 <label class="col-sm-3 label-on-left">Valor</label>
                                 <div class="col-sm-9">
                                     <div class="form-group">
-                                        <p class="form-control-static">R$ 187,45</p>
+                                        <p class="form-control-static" id="view-despesa-valor">R$ 187,45</p>
                                     </div>
                                 </div>
                             </div>
@@ -257,7 +265,7 @@
                                 <label class="col-sm-3 label-on-left">Data de vencimento</label>
                                 <div class="col-sm-9">
                                     <div class="form-group">
-                                        <p class="form-control-static">20/09/2017</p>
+                                        <p class="form-control-static" id="view-despesa-vencimento">20/09/2017</p>
                                     </div>
                                 </div>
                             </div>
@@ -265,7 +273,7 @@
                                 <label class="col-sm-3 label-on-left">Parcela</label>
                                 <div class="col-sm-9">
                                     <div class="form-group">
-                                        <p class="form-control-static">1/4</p>
+                                        <p class="form-control-static" id="view-despesa-parcela">1/4</p>
                                     </div>
                                 </div>
                             </div>
@@ -273,17 +281,20 @@
                                 <label class="col-sm-3 label-on-left">Categoria</label>
                                 <div class="col-sm-9">
                                     <div class="form-group">
-                                        <p class="form-control-static">Alimentação</p>
+                                        <p class="form-control-static" id="view-despesa-categoria">Alimentação</p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
+                            <div class="row" id="box-credito" style="display:none;">
                                 <label class="col-sm-3 label-on-left">Cartão de crédito</label>
                                 <div class="col-sm-9">
                                     <div class="form-group">
-                                        <p class="form-control-static">Itaú</p>
+                                        <p class="form-control-static" id="view-despesa-credito">Itaú</p>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="text-center">
+                                <button type="button" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal" data-dismiss="modal">Ok</button>
                             </div>
                         </div>
                     </form>
@@ -314,8 +325,16 @@
         }
 
         function visualizar(nome,valor,categoria,parcela,credito) {
-            $("#nome-view").html(nome);
-            $("#valor-view").html(valor);
+            $("#view-despesa-nome").html(nome);
+            $("#view-despesa-valor").html(valor);
+            $("#view-despesa-categoria").html(categoria);
+            $("#view-despesa-parcela").html(parcela);
+            if (credito!=null && credito!="") {
+                $("#view-despesa-credito").html(credito);
+                $("#box-credito").css("display", "block");
+            } else {
+                $("#box-credito").css("display", "none");
+            }
             $("#modal-panel-view").modal("toggle");
         }
 
