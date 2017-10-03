@@ -128,7 +128,7 @@ class DespesaPendenteController extends Controller
                     '".date('Ymt', strtotime($periodoSelecionado))."')");
             return response()->json([
                 'status' => 'success',
-                'message' =>  'Categoria removida com sucesso.'
+                'message' =>  'Despesa removida com sucesso.'
             ]);
         } catch (Exception $e) {
             return response()->json([

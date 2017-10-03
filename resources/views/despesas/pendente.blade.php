@@ -319,6 +319,7 @@
                 for(i = 0; i < $(messages).length; i++) {
                     showErrorNotification($( messages )[i]);
                 }
+                messages = [];
                 return false;
             }
             return true;
