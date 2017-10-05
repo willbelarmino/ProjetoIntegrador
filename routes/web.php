@@ -28,6 +28,7 @@ Route::group(['prefix'=>'categoria','where'=>['id'=>'[0-9]+']], function() {
 });
 
 Route::group(['prefix'=>'despesa','where'=>['id'=>'[0-9]+']], function() {
+    Route::get('pdfView/{teste}', ['as'=>'generate.pdf', 'uses'=>'DespesaPendenteController@toPDF']);
     Route::get('pendentes', ['as'=>'pendentes', 'uses'=>'DespesaPendenteController@index']);
     Route::post('criarPendente', ['as'=>'criar.pendente', 'uses'=>'DespesaPendenteController@create']);
     Route::post('alterarPendente', ['as'=>'alterar.pendente', 'uses'=>'DespesaPendenteController@edit']);

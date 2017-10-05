@@ -42,10 +42,7 @@
 
                                                 <td class="td-actions text-right">
                                                     <button type="button" rel="tooltip" class="btn btn-info"
-                                                            onclick="visualizar(
-                                                                '{{$categoria->nome}}',
-                                                                '{{ 'R$ '.number_format($categoria->limite, 2, ',', '.')}}'
-                                                            );">
+                                                            onclick="visualizar('{{$categoria->nome}}', '{{ 'R$ '.number_format($categoria->limite, 2, ',', '.')}}');">
                                                         <i class="material-icons">assignment</i>
                                                     </button>
                                                     <button type="button" rel="tooltip" class="btn btn-success"
@@ -62,6 +59,7 @@
                                                 </td>
                                             </tr>
                                         @endforeach
+
                                         </tbody>
                                     </table>
                                 </div>
@@ -279,7 +277,7 @@
                         }
                     }
                 });
-                $(".pagination").prepend('<li class="btn btn-primary btn-xs" style="padding: 5px 13px" data-toggle="modal" data-target="#modal-panel"><i class="material-icons">add</i>Adicionar</li>');
+                $(".pagination").prepend('<li class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel">Adicionar</li>');
             });
         }
 

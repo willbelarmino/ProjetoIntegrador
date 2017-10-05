@@ -78,9 +78,11 @@
                                                 </td>
                                             </tr>
                                         @endforeach
-
                                         </tbody>
                                     </table>
+                                    <button type="button"  class="btn btn-danger btn-xs" onclick="location.href='{{ route('generate.pdf', $testepdf) }}'" style="float:right">
+                                        <i class="material-icons">print</i> IMPRIMIR
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -206,8 +208,7 @@
 
                             <div class="form-group label-floating">
                                 <label class="control-label">Categoria</label>
-                                <select id="categoria-edit" name="categoria" class="selectpicker" data-style="select-with-transition" data-size="7">
-                                    <option value="">Teste</option>
+                                <select id="categoria-edit" name="categoria" class="selectpicker" title="Selecionar" data-style="select-with-transition" data-size="7">
                                     @foreach ($categorias as $categoria)
                                         <option value="{{$categoria->id}}">{{$categoria->nome}}</option>
                                     @endforeach
@@ -445,7 +446,7 @@
                         }
                     }
                 });
-                $(".pagination").prepend('<li class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel">Adicionar</li>');
+                $(".pagination").prepend('<li class="btn btn-primary btn-xs" style="padding: 5px 13px" data-toggle="modal" data-target="#modal-panel"><i class="material-icons">add</i>Adicionar</li>');
             });
         }
 
@@ -606,8 +607,7 @@
                 }
                 e.preventDefault(); // avoid to execute the actual submit of the form.
             });
-
-        });
+        })
 
     </script>
 @endsection

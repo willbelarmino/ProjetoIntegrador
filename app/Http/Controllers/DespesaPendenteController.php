@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Exception;
 use App\Exceptions\CustomException;
+use PDF;
+use App;
+use Barryvdh\Snappy;
 
 class DespesaPendenteController extends Controller
 {
@@ -39,13 +42,14 @@ class DespesaPendenteController extends Controller
 
         foreach($parcelasPendentes as $key => $subarray) {
             $allParcelas = ParcelaPendente::with('despesa')
-                ->where('id_despesa', '=', 1)
+                ->where('id_despesa', '=', $parcelasPendentes[$key]->despesa->id)
                 ->orderBy('dt_vencimento', 'asc')
                 ->get();
 
             $size = count($allParcelas);
 
             foreach($allParcelas as $key2 => $subsubarray) {
+                //$parcelasPendentes[$key]->referencia=$allParcelas;
                 if ( ($allParcelas[$key2]->id) == ($parcelasPendentes[$key]->id) ) {
                     $parcelasPendentes[$key]->referencia=($key2+1).'/'.$size;
                     break;
@@ -59,6 +63,7 @@ class DespesaPendenteController extends Controller
                 'page'=>'Despesas Pendentes',
                 'parcelas'=>$parcelasPendentes,
                 'categorias'=>$categorias,
+                'testepdf'=>$parcelasPendentes,
                 'cartoes'=>$cartoes]);
     }
 
@@ -180,6 +185,11 @@ class DespesaPendenteController extends Controller
                 'message' => $e->getMessage() //'Ops. Erro ao alterar registro. Tente novamente mais tarde.'
             ]);
         }
+    }
+
+    protected function toPDF($teste){
+        $pdf = PDF::loadView('despesas/relatorios/pendente-rel', $teste);
+        return $pdf->download('invoice.pdf');
     }
 
 }

@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Exception;
 use App\Exceptions\CustomException;
+use PDF;
+use App;
+use Barryvdh\Snappy;
 
 class CategoriaController extends Controller
 {

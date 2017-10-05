@@ -261,8 +261,7 @@
                     "next":       "Próximo",
                     "previous":   "Anterior"
                 }
-            }
-
+            },
         });
 
 
@@ -285,12 +284,11 @@
         });
 
 
-
         //New record
-        $(".pagination").prepend('<li class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel">Adicionar</li>');
+        $(".pagination").prepend('<li class="btn btn-primary btn-xs" style="padding: 5px 13px" data-toggle="modal" data-target="#modal-panel"><i class="material-icons">add</i>Adicionar</li>');
 
         $( "[name='datatables_length']" ).change(function() {
-            $(".pagination").prepend('<li class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel">Adicionar</li>');
+            $(".pagination").prepend('<li class="btn btn-primary btn-xs" style="padding: 5px 13px" data-toggle="modal" data-target="#modal-panel"><i class="material-icons">add</i>Adicionar</li>');
         });
 
         $('.card .material-datatables label').addClass('form-group');
