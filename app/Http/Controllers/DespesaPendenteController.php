@@ -57,13 +57,16 @@ class DespesaPendenteController extends Controller
             }
 
         }
+        $relArray  = array(
+            "foo" => "bar",
+            "bar" => "foo",
+        );
 
         return view('despesas/pendente',
             ['menuView'=>'pendentes',
                 'page'=>'Despesas Pendentes',
                 'parcelas'=>$parcelasPendentes,
                 'categorias'=>$categorias,
-                'testepdf'=>$parcelasPendentes,
                 'cartoes'=>$cartoes]);
     }
 
@@ -187,9 +190,17 @@ class DespesaPendenteController extends Controller
         }
     }
 
-    protected function toPDF($teste){
-        $pdf = PDF::loadView('despesas/relatorios/pendente-rel', $teste);
-        return $pdf->download('invoice.pdf');
+    protected function toPDF(Request $request){
+        $usuarioLogado = $request->session()->get('usuarioLogado');
+        $periodoSelecionado = $request->session()->get('periodoSelecionado');
+        $parcelasPendentes = ParcelaPendente::with(['despesa.categoria' => function ($query) use ($usuarioLogado) {
+            $query->where('categoria.id_usuario', '=', $usuarioLogado->id);
+        }])->whereBetween('dt_vencimento', [
+            date('Y-m-01', strtotime($periodoSelecionado)),
+            date('Y-m-t', strtotime($periodoSelecionado))
+        ])->get();
+        $pdf = PDF::loadView('despesas/relatorios/pendente-rel', ['link'=>$parcelasPendentes, 'title'=>'Despesas Pendentes']);
+        return $pdf->stream();
     }
 
 }

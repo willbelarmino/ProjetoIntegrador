@@ -80,9 +80,12 @@
                                         @endforeach
                                         </tbody>
                                     </table>
-                                    <button type="button"  class="btn btn-danger btn-xs" onclick="location.href='{{ route('generate.pdf', $testepdf) }}'" style="float:right">
-                                        <i class="material-icons">print</i> IMPRIMIR
-                                    </button>
+
+                                        <button type="button"  class="btn btn-danger btn-xs" onclick="window.open('{{ route('generate.pdf') }}','_blank');"  style="float:right">
+                                            <i class="material-icons">print</i> IMPRIMIR
+                                        </button>
+
+
                                 </div>
                             </div>
                         </div>
