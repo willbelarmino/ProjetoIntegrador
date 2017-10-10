@@ -178,14 +178,29 @@
     <!-- /MODAL -->
 
 
-    <!-- MODAL -->
+    <!-- MODAL VIEW -->
     <div class="modal fade" tabindex="-1" role="dialog" id="modal-panel-view">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="card">
-
-                    <label>Nome: <span id="nome-view"></span></label>
-                    <label>Limite: <span id="limite-view"></span></label>
+                    <form class="form-horizontal">
+                        <div class="card-header card-header-text" data-background-color="purple">
+                            <h4 class="card-title" id="view-categoria-nome">Stock Center</h4>
+                        </div>
+                        <div class="card-content">
+                            <div class="row">
+                                <label class="col-sm-3 label-on-left">Limite</label>
+                                <div class="col-sm-9">
+                                    <div class="form-group">
+                                        <p class="form-control-static" id="view-categoria-limite">R$ 187,45</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <button type="button" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal" data-dismiss="modal">Ok</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -197,8 +212,8 @@
     <script type="text/javascript">
 
         function visualizar(nome,limite) {
-            $("#nome-view").html(nome);
-            $("#limite-view").html(limite);
+            $("#view-categoria-nome").html(nome);
+            $("#view-categoria-limite").html(limite);
             $("#modal-panel-view").modal("toggle");
         }
 

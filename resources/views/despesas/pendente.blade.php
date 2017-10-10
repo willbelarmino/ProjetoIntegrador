@@ -129,9 +129,7 @@
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Data de vencimento
-                                    <star>*</star>
-                                </label>
+                                <label class="control-label">Data de vencimento</label>
                                 <input class="form-control datepicker" id="vencimento" name="vencimento" value="{{date('d/m/Y')}}" required="true" />
                             </div>
 
@@ -156,13 +154,12 @@
                             </div>
 
                             <div class="togglebutton">
-                                <label>
+                                <label style="color: #AAAAAA;">
                                     <input type="checkbox" id="check-credito"> Cartão de crédito
                                 </label>
                             </div>
 
                             <div class="form-group label-floating" id="input-credito" style="display:none;">
-                                <label class="control-label">Cartão de crédito</label>
                                 <select id="credito" name="credito" class="selectpicker" disabled data-style="select-with-transition" title="Selecione cartão" data-size="7">
                                     @foreach ($cartoes as $cartao)
                                         <option value="{{$cartao->id}}">{{$cartao->conta->nome}}</option>

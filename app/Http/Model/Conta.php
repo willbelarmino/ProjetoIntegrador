@@ -12,6 +12,8 @@ class Conta extends Model
 
     protected $table = 'conta';
 
+    private $saldo;
+
     protected $fillable = ['nome', 'image', 'dt_movimento','id_usuario', 'tipo', 'exibir_indicador'];
 
     public function cartoes() {

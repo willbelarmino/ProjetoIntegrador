@@ -27,6 +27,13 @@ Route::group(['prefix'=>'categoria','where'=>['id'=>'[0-9]+']], function() {
     Route::post('deletarCategoria', ['as'=>'deletar.categoria', 'uses'=>'CategoriaController@delete']);
 });
 
+Route::group(['prefix'=>'conta','where'=>['id'=>'[0-9]+']], function() {
+    Route::get('contas', ['as'=>'contas', 'uses'=>'ContaController@index']);
+    Route::post('criarConta', ['as'=>'criar.conta', 'uses'=>'ContaController@create']);
+    Route::post('alterarConta', ['as'=>'alterar.conta', 'uses'=>'ContaController@edit']);
+    Route::post('deletarConta', ['as'=>'deletar.conta', 'uses'=>'ContaController@delete']);
+});
+
 Route::group(['prefix'=>'despesa','where'=>['id'=>'[0-9]+']], function() {
     Route::get('pdfView', ['as'=>'generate.pdf', 'uses'=>'DespesaPendenteController@toPDF']);
     Route::get('pendentes', ['as'=>'pendentes', 'uses'=>'DespesaPendenteController@index']);

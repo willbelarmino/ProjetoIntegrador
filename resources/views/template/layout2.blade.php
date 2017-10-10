@@ -90,7 +90,7 @@
                     </a>
                 </li>
                 <li class="@if ($menuView == 'contas') active @endif">
-                    <a href="./dashboard.html">
+                    <a href="{{route('contas')}}">
                         <i class="mdi mdi-account-card-details"></i>
                         <p>Contas</p>
                     </a>

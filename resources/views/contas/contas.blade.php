@@ -1,7 +1,7 @@
 @extends('template/layout2')
 
 @section('title')
-    <title>Categorias - MoneyCash</title>
+    <title>Contas - MoneyCash</title>
 @endsection
 
 @section('content')
@@ -23,37 +23,71 @@
                                     <table id="datatables" class="table table-striped table-no-bordered table-hover" cellspacing="0" width="100%" style="width:100%">
                                         <thead>
                                         <tr>
+                                            <th class="disabled-sorting text-right"></th>
                                             <th>Nome</th>
-                                            <th>Limite</th>
+                                            <th>Saldo</th>
+                                            <th>Última movimentação</th>
                                             <th class="disabled-sorting text-right"></th>
                                         </tr>
                                         </thead>
                                         <tbody>
 
-                                        @foreach ($categorias as $categoria)
-                                            <tr>
-                                                <td>{{ $categoria->nome }}</td>
+                                        @foreach ($contas as $conta)
+                                            @php ($tipoconta = null)
+                                            @php ($indicador = null)
 
-                                                @if (empty($categoria->limite))
+                                            @if ($conta->tipo==chr(0x50))
+                                                @php ($tipoconta = 'Poupança')
+                                            @elseif ($conta->tipo==chr(0x43))
+                                                @php ($tipoconta = 'Corrente')
+                                            @elseif ($conta->tipo==chr(0x4F))
+                                                @php ($tipoconta = 'Outros')
+                                            @endif
+
+                                            @if ($conta->exibir_indicador==chr(0x53))
+                                                @php ($indicador = 'Sim')
+                                            @elseif ($conta->exibir_indicador==chr(0x4E))
+                                                @php ($indicador = 'Não')
+                                            @endif
+                                            <tr>
+                                                <td class="td-actions text-right" style="float: left">
+                                                    <img  style="width: 50px; height: 40px" src="{{ asset('storage/contas/'.$conta->image) }}" alt="...">
+                                                </td>
+
+                                                <td>{{ $conta->nome }}</td>
+
+                                                @if (empty($conta->saldo))
                                                     <td> -//- </td>
                                                 @else
-                                                    <td>{{ 'R$ '.number_format($categoria->limite, 2, ',', '.') }}</td>
+                                                    <td>{{ 'R$ '.number_format($conta->saldo, 2, ',', '.') }}</td>
                                                 @endif
+
+                                                <td> {{ date('d/m/Y', strtotime($conta->dt_movimento)) }} </td>
 
                                                 <td class="td-actions text-right">
                                                     <button type="button" rel="tooltip" class="btn btn-info"
-                                                            onclick="visualizar('{{$categoria->nome}}', '{{ 'R$ '.number_format($categoria->limite, 2, ',', '.')}}');">
+                                                            onclick="visualizar(
+                                                                '{{asset('storage/contas/'.$conta->image)}}',
+                                                                '{{$conta->nome}}',
+                                                                '{{ 'R$ '.number_format($conta->saldo, 2, ',', '.')}}',
+                                                                '{{$tipoconta}}',
+                                                                '{{$indicador}}',
+                                                                '{{date('d/m/Y', strtotime($conta->dt_movimento))}}'
+                                                            );">
                                                         <i class="material-icons">assignment</i>
                                                     </button>
                                                     <button type="button" rel="tooltip" class="btn btn-success"
                                                             onclick="alterar(
-                                                                '{{$categoria->id}}',
-                                                                '{{$categoria->nome}}',
-                                                                '{{ 'R$ '.number_format($categoria->limite, 2, ',', '.')}}'
+                                                                '{{$conta->id}}',
+                                                                '{{$conta->nome}}',
+                                                                '{{ 'R$ '.number_format($conta->saldo, 2, ',', '.')}}'
                                                             );">
                                                         <i class="material-icons">edit</i>
                                                     </button>
-                                                    <button type="button" rel="tooltip" class="btn btn-danger" onclick="deletar({{$categoria->id}});">
+                                                    <button type="button" rel="tooltip" class="btn btn-danger"
+                                                            onclick="deletar(
+                                                                {{$conta->id}}
+                                                            );">
                                                         <i class="material-icons">close</i>
                                                     </button>
                                                 </td>
@@ -92,37 +126,52 @@
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="card">
-                    <form id="formCategoria" enctype="multipart/form-data">
+                    <form id="formConta" enctype="multipart/form-data">
                         <div class="card-header card-header-icon" data-background-color="purple">
                             <i class="mdi mdi-credit-card-multiple"></i>
                         </div>
                         <div class="card-content">
-                            <h4 class="card-title">Categoria</h4>
+                            <h4 class="card-title">Conta</h4>
+
+                            <div class="footer text-center">
+                                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                                    <div class="fileinput-new thumbnail">
+                                        <img title="A imagem deve ser no formato jpg, png ou gif e ser menor que 500Kb!" src="../img/image_placeholder.jpg" alt="...">
+                                    </div>
+                                    <div class="fileinput-preview fileinput-exists thumbnail"></div>
+                                    <div>
+                                                    <span class="btn btn-primary btn-round btn-file btn-xs">
+                                                        <span class="fileinput-new">Adicionar Foto</span>
+                                                        <span class="fileinput-exists">Alterar</span>
+                                                        <input type="file" onChange="validationFile(this.form,this)" accept="image/*" id="image" name="image" />
+                                                    </span>
+                                        <a class="btn btn-danger btn-round fileinput-exists btn-xs" data-dismiss="fileinput"><i class="fa fa-times"></i> Remover</a>
+                                    </div>
+                                    <label id="avatar-error"></label>
+                                </div>
+                            </div>
+
                             <div class="form-group label-floating">
-                                <label class="control-label">Nome
-                                    <star>*</star>
-                                </label>
+                                <label class="control-label">Nome</label>
                                 <input class="form-control" id="nome" name="nome" type="text" required="true" />
                             </div>
 
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox" id="habilitar-limite" name="optionsCheckboxes">
-                                    <a style="font-size:12px"  >Inserir limite</a>.
+                            <div class="form-group label-floating">
+                                <label class="control-label">Tipo de conta</label>
+                                <select id="tipo" name="tipo"  class="selectpicker" data-style="select-with-transition" title="Selecionar" data-size="7">
+                                    <option value="C">Corrente</option>
+                                    <option value="P">Poupança</option>
+                                    <option value="O">Outros</option>
+                                </select>
+                            </div>
+
+                            <div class="togglebutton">
+                                <label style="color: #AAAAAA;">
+                                    <input type="checkbox" id="check-indicador" name="indicador"> Exibir indicador
                                 </label>
                             </div>
 
 
-
-                            <div class="form-group label-floating" id="input-limite" style="display:none;">
-                                <label class="control-label">Limite
-                                    <star>*</star>
-                                </label>
-                                <input class="form-control money-format" disabled id="limite" name="limite" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
-                            </div>
-                            <div class="category form-category">
-                                <star>*</star> Campos obrigatórios
-                            </div>
                             <div class="text-center">
                                 <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Salvar</button>
                             </div>
@@ -139,9 +188,7 @@
                             <h4 class="card-title">Categoria</h4>
                             <input id="id-edit" name="id" type="hidden"/>
                             <div class="form-group label-floating">
-                                <label class="control-label">Nome
-                                    <star>*</star>
-                                </label>
+                                <label class="control-label">Nome</label>
                                 <input class="form-control" id="nome-edit" name="nome" type="text" required="true" />
                             </div>
 
@@ -153,14 +200,10 @@
                             </div>
 
                             <div class="form-group label-floating" id="input-limite-edit" style="display:none;">
-                                <label class="control-label">Limite
-                                    <star>*</star>
-                                </label>
+                                <label class="control-label">Limite</label>
                                 <input class="form-control money-format" disabled id="limite-edit" name="limite" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
                             </div>
-                            <div class="category form-category">
-                                <star>*</star> Campos obrigatórios
-                            </div>
+
                             <div class="text-center">
                                 <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Alterar</button>
                             </div>
@@ -176,14 +219,64 @@
     <!-- /MODAL -->
 
 
-    <!-- MODAL -->
+    <!-- MODAL VIEW -->
     <div class="modal fade" tabindex="-1" role="dialog" id="modal-panel-view">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="card">
+                    <form class="form-horizontal">
+                        <div class="card-header card-header-text" data-background-color="gray">
+                            <h4 class="card-title" id="view-conta-image">
 
-                    <label>Nome: <span id="nome-view"></span></label>
-                    <label>Limite: <span id="limite-view"></span></label>
+                            </h4>
+                        </div>
+                        <div class="card-content">
+                            <div class="row">
+                                <label class="col-sm-3 label-on-left">Nome</label>
+                                <div class="col-sm-9">
+                                    <div class="form-group">
+                                        <p class="form-control-static" id="view-conta-nome">R$ 187,45</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <label class="col-sm-3 label-on-left">Saldo</label>
+                                <div class="col-sm-9">
+                                    <div class="form-group">
+                                        <p class="form-control-static" id="view-conta-saldo">R$ 187,45</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <label class="col-sm-3 label-on-left">Tipo de conta</label>
+                                <div class="col-sm-9">
+                                    <div class="form-group">
+                                        <p class="form-control-static" id="view-conta-tipo">1/4</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <label class="col-sm-3 label-on-left">Exibir indicador</label>
+                                <div class="col-sm-9">
+                                    <div class="form-group">
+                                        <p class="form-control-static" id="view-conta-indicador">Alimentação</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <label class="col-sm-3 label-on-left">Último movimento</label>
+                                <div class="col-sm-9">
+                                    <div class="form-group">
+                                        <p class="form-control-static" id="view-conta-movimento">20/09/2017</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center">
+                                <button type="button" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal" data-dismiss="modal">Ok</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -194,9 +287,46 @@
 @section('scripts')
     <script type="text/javascript">
 
-        function visualizar(nome,limite) {
-            $("#nome-view").html(nome);
-            $("#limite-view").html(limite);
+        function validationFile(form, input) {
+            file = $(input).val();
+            extensoes_permitidas = new Array(".gif", ".jpg", ".png");
+            if (file) {
+                //recupera a extensão do arquivo
+                extensao = (file.substring(file.lastIndexOf("."))).toLowerCase();
+                // verifica se a extensão é permitida
+                valid_file = false;
+                for (var i = 0; i < extensoes_permitidas.length; i++) {
+                    if (extensoes_permitidas[i] == extensao) {
+                        valid_file = true;
+                        break;
+                    }
+                }
+                if (!valid_file) {
+                    // se a extensao for invalida mostra mensagem de erro
+                    $(input).val("");
+                    $("#avatar-error").html("Formato inválido.");
+                }else{
+                    // verifica tamanho da imagem
+                    var arquivo = input.files[0];
+                    if (arquivo.size>500999) {
+                        $(input).val("");
+                        $("#avatar-error").html("Tamanho da imagem inválido.");
+                    } else {
+                        $("#avatar-error").html("");
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function visualizar(imagem,nome,saldo,tipo,indicador,movimento) {
+            $("#view-conta-image").html('<img  style="width: 50px; height: 40px" src="'+imagem+'" alt="...">');
+            $("#view-conta-nome").html(nome);
+            $("#view-conta-saldo").html(saldo);
+            $("#view-conta-tipo").html(tipo);
+            $("#view-conta-indicador").html(indicador);
+            $("#view-conta-movimento").html(movimento);
             $("#modal-panel-view").modal("toggle");
         }
 
@@ -253,7 +383,7 @@
         }
 
         function loadTable() {
-            $('.content-table-view').load("{{route('categorias')}} .content-table-view2", function() {
+            $('.content-table-view').load("{{route('contas')}} .content-table-view2", function() {
                 $('#datatables').DataTable({
                     "pagingType": "full_numbers",
                     "lengthMenu": [
@@ -308,12 +438,17 @@
 
             /* Limpar formulário */
             $("#modal-panel").on("hide.bs.modal", function () {
-                $("#formCategoria-edit").css("display","none");
-                $("#formCategoria").css("display","block");
-                $("#limite").attr('disabled','disabled');
-                $("#input-limite").css("display", "none");
-                $("#limite-edit").attr('disabled','disabled');
-                $("#input-limite-edit").css("display", "none");
+                $("#formConta-edit").css("display","none");
+                $("#formConta").css("display","block");
+                var selects = $(".btn.dropdown-toggle.select-with-transition");
+                $(selects).each (function(){
+                    $(this).addClass("bs-placeholder");
+                    $(this).attr('title','Selecione')
+                });
+                var textSelect = $('.filter-option.pull-left');
+                $(textSelect).each (function(){
+                    $(this).text('Selecione')
+                });
                 var form = $("#modal-panel").find("form")
                 $(form).each (function(){
                     var formID = $(this).attr("id");
@@ -330,9 +465,6 @@
                     messages: {
                         nome: {
                             required: "Campo de preenchimento obrigatório."
-                        },
-                        limite: {
-                            required: "Campo de preenchimento obrigatório."
                         }
                     },
                     errorPlacement: function(error, element) {
@@ -343,12 +475,12 @@
             });
 
             /* Submita o formualário via Ajax*/
-            $( "#formCategoria" ).submit(function( e ) {
-                if ($("#formCategoria" ).valid()) {
-                    var formData = new FormData($("#formCategoria")[0]);
+            $( "#formConta" ).submit(function( e ) {
+                if ($("#formConta" ).valid()) {
+                    var formData = new FormData($("#formConta")[0]);
                     $.ajax({
                         type: "POST",
-                        url: '{{route('criar.categoria')}}',
+                        url: '{{route('criar.conta')}}',
                         data: formData,
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                         dataType: 'json',
