@@ -85,7 +85,19 @@ class ContaController extends Controller
     }
 
     protected function delete(Request $request){
-
+        try {
+            $param = $request->all();
+            DB::table('conta')->where('id',$param['id'])->delete();
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Conta removida com sucesso.'
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Ops. Erro ao remover registro. Tente novamente mais tarde.'
+            ]);
+        }
     }
 
     protected function edit(Request $request){

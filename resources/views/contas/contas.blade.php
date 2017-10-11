@@ -51,7 +51,7 @@
                                             @endif
                                             <tr>
                                                 <td class="td-actions text-right" style="float: left">
-                                                    <img  style="width: 50px; height: 40px" src="{{ asset('storage/contas/'.$conta->image) }}" alt="...">
+                                                    <img  style="width: 45px; height: 40px" src="{{ asset('storage/contas/'.$conta->image) }}" alt="...">
                                                 </td>
 
                                                 <td>{{ $conta->nome }}</td>
@@ -80,7 +80,8 @@
                                                             onclick="alterar(
                                                                 '{{$conta->id}}',
                                                                 '{{$conta->nome}}',
-                                                                '{{ 'R$ '.number_format($conta->saldo, 2, ',', '.')}}'
+                                                                '{{$conta->tipo}}',
+                                                                '{{$conta->exibir_indicador}}'
                                                             );">
                                                         <i class="material-icons">edit</i>
                                                     </button>
@@ -145,7 +146,7 @@
                                                         <span class="fileinput-exists">Alterar</span>
                                                         <input type="file" onChange="validationFile(this.form,this)" accept="image/*" id="image" name="image" />
                                                     </span>
-                                        <a class="btn btn-danger btn-round fileinput-exists btn-xs" data-dismiss="fileinput"><i class="fa fa-times"></i> Remover</a>
+                                        <a class="btn btn-danger btn-round fileinput-exists btn-xs" id="remove-image" data-dismiss="fileinput"><i class="fa fa-times"></i> Remover</a>
                                     </div>
                                     <label id="avatar-error"></label>
                                 </div>
@@ -180,29 +181,51 @@
                             </div>
                         </div>
                     </form>
-                    <form id="formCategoria-edit" enctype="multipart/form-data" style="display:none;">
+                    <form id="formConta-edit" enctype="multipart/form-data" style="display:none;">
                         <div class="card-header card-header-icon" data-background-color="purple">
                             <i class="mdi mdi-credit-card-multiple"></i>
                         </div>
                         <div class="card-content">
-                            <h4 class="card-title">Categoria</h4>
+                            <h4 class="card-title">Conta</h4>
                             <input id="id-edit" name="id" type="hidden"/>
+                            <div class="footer text-center">
+                                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                                    <div class="fileinput-new thumbnail">
+                                        <img title="A imagem deve ser no formato jpg, png ou gif e ser menor que 500Kb!" src="../img/image_placeholder.jpg" alt="...">
+                                    </div>
+                                    <div class="fileinput-preview fileinput-exists thumbnail"></div>
+                                    <div>
+                                                    <span class="btn btn-primary btn-round btn-file btn-xs">
+                                                        <span class="fileinput-new">Adicionar Foto</span>
+                                                        <span class="fileinput-exists">Alterar</span>
+                                                        <input type="file" onChange="validationFile(this.form,this)" accept="image/*" id="image-edit" name="image" />
+                                                    </span>
+                                        <a class="btn btn-danger btn-round fileinput-exists btn-xs" id="remove-image-edit" data-dismiss="fileinput"><i class="fa fa-times"></i> Remover</a>
+                                    </div>
+                                    <label id="avatar-error"></label>
+                                </div>
+                            </div>
+
                             <div class="form-group label-floating">
                                 <label class="control-label">Nome</label>
                                 <input class="form-control" id="nome-edit" name="nome" type="text" required="true" />
                             </div>
 
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox" id="habilitar-limite-edit" name="optionsCheckboxes">
-                                    <a style="font-size:12px"  >Inserir limite</a>.
+                            <div class="form-group label-floating">
+                                <label class="control-label">Tipo de conta</label>
+                                <select id="tipo-edit" name="tipo"  class="selectpicker" data-style="select-with-transition" title="Selecionar" data-size="7">
+                                    <option value="C">Corrente</option>
+                                    <option value="P">Poupança</option>
+                                    <option value="O">Outros</option>
+                                </select>
+                            </div>
+
+                            <div class="togglebutton">
+                                <label style="color: #AAAAAA;">
+                                    <input type="checkbox" id="check-indicador-edit" name="indicador"> Exibir indicador
                                 </label>
                             </div>
 
-                            <div class="form-group label-floating" id="input-limite-edit" style="display:none;">
-                                <label class="control-label">Limite</label>
-                                <input class="form-control money-format" disabled id="limite-edit" name="limite" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
-                            </div>
 
                             <div class="text-center">
                                 <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Alterar</button>
@@ -333,7 +356,7 @@
         function deletar(id) {
             $.ajax({
                 type: "POST",
-                url: '{{route('deletar.categoria')}}',
+                url: '{{route('deletar.conta')}}',
                 data: { id : id },
                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                 dataType: 'json',
@@ -357,10 +380,13 @@
             });
         }
 
-
-        function alterar(id,nome,limite) {
-            $("#formCategoria-edit").css("display","block");
-            $("#formCategoria").css("display","none");
+        '{{$conta->id}}',
+            '{{$conta->nome}}',
+            '{{$conta->tipo}}',
+            '{{$conta->exibir_indicador}}'
+        function alterar(id,nome,tipo,indicador) {
+            $("#formConta-edit").css("display","block");
+            $("#formConta").css("display","none");
             $("#id-edit").val(id);
 
             $("#nome-edit").val(nome);
@@ -368,15 +394,17 @@
             $(inputNome).removeClass('is-empty');
             $(inputNome).addClass('label-floating');
 
-            if (limite!="R$ 0,00") {
-                $("#limite-edit").val(limite);
-                var inputLimite = $("#limite-edit").parent()[0];
-                $(inputLimite).removeClass('is-empty');
-                $(inputLimite).addClass('label-floating');
+            $("#tipo-edit").val(tipo);
+            var selectTipoEdit = $(".btn.dropdown-toggle.select-with-transition")[1];
+            $(selectTipoEdit).removeClass("bs-placeholder");
+            $(selectTipoEdit).attr('title',nomeTipo);
+            var textTipoSelect = $('.filter-option.pull-left')[1];
+            $(textTipoSelect).text(nomeTipo);
 
-                $("#habilitar-limite-edit").prop("checked", true);
-                $("#limite-edit").removeAttr('disabled');
-                $("#input-limite-edit").css("display", "block");
+            if (indicador!=null && indicador=='S') {
+                $("#check-indicador-edit").prop("checked", true);
+            } else if (indicador!=null && indicador=='N') {
+                $("#check-indicador-edit").prop("checked", false);
             }
 
             $("#modal-panel").modal("toggle");
@@ -440,6 +468,7 @@
             $("#modal-panel").on("hide.bs.modal", function () {
                 $("#formConta-edit").css("display","none");
                 $("#formConta").css("display","block");
+                $("#remove-image").click();
                 var selects = $(".btn.dropdown-toggle.select-with-transition");
                 $(selects).each (function(){
                     $(this).addClass("bs-placeholder");
