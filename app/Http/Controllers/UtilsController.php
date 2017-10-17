@@ -37,14 +37,14 @@ class UtilsController extends Controller
             }
             return response()->json([
                 'mes' => $mes[$mesNumber]." - ".substr($periodoSelecionadoInicio, -8, -4),
-                'tipo' => 'mes',
+                'resize' => '130',
                 'periodoSelecionadoInicio' => $periodoSelecionadoInicio,
                 'periodoSelecionadoFim' => $periodoSelecionadoFim
             ]);
         } else {
             return response()->json([
                 'mes' => date('d/m/Y', strtotime($periodoSelecionadoInicio))." - ".date('d/m/Y', strtotime($periodoSelecionadoFim)),
-                'tipo' => 'data',
+                'resize' => '165',
                 'periodoSelecionadoInicio' => $periodoSelecionadoInicio,
                 'periodoSelecionadoFim' => $periodoSelecionadoFim
             ]);
@@ -61,7 +61,9 @@ class UtilsController extends Controller
             } else {
                 $novoPeriodo = date("Ymd", strtotime(date("Y-m-d", strtotime($periodoSelecionadoInicio)) . " -1 month"));
             }
-            $request->session()->put('periodoSelecionado', $novoPeriodo);
+            $request->session()->put('periodoSelecionadoInicio', date("Ym01",  strtotime($novoPeriodo)));
+            $request->session()->put('periodoSelecionadoFim', date("Ymt",  strtotime($novoPeriodo)));
+
             if (substr($novoPeriodo, -4, -3) == '0') {
                 $mesNumber = substr($novoPeriodo, -3, -2);
             } else {

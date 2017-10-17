@@ -19,13 +19,15 @@ class CategoriaController extends Controller
     public function index(Request $request){
         $usuarioLogado = $request->session()->get('usuarioLogado');
         $categorias = DB::table('categoria')->where('id_usuario', $usuarioLogado->id)->get();
-        $nomeMes = UtilsController::getNomeMesSelecionado($request);
+        $periodo = UtilsController::getPeriodo($request);
+        $periodo = $periodo->getData();
         return view('categorias/categorias',[
             'menuView'=>'categorias',
             'page'=>'Categorias',
             'categorias'=>$categorias,
             'usuario'=>$usuarioLogado,
-            'nomeMes'=>$nomeMes
+            'nomeMes'=>$periodo->mes,
+            'resize'=>$periodo->resize
         ]);
     }
 

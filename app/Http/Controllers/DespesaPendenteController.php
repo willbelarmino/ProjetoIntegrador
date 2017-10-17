@@ -23,6 +23,7 @@ class DespesaPendenteController extends Controller
     public function index(Request $request){
         $usuarioLogado = $request->session()->get('usuarioLogado');
         $periodo = UtilsController::getPeriodo($request);
+        $periodo = $periodo->getData();
         $categorias = Categoria::from('categoria AS c')
             ->where("c.id_usuario",$usuarioLogado->id)
             ->get();
@@ -69,6 +70,7 @@ class DespesaPendenteController extends Controller
                 'categorias'=>$categorias,
                 'cartoes'=>$cartoes,
                 'nomeMes'=>$periodo->mes,
+                'resize'=>$periodo->resize,
                 'usuario'=>$usuarioLogado
             ]);
     }

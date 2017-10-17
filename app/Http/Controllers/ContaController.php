@@ -24,7 +24,8 @@ class ContaController extends Controller
 
     public function index(Request $request){
         $usuarioLogado = $request->session()->get('usuarioLogado');
-        $nomeMes = UtilsController::getNomeMesSelecionado($request);
+        $periodo = UtilsController::getPeriodo($request);
+        $periodo = $periodo->getData();
         $contas = DB::table('conta')->where('id_usuario', $usuarioLogado->id)->get();
         foreach($contas as $key => $subarray) {
             $contas[$key]->saldo=100.0;
@@ -34,7 +35,8 @@ class ContaController extends Controller
             'page'=>'Contas',
             'contas'=>$contas,
             'usuario'=>$usuarioLogado,
-            'nomeMes'=>$nomeMes
+            'nomeMes'=>$periodo->mes,
+            'resize'=>$periodo->resize
         ]);
     }
 

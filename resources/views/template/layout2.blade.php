@@ -95,6 +95,12 @@
                         <p>Contas</p>
                     </a>
                 </li>
+                <li class="@if ($menuView == 'cartoes') active @endif">
+                    <a href="{{route('contas')}}">
+                        <i class="mdi mdi-cards-outline"></i>
+                        <p>Cartões</p>
+                    </a>
+                </li>
                 <li class="@if ($menuView == 'categorias') active @endif">
                     <a href="{{route('categorias')}}">
                         <i class="mdi mdi-format-line-weight"></i>
@@ -167,7 +173,7 @@
             <div class="row">
                 <div class="periodo-bar text-center">
                     <span onclick="alteraPeriodo('previous');" class="btn btn-primary btn-sm"> <i class="material-icons">keyboard_arrow_left</i> </span>
-                    <span id="nomeMes" data-toggle="modal" data-target="#modal-periodo" class="btn btn-primary btn-fill btn-sm button-modal" style="width: 130px !important;"> {{$nomeMes}} </span>
+                    <span id="nomeMes" data-toggle="modal" data-target="#modal-periodo" class="btn btn-primary btn-fill btn-sm button-modal" style="width: {{$resize}}px !important;"> {{$nomeMes}} </span>
                     <span onclick="alteraPeriodo('next');" class="btn btn-primary btn-sm"> <i class="material-icons">keyboard_arrow_right</i> </span>
                 </div>
             </div>
@@ -198,7 +204,7 @@
             <div class="card">
                 <form id="formPeriodo">
                     <div class="card-header card-header-icon" data-background-color="purple">
-                        <i class="mdi mdi-credit-card-multiple"></i>
+                        <i class="material-icons">date_range</i>
                     </div>
                     <div class="card-content">
                         <h4 class="card-title">Período</h4>
@@ -372,6 +378,8 @@
                     this.reset();
                 });
             });
+            //$("#inicio").val("");
+            //$("#final").val("");
         });
 
         /* Submita o formualário via Ajax*/
