@@ -1,7 +1,7 @@
 @extends('template/layout2')
 
 @section('title')
-    <title>Contas - MoneyCash</title>
+    <title>Cartões - MoneyCash</title>
 @endsection
 
 @section('content')
@@ -98,9 +98,6 @@
 
                                         </tbody>
                                     </table>
-                                    <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
-                                        <i class="material-icons">add</i> ADICIONAR
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -152,7 +149,7 @@
                                                     </span>
                                         <a class="btn btn-danger btn-round fileinput-exists btn-xs" id="remove-image" data-dismiss="fileinput"><i class="fa fa-times"></i> Remover</a>
                                     </div>
-                                    <label class="avatar-error"></label>
+                                    <label id="avatar-error"></label>
                                 </div>
                             </div>
 
@@ -185,10 +182,6 @@
                             </div>
                         </div>
                     </form>
-
-
-
-
                     <form id="formConta-edit" enctype="multipart/form-data" style="display:none;">
                         <div class="card-header card-header-icon" data-background-color="purple">
                             <i class="mdi mdi-credit-card-multiple"></i>
@@ -200,18 +193,18 @@
                             <div class="footer text-center">
                                 <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                                     <div class="fileinput-new thumbnail">
-                                        <img id="image-edit" title="A imagem deve ser no formato jpg, png ou gif e ser menor que 500Kb!" src="../img/image_placeholder.jpg" alt="...">
+                                        <img title="A imagem deve ser no formato jpg, png ou gif e ser menor que 500Kb!" src="../img/image_placeholder.jpg" alt="...">
                                     </div>
                                     <div class="fileinput-preview fileinput-exists thumbnail"></div>
                                     <div>
                                                     <span class="btn btn-primary btn-round btn-file btn-xs">
-                                                        <span class="fileinput-new">Alterar Foto</span>
+                                                        <span class="fileinput-new">Adicionar Foto</span>
                                                         <span class="fileinput-exists">Alterar</span>
-                                                        <input type="file" onChange="validationFile(this.form,this)" accept="image/*" id="conta-view" name="conta-view" />
+                                                        <input type="file" onChange="validationFile(this.form,this)" accept="image/*" id="image-edit" name="image" />
                                                     </span>
                                         <a class="btn btn-danger btn-round fileinput-exists btn-xs" id="remove-image-edit" data-dismiss="fileinput"><i class="fa fa-times"></i> Remover</a>
                                     </div>
-                                    <label class="avatar-error"></label>
+                                    <label id="avatar-error"></label>
                                 </div>
                             </div>
 
@@ -336,15 +329,15 @@
                 if (!valid_file) {
                     // se a extensao for invalida mostra mensagem de erro
                     $(input).val("");
-                    $(".avatar-error").html("Formato inválido.");
+                    $("#avatar-error").html("Formato inválido.");
                 }else{
                     // verifica tamanho da imagem
                     var arquivo = input.files[0];
                     if (arquivo.size>500999) {
                         $(input).val("");
-                        $(".avatar-error").html("Tamanho da imagem inválido.");
+                        $("#avatar-error").html("Tamanho da imagem inválido.");
                     } else {
-                        $(".avatar-error").html("");
+                        $("#avatar-error").html("");
                         return true;
                     }
                 }
@@ -389,12 +382,17 @@
             });
         }
 
+        '{{$conta->id}}',
+            '{{$conta->nome}}',
+            '{{$conta->tipo}}',
+            '{{$conta->exibir_indicador}}'
+
+
         function alterar(id,nome,tipo,indicador,imagem) {
             $("#formConta-edit").css("display","block");
             $("#formConta").css("display","none");
             $("#id-edit").val(id);
             $("#imagem-edit").val(imagem);
-            $("#image-edit").attr('src', '../storage/contas/'+imagem);
 
             $("#nome-edit").val(nome);
             var inputNome = $("#nome-edit").parent()[0];
@@ -449,18 +447,18 @@
                         }
                     }
                 });
+                $(".pagination").prepend('<li class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel">Adicionar</li>');
             });
         }
 
         $(document).ready(function() {
 
-
+            
             /* Limpar formulário */
             $("#modal-panel").on("hide.bs.modal", function () {
                 $("#formConta-edit").css("display","none");
                 $("#formConta").css("display","block");
                 $("#remove-image").click();
-                $("#remove-image-edit").click();
                 var selects = $(".btn.dropdown-toggle.select-with-transition");
                 $(selects).each (function(){
                     $(this).addClass("bs-placeholder");

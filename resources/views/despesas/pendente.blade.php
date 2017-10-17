@@ -80,7 +80,9 @@
                                         @endforeach
                                         </tbody>
                                     </table>
-
+                                        <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
+                                            <i class="material-icons">add</i> ADICIONAR
+                                        </button>
                                         <button type="button"  class="btn btn-danger btn-xs" onclick="window.open('{{ route('generate.pdf') }}','_blank');"  style="float:right">
                                             <i class="material-icons">print</i> IMPRIMIR
                                         </button>
@@ -446,7 +448,6 @@
                         }
                     }
                 });
-                $(".pagination").prepend('<li class="btn btn-primary btn-xs" style="padding: 5px 13px" data-toggle="modal" data-target="#modal-panel"><i class="material-icons">add</i>Adicionar</li>');
             });
         }
 
@@ -542,7 +543,7 @@
                     if (validacaoExtraForm()) {
                         $.ajax({
                             type: "POST",
-                            url: '{{route('criar.pendente')}}',
+                            url: '{{route('periodo.alteraData')}}',
                             data: formData,
                             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                             dataType: 'json',

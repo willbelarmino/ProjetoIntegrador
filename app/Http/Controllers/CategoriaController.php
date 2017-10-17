@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Http\Model\Categoria;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -20,7 +19,14 @@ class CategoriaController extends Controller
     public function index(Request $request){
         $usuarioLogado = $request->session()->get('usuarioLogado');
         $categorias = DB::table('categoria')->where('id_usuario', $usuarioLogado->id)->get();
-        return view('categorias/categorias',['menuView'=>'categorias','page'=>'Categorias','categorias'=>$categorias]);
+        $nomeMes = UtilsController::getNomeMesSelecionado($request);
+        return view('categorias/categorias',[
+            'menuView'=>'categorias',
+            'page'=>'Categorias',
+            'categorias'=>$categorias,
+            'usuario'=>$usuarioLogado,
+            'nomeMes'=>$nomeMes
+        ]);
     }
 
     protected function create(Request $request){

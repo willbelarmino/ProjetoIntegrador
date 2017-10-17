@@ -64,6 +64,9 @@
                                         @endforeach
                                         </tbody>
                                     </table>
+                                    <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
+                                        <i class="material-icons">add</i> ADICIONAR
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -273,6 +276,8 @@
             $('.content-table-view').load("{{route('categorias')}} .content-table-view2", function() {
                 $('#datatables').DataTable({
                     "pagingType": "full_numbers",
+                    "deferRender": true,
+                    "processing": true,
                     "lengthMenu": [
                         [10, 25, 50, -1],
                         [10, 25, 50, "All"]
@@ -294,7 +299,6 @@
                         }
                     }
                 });
-                $(".pagination").prepend('<li class="btn btn-primary btn-xs" style="padding: 5px 13px" data-toggle="modal" data-target="#modal-panel"><i class="material-icons">add</i>Adicionar</li>');
             });
         }
 

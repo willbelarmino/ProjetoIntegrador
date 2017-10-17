@@ -13,6 +13,11 @@
 
 Route::get('/', 'Auth\LoginController@index');
 
+Route::group(['prefix'=>'periodo','where'=>['id'=>'[0-9]+']], function() {
+    Route::post('alterarPeriodo', ['as'=>'periodo.alteraMes', 'uses'=>'UtilsController@alterarPeriodoMes']);
+    Route::post('alterarPeriodoData', ['as'=>'periodo.alteraData', 'uses'=>'UtilsController@alterarPeriodoData']);
+});
+
 Route::group(['prefix'=>'acesso','where'=>['id'=>'[0-9]+']], function() {
     Route::get('login', ['as'=>'login', 'uses'=>'Auth\LoginController@index']);
     Route::get('registro', ['as'=>'registro', 'uses'=>'Auth\RegisterController@index']);
@@ -40,5 +45,4 @@ Route::group(['prefix'=>'despesa','where'=>['id'=>'[0-9]+']], function() {
     Route::post('criarPendente', ['as'=>'criar.pendente', 'uses'=>'DespesaPendenteController@create']);
     Route::post('alterarPendente', ['as'=>'alterar.pendente', 'uses'=>'DespesaPendenteController@edit']);
     Route::post('deletarPendente', ['as'=>'deletar.pendente', 'uses'=>'DespesaPendenteController@delete']);
-
 });

@@ -22,7 +22,7 @@ class DespesaPendenteController extends Controller
 
     public function index(Request $request){
         $usuarioLogado = $request->session()->get('usuarioLogado');
-        $periodoSelecionado = $request->session()->get('periodoSelecionado');
+        $periodo = UtilsController::getPeriodo($request);
         $categorias = Categoria::from('categoria AS c')
             ->where("c.id_usuario",$usuarioLogado->id)
             ->get();
@@ -36,8 +36,8 @@ class DespesaPendenteController extends Controller
         $parcelasPendentes = ParcelaPendente::with(['despesa.categoria' => function ($query) use ($usuarioLogado) {
             $query->where('categoria.id_usuario', '=', $usuarioLogado->id);
         }])->whereBetween('dt_vencimento', [
-            date('Y-m-01', strtotime($periodoSelecionado)),
-            date('Y-m-t', strtotime($periodoSelecionado))
+            $periodo->periodoSelecionadoInicio,
+            $periodo->periodoSelecionadoFim
         ])->get();
 
         foreach($parcelasPendentes as $key => $subarray) {
@@ -67,7 +67,10 @@ class DespesaPendenteController extends Controller
                 'page'=>'Despesas Pendentes',
                 'parcelas'=>$parcelasPendentes,
                 'categorias'=>$categorias,
-                'cartoes'=>$cartoes]);
+                'cartoes'=>$cartoes,
+                'nomeMes'=>$periodo->mes,
+                'usuario'=>$usuarioLogado
+            ]);
     }
 
     protected function create(Request $request){
@@ -128,12 +131,13 @@ class DespesaPendenteController extends Controller
 
     protected function delete(Request $request){
         try {
-            $periodoSelecionado = $request->session()->get('periodoSelecionado');
+            $periodoSelecionadoInicio = $request->session()->get('periodoSelecionadoInicio');
+            $periodoSelecionadoFim = $request->session()->get('periodoSelecionadoFim');
             $param = $request->all();
             DB::select("CALL excluirDespesaPendente(                    
                     ".$param['id'].",
-                    '".date('Ym01', strtotime($periodoSelecionado))."',
-                    '".date('Ymt', strtotime($periodoSelecionado))."')");
+                    '".$periodoSelecionadoInicio."',
+                    '".$periodoSelecionadoFim."')");
             return response()->json([
                 'status' => 'success',
                 'message' =>  'Despesa removida com sucesso.'
@@ -148,7 +152,6 @@ class DespesaPendenteController extends Controller
 
     protected function edit(Request $request){
         try {
-            $periodoSelecionado = $request->session()->get('periodoSelecionado');
             $param = $request->all();
 
             $valor = str_replace("R$", "", $param['valor']);
@@ -192,12 +195,13 @@ class DespesaPendenteController extends Controller
 
     protected function toPDF(Request $request){
         $usuarioLogado = $request->session()->get('usuarioLogado');
-        $periodoSelecionado = $request->session()->get('periodoSelecionado');
+        $periodoSelecionadoInicio = $request->session()->get('periodoSelecionadoInicio');
+        $periodoSelecionadoFim = $request->session()->get('periodoSelecionadoFim');
         $parcelasPendentes = ParcelaPendente::with(['despesa.categoria' => function ($query) use ($usuarioLogado) {
             $query->where('categoria.id_usuario', '=', $usuarioLogado->id);
         }])->whereBetween('dt_vencimento', [
-            date('Y-m-01', strtotime($periodoSelecionado)),
-            date('Y-m-t', strtotime($periodoSelecionado))
+            $periodoSelecionadoInicio,
+            $periodoSelecionadoFim
         ])->get();
         $pdf = PDF::loadView('despesas/relatorios/pendente-rel', ['link'=>$parcelasPendentes, 'title'=>'Despesas Pendentes']);
         return $pdf->stream();

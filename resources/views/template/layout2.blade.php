@@ -45,11 +45,11 @@
         <div class="sidebar-wrapper">
             <div class="user">
                 <div class="photo">
-                    <img src="../img/faces/avatar.jpg" />
+                    <img src="{{ asset('storage/avatars/'.$usuario->image) }}" />
                 </div>
                 <div class="info">
                     <a data-toggle="collapse" href="#collapseExample" class="collapsed">
-                        Mozzara
+                        {{ $usuario->nome }}
                         <b class="caret"></b>
                     </a>
                     <div class="collapse" id="collapseExample">
@@ -164,6 +164,14 @@
         </nav>
         <div class="content">
 
+            <div class="row">
+                <div class="periodo-bar text-center">
+                    <span onclick="alteraPeriodo('previous');" class="btn btn-primary btn-sm"> <i class="material-icons">keyboard_arrow_left</i> </span>
+                    <span id="nomeMes" data-toggle="modal" data-target="#modal-periodo" class="btn btn-primary btn-fill btn-sm button-modal" style="width: 130px !important;"> {{$nomeMes}} </span>
+                    <span onclick="alteraPeriodo('next');" class="btn btn-primary btn-sm"> <i class="material-icons">keyboard_arrow_right</i> </span>
+                </div>
+            </div>
+
             @yield('content')
 
         </div>
@@ -182,6 +190,43 @@
 </div>
 
 @yield('modal')
+
+<!-- MODAL ALTERA PERIODO FORM -->
+<div class="modal fade" tabindex="-1" role="dialog" id="modal-periodo">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="card">
+                <form id="formPeriodo">
+                    <div class="card-header card-header-icon" data-background-color="purple">
+                        <i class="mdi mdi-credit-card-multiple"></i>
+                    </div>
+                    <div class="card-content">
+                        <h4 class="card-title">Período</h4>
+
+                         <div class="form-group label-floating">
+                            <label class="control-label">Data inicial</label>
+                            <input class="form-control datepicker" id="inicio" name="inicio" value="{{date('01/m/Y')}}" required="true" />
+                        </div>
+
+                        <div class="form-group label-floating">
+                            <label class="control-label">Data final</label>
+                            <input class="form-control datepicker" id="final" name="final" value="{{date('t/m/Y')}}" required="true" />
+                        </div>
+
+
+                        <div class="text-center" style="margin-top: 20px;">
+                            <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Salvar</button>
+                        </div>
+                        <div class="text-center">
+                            <button type="button" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal" data-dismiss="modal">Cancelar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /MODAL -->
 
 
 </body>
@@ -239,10 +284,42 @@
         });
     }
 
+    function alteraPeriodo(id) {
+        $.ajax({
+            type: "POST",
+            url: '{{route('periodo.alteraMes')}}',
+            data: { id : id },
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+            dataType: 'json',
+            cache: false,
+            beforeSend: function () {
+                setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
+            },
+            success: function (data) {
+                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                if (data.status == "success") {
+                    setTimeout(function(){
+                        loadTable();
+                        $("#nomeMes").html(data.nomeMes);
+                        $("#nomeMes").css('cssText', 'width: 130px !important');
+                    }, 2000);
+                    setTimeout(function(){ showSucessNotification(data.message); }, 2500);
+                } else {
+                    setTimeout(function(){ showErrorNotification(data.message); }, 2500);
+                }
+            },
+            error: function (request, status, error) {
+                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                setTimeout(function(){ showErrorNotification(error); }, 2500);
+            }
+        });
+    }
+
     $(document).ready(function() {
         $('#datatables').DataTable({
             "pagingType": "full_numbers",
             "deferRender": true,
+            "processing": true,
             "lengthMenu": [
                 [10, 25, 50, -1],
                 [10, 25, 50, "All"]
@@ -284,15 +361,58 @@
 
         });
 
+        $('.card .material-datatables label').addClass('form-group');
 
-        //New record
-        $(".pagination").prepend('<li class="btn btn-primary btn-xs" style="padding: 5px 13px" data-toggle="modal" data-target="#modal-panel"><i class="material-icons">add</i>Adicionar</li>');
-
-        $( "[name='datatables_length']" ).change(function() {
-            $(".pagination").prepend('<li class="btn btn-primary btn-xs" style="padding: 5px 13px" data-toggle="modal" data-target="#modal-panel"><i class="material-icons">add</i>Adicionar</li>');
+        /* Limpar modal periodo */
+        $("#modal-periodo").on("hide.bs.modal", function () {
+            var form = $("#modal-panel").find("form")
+            $(form).each (function(){
+                var formID = $(this).attr("id");
+                $("#"+formID).each (function(){
+                    this.reset();
+                });
+            });
         });
 
-        $('.card .material-datatables label').addClass('form-group');
+        /* Submita o formualário via Ajax*/
+        $( "#formPeriodo" ).submit(function( e ) {
+            if ($("#formPeriodo" ).valid()) {
+                var formData = new FormData($("#formPeriodo")[0]);
+                    $.ajax({
+                        type: "POST",
+                        url: '{{route('periodo.alteraData')}}',
+                        data: formData,
+                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                        dataType: 'json',
+                        processData: false,
+                        contentType: false,
+                        cache: false,
+                        beforeSend: function () {
+                            $("#modal-periodo").modal('toggle');
+                            setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
+
+                        },
+                        success: function (data) {
+                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                            if (data.status == "success") {
+                                setTimeout(function(){
+                                    loadTable();
+                                    $("#nomeMes").html(data.nomeMes);
+                                    $("#nomeMes").css('cssText', 'width: 165px !important');
+                                }, 2000);
+                                setTimeout(function(){ showSucessNotification(data.message); }, 2500);
+                            } else {
+                                setTimeout(function(){ showErrorNotification(data.message); }, 2500);
+                            }
+                        },
+                        error: function (request, status, error) {
+                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                            setTimeout(function(){ showErrorNotification(error); }, 2500);
+                        }
+                    });
+            }
+            e.preventDefault(); // avoid to execute the actual submit of the form.
+        });
 
     });
 </script>

@@ -97,9 +97,12 @@ class RegisterController extends Controller
                     Storage::disk('local-avatar')->put($file_avatar_name,$avatar->__toString());
                     DB::table('usuario')->where('id', $new_user->id)->update(['image' => $file_avatar_name]);
                 }
-
+                $new_user =  DB::table('usuario')->where([
+                    ['id', '=', $new_user->id]
+                ])->first();
                 $request->session()->put('usuarioLogado', $new_user);
-                $request->session()->put('periodoSelecionado', date('Ymd'));
+                $request->session()->put('periodoSelecionadoInicio', date('Ym01'));
+                $request->session()->put('periodoSelecionadoFim', date('Ymt'));
 
                 return response()->json([
                     'status' => 'success',

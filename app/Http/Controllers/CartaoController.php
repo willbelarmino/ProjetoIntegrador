@@ -19,23 +19,20 @@ use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 
 
-class ContaController extends Controller
+class CartaoController extends Controller
 {
 
     public function index(Request $request){
         $usuarioLogado = $request->session()->get('usuarioLogado');
-        $nomeMes = UtilsController::getNomeMesSelecionado($request);
-        $contas = DB::table('conta')->where('id_usuario', $usuarioLogado->id)->get();
-        foreach($contas as $key => $subarray) {
-            $contas[$key]->saldo=100.0;
-        }
-        return view('contas/contas',[
-            'menuView'=>'contas',
-            'page'=>'Contas',
-            'contas'=>$contas,
-            'usuario'=>$usuarioLogado,
-            'nomeMes'=>$nomeMes
-        ]);
+
+        $cartoes = CartaoCredito::from('cartao_credito AS cc')
+            ->where("c.id_usuario",$usuarioLogado->id)
+            ->join('categoria AS c','cc.id_conta','=','c.id')
+            ->select('cc.*')
+            ->get();
+
+     
+        return view('cartoes/cartoes',['menuView'=>'cartoes','page'=>'Cartões','cartoes'=>$cartoes]);
     }
 
     protected function create(Request $request){
@@ -63,7 +60,7 @@ class ContaController extends Controller
             $file = $request->file('image');
             if (!empty($file)) {
                 $image = Image::make($file)->resize(128, 128)->encode('jpg')->stream();
-                $file_image_name = $new_conta->id.time().'.jpg';
+                $file_image_name = '4'.time().'.jpg';
                 Storage::disk('local-conta')->put($file_image_name,$image->__toString());
                 DB::table('conta')->where('id', $new_conta->id)->update(['image' => $file_image_name]);
             }
@@ -117,13 +114,13 @@ class ContaController extends Controller
                 $indicador = 'N';
             }
            
-            $file = $request->file('conta-view');
+            $file = $request->file('image');
             if (!empty($file)) {
                 $image = Image::make($file)->resize(128, 128)->encode('jpg')->stream();
-                $file_image_name_old = $param['imagem'];
-                $file_image_name = $param['id'].time().'.jpg';
-                Storage::disk('local-conta')->delete($file_image_name_old);
-                Storage::disk('local-conta')->put($file_image_name,$image->__toString());
+                $file_image_name = $param['imagem'];
+                Storage::disk('local-conta')->put($file_image_name,$image->__toString());               
+            } else {
+                DB::table('conta')->where('id', $param['id'])->update(['image' => 'conta_default.jpg']);
             }
 
             DB::table('conta')
@@ -131,8 +128,7 @@ class ContaController extends Controller
                 ->update([
                     'nome' => $param['nome'],
                     'tipo' => $param['tipo'],
-                    'exibir_indicador' => $indicador,
-                    'image' => $file_image_name
+                    'exibir_indicador' => $indicador,                                    
             ]);
 
             return response()->json([

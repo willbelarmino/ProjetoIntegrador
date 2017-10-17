@@ -21,7 +21,7 @@
                         <form id ="loginForm" class="form">
                             <div class="card card-login card-hidden">
                                 <div class="card-header text-center" data-background-color="purple">
-                                    <h4 class="card-title"> <img style="width:150px;height:100px;" src="../img/login.png"/></h4>
+                                    <h4 class="card-title"> <img style="width:150px;height:80px;" src="../img/login.png"/></h4>
                                 </div>
                                 <div class="card-content">
                                     <div class="input-group">
