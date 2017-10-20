@@ -25,70 +25,46 @@
                                         <tr>
                                             <th class="disabled-sorting text-right"></th>
                                             <th>Nome</th>
-                                            <th>Saldo</th>
-                                            <th>Última movimentação</th>
+                                            <th>Limite</th>
+                                            <th>Data de fechamento</th>
+                                            <th>Data de vencimento</th>
                                             <th class="disabled-sorting text-right"></th>
                                         </tr>
                                         </thead>
                                         <tbody>
 
-                                        @foreach ($contas as $conta)
-                                            @php ($tipoconta = null)
-                                            @php ($indicador = null)
-
-                                            @if ($conta->tipo==chr(0x50))
-                                                @php ($tipoconta = 'Poupança')
-                                            @elseif ($conta->tipo==chr(0x43))
-                                                @php ($tipoconta = 'Corrente')
-                                            @elseif ($conta->tipo==chr(0x4F))
-                                                @php ($tipoconta = 'Outros')
-                                            @endif
-
-                                            @if ($conta->exibir_indicador==chr(0x53))
-                                                @php ($indicador = 'Sim')
-                                            @elseif ($conta->exibir_indicador==chr(0x4E))
-                                                @php ($indicador = 'Não')
-                                            @endif
+                                        @foreach ($cartoes as $cartao)
                                             <tr>
-                                                <td class="td-actions text-right" style="float: left">
-                                                    <img  style="width: 45px; height: 40px" src="{{ asset('storage/contas/'.$conta->image) }}" alt="...">
-                                                </td>
+                                                <td>{{ $cartao->conta->nome }}</td>
 
-                                                <td>{{ $conta->nome }}</td>
+                                                <td>{{ 'R$ '.number_format($cartao->limite, 2, ',', '.') }}</td>
 
-                                                @if (empty($conta->saldo))
-                                                    <td> -//- </td>
-                                                @else
-                                                    <td>{{ 'R$ '.number_format($conta->saldo, 2, ',', '.') }}</td>
-                                                @endif
+                                                <td> {{ date('d/m/Y', strtotime($cartao->dt_fechamento)) }} </td>
 
-                                                <td> {{ date('d/m/Y', strtotime($conta->dt_movimento)) }} </td>
+                                                <td> {{ date('d/m/Y', strtotime($cartao->dt_vencimento)) }} </td>
 
                                                 <td class="td-actions text-right">
                                                     <button type="button" rel="tooltip" class="btn btn-info"
                                                             onclick="visualizar(
-                                                                '{{asset('storage/contas/'.$conta->image)}}',
-                                                                '{{$conta->nome}}',
-                                                                '{{ 'R$ '.number_format($conta->saldo, 2, ',', '.')}}',
-                                                                '{{$tipoconta}}',
-                                                                '{{$indicador}}',
-                                                                '{{date('d/m/Y', strtotime($conta->dt_movimento))}}'
+                                                                '{{$cartao->conta->nome}}',
+                                                                '{{ 'R$ '.number_format($cartao->limite, 2, ',', '.')}}',
+                                                                '{{ date('d/m/Y', strtotime($cartao->dt_fechamento)) }}',
+                                                                '{{ date('d/m/Y', strtotime($cartao->dt_vencimento)) }}'
                                                             );">
                                                         <i class="material-icons">assignment</i>
                                                     </button>
                                                     <button type="button" rel="tooltip" class="btn btn-success"
                                                             onclick="alterar(
-                                                                '{{$conta->id}}',
-                                                                '{{$conta->nome}}',
-                                                                '{{$conta->tipo}}',
-                                                                '{{$conta->exibir_indicador}}',
-                                                                '{{$conta->image}}'
+                                                                    '{{$cartao->conta->nome}}',
+                                                                    '{{ 'R$ '.number_format($cartao->limite, 2, ',', '.')}}',
+                                                                    '{{ date('d/m/Y', strtotime($cartao->dt_fechamento)) }}',
+                                                                    '{{ date('d/m/Y', strtotime($cartao->dt_vencimento)) }}'
                                                             );">
                                                         <i class="material-icons">edit</i>
                                                     </button>
                                                     <button type="button" rel="tooltip" class="btn btn-danger"
                                                             onclick="deletar(
-                                                                {{$conta->id}}
+                                                                {{$cartao->id}}
                                                             );">
                                                         <i class="material-icons">close</i>
                                                     </button>

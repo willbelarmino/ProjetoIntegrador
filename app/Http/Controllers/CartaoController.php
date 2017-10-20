@@ -24,7 +24,6 @@ class CartaoController extends Controller
 
     public function index(Request $request){
         $usuarioLogado = $request->session()->get('usuarioLogado');
-
         $cartoes = CartaoCredito::from('cartao_credito AS cc')
             ->where("c.id_usuario",$usuarioLogado->id)
             ->join('categoria AS c','cc.id_conta','=','c.id')
@@ -37,8 +36,6 @@ class CartaoController extends Controller
 
     protected function create(Request $request){
         try {
-
-
             $usuarioLogado = $request->session()->get('usuarioLogado');
             $param = $request->all();
 

@@ -96,7 +96,7 @@
                     </a>
                 </li>
                 <li class="@if ($menuView == 'cartoes') active @endif">
-                    <a href="{{route('contas')}}">
+                    <a href="{{route('cartoes')}}">
                         <i class="mdi mdi-cards-outline"></i>
                         <p>Cartões</p>
                     </a>

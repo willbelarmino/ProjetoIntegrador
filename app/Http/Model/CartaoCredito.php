@@ -15,7 +15,7 @@ class CartaoCredito extends Model
     protected $fillable = ['limite', 'dt_fechamento', 'dt_vencimento','id_conta','cartao_independente'];
 
     public function conta() {
-        return $this->belongsTo('App\Http\Model\Conta', 'id_conta');
+        return $this->belongsTo('App\Http\Model\Conta', 'id_conta', 'id');
     }
 
     public function despesas() {

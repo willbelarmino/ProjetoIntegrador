@@ -46,3 +46,18 @@ Route::group(['prefix'=>'despesa','where'=>['id'=>'[0-9]+']], function() {
     Route::post('alterarPendente', ['as'=>'alterar.pendente', 'uses'=>'DespesaPendenteController@edit']);
     Route::post('deletarPendente', ['as'=>'deletar.pendente', 'uses'=>'DespesaPendenteController@delete']);
 });
+
+Route::group(['prefix'=>'cartao','where'=>['id'=>'[0-9]+']], function() {
+    Route::get('cartoes', ['as'=>'cartoes', 'uses'=>'CartaoController@index']);
+    Route::post('criarCartao', ['as'=>'criar.cartao', 'uses'=>'CartaoController@create']);
+    Route::post('alterarCartao', ['as'=>'alterar.cartao', 'uses'=>'CartaoController@edit']);
+    Route::post('deletarCartao', ['as'=>'deletar.cartao', 'uses'=>'CartaoController@delete']);
+});
+
+Route::group(['prefix'=>'renda','where'=>['id'=>'[0-9]+']], function() {
+    Route::get('pdfView', ['as'=>'generate.renda.pdf', 'uses'=>'RendaController@toPDF']);
+    Route::get('rendas', ['as'=>'rendas', 'uses'=>'RendaController@index']);
+    Route::post('criarRenda', ['as'=>'criar.renda', 'uses'=>'RendaController@create']);
+    Route::post('alterarRenda', ['as'=>'alterar.renda', 'uses'=>'RendaController@edit']);
+    Route::post('deletarRenda', ['as'=>'deletar.renda', 'uses'=>'RendaController@delete']);
+});
