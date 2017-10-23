@@ -55,7 +55,6 @@
                                                     </button>
                                                     <button type="button" rel="tooltip" class="btn btn-success"
                                                             onclick="alterar(
-                                                                    '{{$cartao->conta->nome}}',
                                                                     '{{ 'R$ '.number_format($cartao->limite, 2, ',', '.')}}',
                                                                     '{{ date('d/m/Y', strtotime($cartao->dt_fechamento)) }}',
                                                                     '{{ date('d/m/Y', strtotime($cartao->dt_vencimento)) }}'
@@ -104,29 +103,17 @@
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="card">
-                    <form id="formConta" enctype="multipart/form-data">
+                    <form id="formCartao" enctype="multipart/form-data">
                         <div class="card-header card-header-icon" data-background-color="purple">
                             <i class="mdi mdi-credit-card-multiple"></i>
                         </div>
                         <div class="card-content">
-                            <h4 class="card-title">Conta</h4>
+                            <h4 class="card-title">Cartão</h4>
 
-                            <div class="footer text-center">
-                                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                                    <div class="fileinput-new thumbnail">
-                                        <img title="A imagem deve ser no formato jpg, png ou gif e ser menor que 500Kb!" src="../img/image_placeholder.jpg" alt="...">
-                                    </div>
-                                    <div class="fileinput-preview fileinput-exists thumbnail"></div>
-                                    <div>
-                                                    <span class="btn btn-primary btn-round btn-file btn-xs">
-                                                        <span class="fileinput-new">Adicionar Foto</span>
-                                                        <span class="fileinput-exists">Alterar</span>
-                                                        <input type="file" onChange="validationFile(this.form,this)" accept="image/*" id="image" name="image" />
-                                                    </span>
-                                        <a class="btn btn-danger btn-round fileinput-exists btn-xs" id="remove-image" data-dismiss="fileinput"><i class="fa fa-times"></i> Remover</a>
-                                    </div>
-                                    <label id="avatar-error"></label>
-                                </div>
+                            <div class="togglebutton">
+                                <label style="color: #AAAAAA;">
+                                    <input type="checkbox" id="check-tipo" name="tipo"> Cartão independente
+                                </label>
                             </div>
 
                             <div class="form-group label-floating">
@@ -135,18 +122,27 @@
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Tipo de conta</label>
-                                <select id="tipo" name="tipo"  class="selectpicker" data-style="select-with-transition" title="Selecionar" data-size="7">
-                                    <option value="C">Corrente</option>
-                                    <option value="P">Poupança</option>
-                                    <option value="O">Outros</option>
+                                <label class="control-label">Conta</label>
+                                <select id="categoria" name="categoria"  class="selectpicker" data-style="select-with-transition" title="Selecionar" data-size="7">
+                                    @foreach ($contas as $conta)
+                                        <option value="{{$conta->id}}">{{$conta->nome}}</option>
+                                    @endforeach
                                 </select>
                             </div>
 
-                            <div class="togglebutton">
-                                <label style="color: #AAAAAA;">
-                                    <input type="checkbox" id="check-indicador" name="indicador"> Exibir indicador
-                                </label>
+                            <div class="form-group label-floating">
+                                <label class="control-label">Data de fechamento</label>
+                                <input class="form-control datepicker" id="fechamento" name="fechamento" value="{{date('d/m/Y')}}" required="true" />
+                            </div>
+
+                            <div class="form-group label-floating">
+                                <label class="control-label">Data de vencimento</label>
+                                <input class="form-control datepicker" id="vencimento" name="vencimento" value="{{date('d/m/Y')}}" required="true" />
+                            </div>
+
+                            <div class="form-group label-floating">
+                                <label class="control-label">Limite</label>
+                                <input class="form-control money-format" id="limite" name="limite" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
                             </div>
 
 
@@ -158,61 +154,7 @@
                             </div>
                         </div>
                     </form>
-                    <form id="formConta-edit" enctype="multipart/form-data" style="display:none;">
-                        <div class="card-header card-header-icon" data-background-color="purple">
-                            <i class="mdi mdi-credit-card-multiple"></i>
-                        </div>
-                        <div class="card-content">
-                            <h4 class="card-title">Conta</h4>
-                            <input id="id-edit" name="id" type="hidden"/>
-                            <input id="imagem-edit" name="imagem" type="hidden"/>
-                            <div class="footer text-center">
-                                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                                    <div class="fileinput-new thumbnail">
-                                        <img title="A imagem deve ser no formato jpg, png ou gif e ser menor que 500Kb!" src="../img/image_placeholder.jpg" alt="...">
-                                    </div>
-                                    <div class="fileinput-preview fileinput-exists thumbnail"></div>
-                                    <div>
-                                                    <span class="btn btn-primary btn-round btn-file btn-xs">
-                                                        <span class="fileinput-new">Adicionar Foto</span>
-                                                        <span class="fileinput-exists">Alterar</span>
-                                                        <input type="file" onChange="validationFile(this.form,this)" accept="image/*" id="image-edit" name="image" />
-                                                    </span>
-                                        <a class="btn btn-danger btn-round fileinput-exists btn-xs" id="remove-image-edit" data-dismiss="fileinput"><i class="fa fa-times"></i> Remover</a>
-                                    </div>
-                                    <label id="avatar-error"></label>
-                                </div>
-                            </div>
 
-                            <div class="form-group label-floating">
-                                <label class="control-label">Nome</label>
-                                <input class="form-control" id="nome-edit" name="nome" type="text" required="true" />
-                            </div>
-
-                            <div class="form-group label-floating">
-                                <label class="control-label">Tipo de conta</label>
-                                <select id="tipo-edit" name="tipo"  class="selectpicker" data-style="select-with-transition" title="Selecionar" data-size="7">
-                                    <option value="C">Corrente</option>
-                                    <option value="P">Poupança</option>
-                                    <option value="O">Outros</option>
-                                </select>
-                            </div>
-
-                            <div class="togglebutton">
-                                <label style="color: #AAAAAA;">
-                                    <input type="checkbox" id="check-indicador-edit" name="indicador"> Exibir indicador
-                                </label>
-                            </div>
-
-
-                            <div class="text-center">
-                                <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Alterar</button>
-                            </div>
-                            <div class="text-center">
-                                <button type="button" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal" data-dismiss="modal">Cancelar</button>
-                            </div>
-                        </div>
-                    </form>
                 </div>
             </div>
         </div>
