@@ -1,7 +1,7 @@
 @extends('template/layout2')
 
 @section('title')
-    <title>Despesas Pendentes - MoneyCash</title>
+    <title>Despesas Pagas - MoneyCash</title>
 @endsection
 
 @section('content')
@@ -10,7 +10,7 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header card-header-icon" data-background-color="purple">
-                        <i class="mdi mdi-credit-card-multiple"></i>
+                        <i class="mdi mdi-credit-card"></i>
                     </div>
                     <div class="card-content">
                         <h4 class="card-title">{{$page}}</h4>
@@ -25,59 +25,49 @@
                                         <tr>
                                             <th>Nome</th>
                                             <th>Data de vencimento </th>
+                                            <th>Data de pagamento </th>
                                             <th>Valor </th>
-                                            <th>Categoria </th>
+                                            <th>Conta </th>
                                             <th class="disabled-sorting text-right"></th>
                                         </tr>
                                         </thead>
                                         <tbody>
 
                                         @foreach ($parcelas as $parcela)
-                                            @php ($credito = null)
-                                            @if (!empty($parcela->despesa->id_cartao_credito))
-                                                $credito = '{{$parcela->despesa->cartao->conta->nome}}'
-                                            @endif
-                                            <tr>
-                                                <td>{{ $parcela->despesa->nome }}</td>
 
-                                                <td>{{ date('d/m/Y', strtotime($parcela->dt_vencimento)) }}</td>
+                                            <tr>
+                                                <td>{{ $parcela->parcelaPendente->despesa->nome }}</td>
+
+                                                <td>{{ date('d/m/Y', strtotime($parcela->parcelaPendente->dt_vencimento)) }}</td>
+
+                                                <td>{{ date('d/m/Y', strtotime($parcela->dt_pagamento)) }}</td>
 
                                                 <td>{{ 'R$ '.number_format($parcela->valor, 2, ',', '.') }}</td>
 
-                                                <td>{{ $parcela->despesa->categoria->nome }}</td>
+                                                <td>{{ $parcela->conta->nome }}</td>
 
                                                 <td class="td-actions text-right">
-                                                    <button type="button" rel="tooltip" class="btn btn-primary" title="Pagar"
-                                                            onclick="pagar(
-                                                                    '{{$parcela->id}}'
-                                                                    )">
-                                                        <i class="material-icons">attach_money</i>
-                                                    </button>
                                                     <button type="button" rel="tooltip" class="btn btn-info"
                                                             onclick="visualizar(
-                                                                    '{{$parcela->despesa->nome}}',
+                                                                    '{{$parcela->parcelaPendente->despesa->nome}}',
                                                                     '{{ 'R$ '.number_format($parcela->valor, 2, ',', '.')}}',
-                                                                    '{{$parcela->despesa->categoria->nome}}',
-                                                                    '{{$parcela->referencia}}',
-                                                                    '{{$credito}}'
+                                                                    '{{$parcela->parcelaPendente->despesa->categoria->nome}}'
+
+
                                                             )">
                                                         <i class="material-icons">assignment</i>
                                                     </button>
                                                     <button type="button" rel="tooltip" class="btn btn-success"
                                                             onclick="alterar(
                                                                     '{{$parcela->id}}',
-                                                                    '{{$parcela->despesa->nome}}',
+                                                                    '{{$parcela->parcelaPendente->despesa->nome}}',
                                                                     '{{ 'R$ '.number_format($parcela->valor, 2, ',', '.')}}',
-                                                                    '{{ date('d/m/Y', strtotime($parcela->dt_vencimento)) }}',
-                                                                    '{{$parcela->despesa->id_categoria}}',
-                                                                    '{{$parcela->despesa->id_cartao_credito}}',
-                                                                    '{{$parcela->despesa->parcelas}}',
-                                                                    '{{$parcela->despesa->categoria->nome}}',
-                                                                    '{{$credito}}'
+                                                                    '{{ date('d/m/Y', strtotime($parcela->dt_pagamento)) }}'
+
                                                             );">
                                                         <i class="material-icons">edit</i>
                                                     </button>
-                                                    <button type="button" rel="tooltip" class="btn btn-danger" onclick="deletar({{$parcela->despesa->id}});">
+                                                    <button type="button" rel="tooltip" class="btn btn-danger" onclick="deletar({{$parcela->parcelaPendente->despesa->id}});">
                                                         <i class="material-icons">close</i>
                                                     </button>
                                                 </td>
@@ -88,7 +78,7 @@
                                         <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
                                             <i class="material-icons">add</i> ADICIONAR
                                         </button>
-                                        <button type="button"  class="btn btn-danger btn-xs" onclick="window.open('{{ route('generate.relPendente') }}','_blank');"  style="float:right">
+                                        <button type="button"  class="btn btn-danger btn-xs" onclick="window.open('{{ route('generate.relPaga') }}','_blank');"  style="float:right">
                                             <i class="material-icons">print</i> IMPRIMIR
                                         </button>
 
@@ -118,42 +108,6 @@
         </div>
     </div>
 
-    <!-- MODAL PAGAMENTO -->
-    <div class="modal fade" tabindex="-1" role="dialog" id="modal-pagamento">
-        <div class="modal-dialog modal-sm" role="document">
-            <div class="modal-content">
-                <div class="card">
-                    <form id="formPagamento" enctype="multipart/form-data">
-                        <div class="card-header card-header-icon" data-background-color="purple">
-                            <i class="material-icons">attach_money</i>
-                        </div>
-                        <div class="card-content">
-                            <h4 class="card-title">Pagamento</h4>
-
-                            <input id="id-pagamento" name="id" type="hidden"/>
-
-                            <div class="form-group label-floating">
-                                <label class="control-label">Conta</label>
-                                <select id="conta" name="conta"  class="selectpicker" data-style="select-with-transition" title="Selecionar" data-size="7">
-                                    @foreach ($contas as $conta)
-                                        <option value="{{$conta->id}}">{{$conta->nome}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="text-center" style="margin-top: 20px;">
-                                <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Pagar</button>
-                            </div>
-                            <div class="text-center">
-                                <button type="button" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal" data-dismiss="modal">Cancelar</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- /MODAL -->
-
     <!-- MODAL FORM -->
     <div class="modal fade" tabindex="-1" role="dialog" id="modal-panel">
         <div class="modal-dialog modal-sm" role="document">
@@ -161,10 +115,10 @@
                 <div class="card">
                     <form id="formDespesa" enctype="multipart/form-data">
                         <div class="card-header card-header-icon" data-background-color="purple">
-                            <i class="mdi mdi-credit-card-multiple"></i>
+                            <i class="mdi mdi-credit-card"></i>
                         </div>
                         <div class="card-content">
-                            <h4 class="card-title">Despesa Pendente</h4>
+                            <h4 class="card-title">Despesa Paga</h4>
 
                             <div class="form-group label-floating">
                                 <label class="control-label">Nome</label>
@@ -172,8 +126,8 @@
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Data de vencimento</label>
-                                <input class="form-control datepicker" id="vencimento" name="vencimento" value="{{date('d/m/Y')}}" required="true" />
+                                <label class="control-label">Data de pagamento</label>
+                                <input class="form-control datepicker" id="pagamento" name="pagamento" value="{{date('d/m/Y')}}" required="true" />
                             </div>
 
                             <div class="form-group label-floating">
@@ -186,6 +140,15 @@
                                 <input class="form-control" id="parcela" name="parcela" required="true" type="number" min="1" max="320" step="1" value ="1"/>
                             </div>
 
+
+                            <div class="form-group label-floating">
+                                <label class="control-label">Conta</label>
+                                <select id="conta" name="conta"  class="selectpicker" data-style="select-with-transition" title="Selecionar" data-size="7">
+                                    @foreach ($contas as $conta)
+                                        <option value="{{$conta->id}}">{{$conta->nome}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
                             <div class="form-group label-floating">
                                 <label class="control-label">Categoria</label>
@@ -221,10 +184,10 @@
                     </form>
                     <form id="formDespesa-edit" enctype="multipart/form-data" style="display:none;">
                         <div class="card-header card-header-icon" data-background-color="purple">
-                            <i class="mdi mdi-credit-card-multiple"></i>
+                            <i class="mdi mdi-credit-card"></i>
                         </div>
                         <div class="card-content">
-                            <h4 class="card-title">Despesa Pendente</h4>
+                            <h4 class="card-title">Despesa Paga</h4>
                             <input id="id-edit" name="id" type="hidden"/>
                             <div class="form-group label-floating">
                                 <label class="control-label">Nome</label>
@@ -232,10 +195,10 @@
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Data de vencimento
+                                <label class="control-label">Data de pagamento
                                     <star>*</star>
                                 </label>
-                                <input class="form-control datepicker" id="vencimento-edit" name="vencimento" value="{{date('d/m/Y')}}" required="true" />
+                                <input class="form-control datepicker" id="pagamento-edit" name="pagamento" value="{{date('d/m/Y')}}" required="true" />
                             </div>
 
                             <div class="form-group label-floating">
@@ -250,10 +213,10 @@
 
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Categoria</label>
-                                <select id="categoria-edit" name="categoria" class="selectpicker" title="Selecionar" data-style="select-with-transition" data-size="7">
-                                    @foreach ($categorias as $categoria)
-                                        <option value="{{$categoria->id}}">{{$categoria->nome}}</option>
+                                <label class="control-label">Conta</label>
+                                <select id="conta-edit" name="conta" class="selectpicker" title="Selecionar" data-style="select-with-transition" data-size="7">
+                                    @foreach ($contas as $conta)
+                                        <option value="{{$conta->id}}">{{$conta->nome}}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -306,10 +269,10 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <label class="col-sm-3 label-on-left">Data de vencimento</label>
+                                <label class="col-sm-3 label-on-left">Data de pagamento</label>
                                 <div class="col-sm-9">
                                     <div class="form-group">
-                                        <p class="form-control-static" id="view-despesa-vencimento">20/09/2017</p>
+                                        <p class="form-control-static" id="view-despesa-pagamento">20/09/2017</p>
                                     </div>
                                 </div>
                             </div>
@@ -383,11 +346,6 @@
             $("#modal-panel-view").modal("toggle");
         }
 
-        function pagar(id) {
-            $("#id-pagamento").val(id);
-            $("#modal-pagamento").modal("toggle");
-        }
-
         function deletar(id) {
             $.ajax({
                 type: "POST",
@@ -418,7 +376,7 @@
         }
 
 
-        function alterar(id,nome,valor,vencimento,categoria,credito,parcela,nomeCategoria,nomeCredito) {
+        function alterar(id,nome,valor,pagamento,categoria,credito,parcela,nomeCategoria,nomeCredito) {
             $("#formDespesa-edit").css("display","block");
             $("#formDespesa").css("display","none");
             $("#id-edit").val(id);
@@ -464,7 +422,7 @@
             var textCategoriaSelect = $('.filter-option.pull-left')[2];
             $(textCategoriaSelect).text(nomeCategoria);
             $("#parcela-edit").val(parcela);
-            $("#vencimento-edit").val(vencimento);
+            $("#pagamento-edit").val(pagamento);
 
             $("#modal-panel").modal("toggle");
         }
@@ -561,7 +519,7 @@
                         nome: {
                             required: "Campo de preenchimento obrigatório."
                         },
-                        vencimento: {
+                        pagamento: {
                             required: "Campo de preenchimento obrigatório."
                         },
                         valor: {
@@ -582,46 +540,6 @@
                 });
             });
 
-
-            /* Submita o formualário via Ajax*/
-            $( "#formPagamento" ).submit(function( e ) {
-                if ($("#formPagamento" ).valid()) {
-                    var formData = new FormData($("#formPagamento")[0]);
-
-                        $.ajax({
-                            type: "POST",
-                            url: '{{route('pagar')}}',
-                            data: formData,
-                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                            dataType: 'json',
-                            processData: false,
-                            contentType: false,
-                            cache: false,
-                            beforeSend: function () {
-                                $("#modal-pagamento").modal('toggle');
-                                setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
-
-                            },
-                            success: function (data) {
-                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                                if (data.status == "success") {
-                                    setTimeout(function(){ loadTable(); }, 2000);
-                                    setTimeout(function(){ showSucessNotification(data.message); }, 2500);
-                                } else {
-                                    setTimeout(function(){ showErrorNotification(data.message); }, 2500);
-                                }
-                            },
-                            error: function (request, status, error) {
-                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                                setTimeout(function(){ showErrorNotification(error); }, 2500);
-                            }
-                        });
-
-                }
-                e.preventDefault(); // avoid to execute the actual submit of the form.
-            });
-
-
             /* Submita o formualário via Ajax*/
             $( "#formDespesa" ).submit(function( e ) {
                 if ($("#formDespesa" ).valid()) {
@@ -629,7 +547,7 @@
                     if (validacaoExtraForm()) {
                         $.ajax({
                             type: "POST",
-                            url: '{{route('criar.pendente')}}',
+                            url: '{{route('criar.paga')}}',
                             data: formData,
                             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                             dataType: 'json',
@@ -665,7 +583,7 @@
                     var formData = new FormData($("#formDespesa-edit")[0]);
                     $.ajax({
                         type: "POST",
-                        url: '{{route('alterar.pendente')}}',
+                        url: '{{route('alterar.paga')}}',
                         data: formData,
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                         dataType: 'json',

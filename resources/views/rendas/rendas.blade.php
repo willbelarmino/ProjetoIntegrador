@@ -1,7 +1,7 @@
 @extends('template/layout2')
 
 @section('title')
-    <title>Categorias - MoneyCash</title>
+    <title>Rendas - MoneyCash</title>
 @endsection
 
 @section('content')
@@ -10,7 +10,7 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header card-header-icon" data-background-color="purple">
-                        <i class="mdi mdi-credit-card-multiple"></i>
+                        <i class="mdi mdi-square-inc-cash"></i>
                     </div>
                     <div class="card-content">
                         <h4 class="card-title">{{$page}}</h4>
@@ -24,39 +24,46 @@
                                         <thead>
                                         <tr>
                                             <th>Nome</th>
-                                            <th>Limite</th>
+                                            <th>Data de recebimento </th>
+                                            <th>Valor </th>
+                                            <th>Conta </th>
                                             <th class="disabled-sorting text-right"></th>
                                         </tr>
                                         </thead>
                                         <tbody>
 
-                                        @foreach ($categorias as $categoria)
+                                        @foreach ($rendas as $renda)
                                             <tr>
-                                                <td>{{ $categoria->nome }}</td>
+                                                <td>{{ $renda->nome }}</td>
 
-                                                @if (empty($categoria->limite))
-                                                    <td> -//- </td>
-                                                @else
-                                                    <td>{{ 'R$ '.number_format($categoria->limite, 2, ',', '.') }}</td>
-                                                @endif
+                                                <td>{{ date('d/m/Y', strtotime($renda->dt_recebimento)) }}</td>
+
+                                                <td>{{ 'R$ '.number_format($renda->valor, 2, ',', '.') }}</td>
+
+                                                <td>{{ $renda->conta->nome }}</td>
 
                                                 <td class="td-actions text-right">
                                                     <button type="button" rel="tooltip" class="btn btn-info"
                                                             onclick="visualizar(
-                                                                '{{$categoria->nome}}',
-                                                                '{{ 'R$ '.number_format($categoria->limite, 2, ',', '.')}}'
-                                                            );">
+                                                                    '{{$renda->nome}}',
+                                                                    '{{ 'R$ '.number_format($renda->valor, 2, ',', '.')}}',
+                                                                    '{{ date('d/m/Y', strtotime($renda->dt_recebimento)) }}',
+                                                                    '{{$renda->conta->nome}}'
+                                                            )">
                                                         <i class="material-icons">assignment</i>
                                                     </button>
                                                     <button type="button" rel="tooltip" class="btn btn-success"
                                                             onclick="alterar(
-                                                                '{{$categoria->id}}',
-                                                                '{{$categoria->nome}}',
-                                                                '{{ 'R$ '.number_format($categoria->limite, 2, ',', '.')}}'
+                                                                    '{{$renda->id}}',
+                                                                    '{{$renda->nome}}',
+                                                                    '{{ 'R$ '.number_format($renda->valor, 2, ',', '.')}}',
+                                                                    '{{ date('d/m/Y', strtotime($renda->dt_recebimento)) }}',
+                                                                    '{{$renda->id_conta}}',
+                                                                    '{{$renda->conta->nome}}'
                                                             );">
                                                         <i class="material-icons">edit</i>
                                                     </button>
-                                                    <button type="button" rel="tooltip" class="btn btn-danger" onclick="deletar({{$categoria->id}});">
+                                                    <button type="button" rel="tooltip" class="btn btn-danger" onclick="deletar({{$renda->id}});">
                                                         <i class="material-icons">close</i>
                                                     </button>
                                                 </td>
@@ -64,9 +71,14 @@
                                         @endforeach
                                         </tbody>
                                     </table>
-                                    <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
-                                        <i class="material-icons">add</i> ADICIONAR
-                                    </button>
+                                        <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
+                                            <i class="material-icons">add</i> ADICIONAR
+                                        </button>
+                                        <button type="button"  class="btn btn-danger btn-xs" onclick="window.open('{{ route('generate.relRenda.pdf') }}','_blank');"  style="float:right">
+                                            <i class="material-icons">print</i> IMPRIMIR
+                                        </button>
+
+
                                 </div>
                             </div>
                         </div>
@@ -92,43 +104,43 @@
         </div>
     </div>
 
-    <!-- MODAL -->
+    <!-- MODAL FORM -->
     <div class="modal fade" tabindex="-1" role="dialog" id="modal-panel">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="card">
-                    <form id="formCategoria" enctype="multipart/form-data">
+                    <form id="formRenda" enctype="multipart/form-data">
                         <div class="card-header card-header-icon" data-background-color="purple">
-                            <i class="mdi mdi-credit-card-multiple"></i>
+                            <i class="mdi mdi-square-inc-cash"></i>
                         </div>
                         <div class="card-content">
-                            <h4 class="card-title">Categoria</h4>
+                            <h4 class="card-title">Renda</h4>
+
                             <div class="form-group label-floating">
-                                <label class="control-label">Nome
-                                    <star>*</star>
-                                </label>
+                                <label class="control-label">Nome</label>
                                 <input class="form-control" id="nome" name="nome" type="text" required="true" />
                             </div>
 
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox" id="habilitar-limite" name="optionsCheckboxes">
-                                    <a style="font-size:12px"  >Inserir limite</a>.
-                                </label>
+                            <div class="form-group label-floating">
+                                <label class="control-label">Data de recebimento</label>
+                                <input class="form-control datepicker" id="recebimento" name="recebimento" value="{{date('d/m/Y')}}" required="true" />
                             </div>
 
+                            <div class="form-group label-floating">
+                                <label class="control-label">Valor</label>
+                                <input class="form-control money-format" id="valor" name="valor" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
+                            </div>  
 
+                            <div class="form-group label-floating">
+                                <label class="control-label">Conta</label>
+                                <select id="conta" name="conta"  class="selectpicker" data-style="select-with-transition" title="Selecionar" data-size="7">
+                                    @foreach ($contas as $conta)
+                                        <option value="{{$conta->id}}">{{$conta->nome}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                            <div class="form-group label-floating" id="input-limite" style="display:none;">
-                                <label class="control-label">Limite
-                                    <star>*</star>
-                                </label>
-                                <input class="form-control money-format" disabled id="limite" name="limite" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
-                            </div>
-                            <div class="category form-category">
-                                <star>*</star> Campos obrigatórios
-                            </div>
-                            <div class="text-center">
+                            <div class="text-center" style="margin-top: 20px;">
                                 <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Salvar</button>
                             </div>
                             <div class="text-center">
@@ -136,36 +148,40 @@
                             </div>
                         </div>
                     </form>
-                    <form id="formCategoria-edit" enctype="multipart/form-data" style="display:none;">
+                    <form id="formRenda-edit" enctype="multipart/form-data" style="display:none;">
                         <div class="card-header card-header-icon" data-background-color="purple">
-                            <i class="mdi mdi-credit-card-multiple"></i>
+                            <i class="mdi mdi-square-inc-cash"></i>
                         </div>
                         <div class="card-content">
-                            <h4 class="card-title">Categoria</h4>
+                            <h4 class="card-title">Renda</h4>
                             <input id="id-edit" name="id" type="hidden"/>
                             <div class="form-group label-floating">
-                                <label class="control-label">Nome
-                                    <star>*</star>
-                                </label>
+                                <label class="control-label">Nome</label>
                                 <input class="form-control" id="nome-edit" name="nome" type="text" required="true" />
                             </div>
 
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox" id="habilitar-limite-edit" name="optionsCheckboxes">
-                                    <a style="font-size:12px"  >Inserir limite</a>.
-                                </label>
-                            </div>
-
-                            <div class="form-group label-floating" id="input-limite-edit" style="display:none;">
-                                <label class="control-label">Limite
+                            <div class="form-group label-floating">
+                                <label class="control-label">Data de recebimento
                                     <star>*</star>
                                 </label>
-                                <input class="form-control money-format" disabled id="limite-edit" name="limite" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
+                                <input class="form-control datepicker" id="recebimento-edit" name="recebimento" value="{{date('d/m/Y')}}" required="true" />
                             </div>
-                            <div class="category form-category">
-                                <star>*</star> Campos obrigatórios
+
+                            <div class="form-group label-floating">
+                                <label class="control-label">Valor</label>
+                                <input class="form-control money-format" id="valor-edit" name="valor" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
                             </div>
+
+
+                            <div class="form-group label-floating">
+                                <label class="control-label">Conta</label>
+                                <select id="conta-edit" name="conta" class="selectpicker" title="Selecionar" data-style="select-with-transition" data-size="7">
+                                    @foreach ($contas as $conta)
+                                        <option value="{{$conta->id}}">{{$conta->nome}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                           
                             <div class="text-center">
                                 <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Alterar</button>
                             </div>
@@ -188,17 +204,33 @@
                 <div class="card">
                     <form class="form-horizontal">
                         <div class="card-header card-header-text" data-background-color="purple">
-                            <h4 class="card-title" id="view-categoria-nome">Stock Center</h4>
+                            <h4 class="card-title" id="view-renda-nome">Stock Center</h4>
                         </div>
                         <div class="card-content">
                             <div class="row">
-                                <label class="col-sm-3 label-on-left">Limite</label>
+                                <label class="col-sm-3 label-on-left">Valor</label>
                                 <div class="col-sm-9">
                                     <div class="form-group">
-                                        <p class="form-control-static" id="view-categoria-limite">R$ 187,45</p>
+                                        <p class="form-control-static" id="view-renda-valor">R$ 187,45</p>
                                     </div>
                                 </div>
                             </div>
+                            <div class="row">
+                                <label class="col-sm-3 label-on-left">Data de recebimento</label>
+                                <div class="col-sm-9">
+                                    <div class="form-group">
+                                        <p class="form-control-static" id="view-renda-recebimento">20/09/2017</p>
+                                    </div>
+                                </div>
+                            </div>                            
+                            <div class="row">
+                                <label class="col-sm-3 label-on-left">Conta</label>
+                                <div class="col-sm-9">
+                                    <div class="form-group">
+                                        <p class="form-control-static" id="view-renda-conta">Alimentação</p>
+                                    </div>
+                                </div>
+                            </div>                            
                             <div class="text-center">
                                 <button type="button" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal" data-dismiss="modal">Ok</button>
                             </div>
@@ -213,17 +245,35 @@
 
 @section('scripts')
     <script type="text/javascript">
+        
+        function validacaoExtraForm() {
+            var messages = new Array();
+            if ($("#conta").val()=="" || $("#conta").val()=="Selecione") {
+                messages.push("Favor, informar conta");
+            } 
+            if ($(messages).length > 0) {
+                console.log("erros: "+$(messages).length);
+                for(i = 0; i < $(messages).length; i++) {
+                    showErrorNotification($( messages )[i]);
+                }
+                messages = [];
+                return false;
+            }
+            return true;
+        }
 
-        function visualizar(nome,limite) {
-            $("#view-categoria-nome").html(nome);
-            $("#view-categoria-limite").html(limite);
+        function visualizar(nome,valor,dt_recebimento,conta) {
+            $("#view-renda-nome").html(nome);
+            $("#view-renda-valor").html(valor);
+            $("#view-renda-conta").html(conta);
+            $("#view-renda-recebimento").html(dt_recebimento);            
             $("#modal-panel-view").modal("toggle");
         }
 
         function deletar(id) {
             $.ajax({
                 type: "POST",
-                url: '{{route('deletar.categoria')}}',
+                url: '{{route('deletar.renda')}}',
                 data: { id : id },
                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                 dataType: 'json',
@@ -236,7 +286,9 @@
                     if (data.status == "success") {
                         setTimeout(function(){ loadTable(); }, 2000);
                         setTimeout(function(){ showSucessNotification(data.message); }, 2500);
+                        console.log(data.message);
                     } else {
+                        console.log(data.message);
                         setTimeout(function(){ showErrorNotification(data.message); }, 2500);
                     }
                 },
@@ -248,9 +300,9 @@
         }
 
 
-        function alterar(id,nome,limite) {
-            $("#formCategoria-edit").css("display","block");
-            $("#formCategoria").css("display","none");
+        function alterar(id,nome,valor,recebimento,conta,nomeConta) {
+            $("#formRenda-edit").css("display","block");
+            $("#formRenda").css("display","none");
             $("#id-edit").val(id);
 
             $("#nome-edit").val(nome);
@@ -258,26 +310,27 @@
             $(inputNome).removeClass('is-empty');
             $(inputNome).addClass('label-floating');
 
-            if (limite!="R$ 0,00") {
-                $("#limite-edit").val(limite);
-                var inputLimite = $("#limite-edit").parent()[0];
-                $(inputLimite).removeClass('is-empty');
-                $(inputLimite).addClass('label-floating');
-
-                $("#habilitar-limite-edit").prop("checked", true);
-                $("#limite-edit").removeAttr('disabled');
-                $("#input-limite-edit").css("display", "block");
+            if (valor!="R$ 0,00") {
+                $("#valor-edit").val(valor);
+                var inputValor = $("#valor-edit").parent()[0];
+                $(inputValor).removeClass('is-empty');
+                $(inputValor).addClass('label-floating'); 
             }
 
+            $("#conta-edit").val(conta);
+            var selectContaEdit = $(".btn.dropdown-toggle.select-with-transition")[1];
+            $(selectContaEdit).removeClass("bs-placeholder");
+            $(selectContaEdit).attr('title',nomeConta);
+            var textContaSelect = $('.filter-option.pull-left')[1];
+            $(textContaSelect).text(nomeConta);            
+            $("#recebimento-edit").val(recebimento);
             $("#modal-panel").modal("toggle");
         }
 
         function loadTable() {
-            $('.content-table-view').load("{{route('categorias')}} .content-table-view2", function() {
+            $('.content-table-view').load("{{route('rendas')}} .content-table-view2", function() {
                 $('#datatables').DataTable({
                     "pagingType": "full_numbers",
-                    "deferRender": true,
-                    "processing": true,
                     "lengthMenu": [
                         [10, 25, 50, -1],
                         [10, 25, 50, "All"]
@@ -302,39 +355,22 @@
             });
         }
 
-        $(document).ready(function() {
-
-            /* Habilitar input do limite*/
-            $( ".check" ).click(function() {
-                setTimeout(function(){
-                    if ($("#habilitar-limite").is(':checked')==true) {
-                        $("#limite").removeAttr('disabled');
-                        $("#input-limite").css( "display", "block" );
-
-                    }else {
-                        $("#limite").attr('disabled','disabled');
-                        $("#input-limite").css( "display", "none" );
-                    }
-
-                    if ($("#habilitar-limite-edit").is(':checked')==true) {
-                        $("#limite-edit").removeAttr('disabled');
-                        $("#input-limite-edit").css( "display", "block" );
-
-                    }else {
-                        $("#limite-edit").attr('disabled','disabled');
-                        $("#input-limite-edit").css( "display", "none" );
-                    }
-                }, 300);
-            });
+        $(document).ready(function() {       
 
             /* Limpar formulário */
             $("#modal-panel").on("hide.bs.modal", function () {
-                $("#formCategoria-edit").css("display","none");
-                $("#formCategoria").css("display","block");
-                $("#limite").attr('disabled','disabled');
-                $("#input-limite").css("display", "none");
-                $("#limite-edit").attr('disabled','disabled');
-                $("#input-limite-edit").css("display", "none");
+                $("#formRenda-edit").css("display","none");
+                $("#formRenda").css("display","block");               
+                $("#conta").val($("#conta option:first").val());               
+                var selects = $(".btn.dropdown-toggle.select-with-transition");
+                $(selects).each (function(){
+                   $(this).addClass("bs-placeholder");
+                   $(this).attr('title','Selecione')
+                });
+                var textSelect = $('.filter-option.pull-left');
+                $(textSelect).each (function(){
+                    $(this).text('Selecione')
+                });
                 var form = $("#modal-panel").find("form")
                 $(form).each (function(){
                     var formID = $(this).attr("id");
@@ -352,9 +388,16 @@
                         nome: {
                             required: "Campo de preenchimento obrigatório."
                         },
-                        limite: {
+                        recebimento: {
+                            required: "Campo de preenchimento obrigatório."
+                        },
+                        valor: {
+                            required: "Campo de preenchimento obrigatório."
+                        },
+                        conta: {
                             required: "Campo de preenchimento obrigatório."
                         }
+
                     },
                     errorPlacement: function(error, element) {
                         $(element).parent('div').addClass('has-error');
@@ -364,12 +407,49 @@
             });
 
             /* Submita o formualário via Ajax*/
-            $( "#formCategoria" ).submit(function( e ) {
-                if ($("#formCategoria" ).valid()) {
-                    var formData = new FormData($("#formCategoria")[0]);
+            $( "#formRenda" ).submit(function( e ) {
+                if ($("#formRenda" ).valid()) {
+                    var formData = new FormData($("#formRenda")[0]);
+                    if (validacaoExtraForm()) {
+                        $.ajax({
+                            type: "POST",
+                            url: '{{route('criar.renda')}}',
+                            data: formData,
+                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                            dataType: 'json',
+                            processData: false,
+                            contentType: false,
+                            cache: false,
+                            beforeSend: function () {
+                                $("#modal-panel").modal('toggle');
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
+
+                            },
+                            success: function (data) {
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                if (data.status == "success") {
+                                    setTimeout(function(){ loadTable(); }, 2000);
+                                    setTimeout(function(){ showSucessNotification(data.message); }, 2500);
+                                } else {
+                                    setTimeout(function(){ showErrorNotification(data.message); }, 2500);
+                                }
+                            },
+                            error: function (request, status, error) {
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                setTimeout(function(){ showErrorNotification(error); }, 2500);
+                            }
+                        });
+                    }
+                }
+                e.preventDefault(); // avoid to execute the actual submit of the form.
+            });
+
+            $( "#formRenda-edit" ).submit(function( e ) {
+                if ($("#formRenda-edit" ).valid()) {
+                    var formData = new FormData($("#formRenda-edit")[0]);
                     $.ajax({
                         type: "POST",
-                        url: '{{route('criar.categoria')}}',
+                        url: '{{route('alterar.renda')}}',
                         data: formData,
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                         dataType: 'json',
@@ -398,43 +478,7 @@
                 }
                 e.preventDefault(); // avoid to execute the actual submit of the form.
             });
-
-            $( "#formCategoria-edit" ).submit(function( e ) {
-                if ($("#formCategoria-edit" ).valid()) {
-                    var formData = new FormData($("#formCategoria-edit")[0]);
-                    $.ajax({
-                        type: "POST",
-                        url: '{{route('alterar.categoria')}}',
-                        data: formData,
-                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                        dataType: 'json',
-                        processData: false,
-                        contentType: false,
-                        cache: false,
-                        beforeSend: function () {
-                            $("#modal-panel").modal('toggle');
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
-
-                        },
-                        success: function (data) {
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                            if (data.status == "success") {
-                                setTimeout(function(){ loadTable(); }, 2000);
-                                setTimeout(function(){ showSucessNotification(data.message); }, 2500);
-                            } else {
-                                setTimeout(function(){ showErrorNotification(data.message); }, 2500);
-                            }
-                        },
-                        error: function (request, status, error) {
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                            setTimeout(function(){ showErrorNotification(error); }, 2500);
-                        }
-                    });
-                }
-                e.preventDefault(); // avoid to execute the actual submit of the form.
-            });
-
-        });
+        })
 
     </script>
 @endsection

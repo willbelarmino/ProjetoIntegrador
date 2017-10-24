@@ -19,4 +19,9 @@ class ParcelaPendente extends Model
     public function despesa() {
         return $this->belongsTo('App\Http\Model\Despesa', 'id_despesa','id');
     }
+
+    public function parcelaPaga() {
+        return $this->hasOne('App\Http\Model\ParcelaPaga', 'id_pendente', 'id');
+
+    }
 }

@@ -66,13 +66,13 @@
             </div>
             <ul class="nav">
                 <li class="@if ($menuView == 'dashboard') active @endif">
-                    <a href="./dashboard.html">
+                    <a href="{{route('home')}}">
                         <i class="mdi mdi-chart-pie"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
                 <li class="@if ($menuView == 'rendas') active @endif">
-                    <a href="./dashboard.html">
+                    <a href="{{route('rendas')}}">
                         <i class="mdi mdi-square-inc-cash"></i>
                         <p>Rendas</p>
                     </a>
@@ -84,7 +84,7 @@
                     </a>
                 </li>
                 <li class="@if ($menuView == 'pagas') active @endif">
-                    <a href="./dashboard.html">
+                    <a href="{{route('pagas')}}">
                         <i class="mdi mdi-credit-card"></i>
                         <p>Despesas Pagas</p>
                     </a>
@@ -130,36 +130,10 @@
                 </div>
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav navbar-right">
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                <i class="material-icons">notifications</i>
-                                <span class="notification">5</span>
-                                <p class="hidden-lg hidden-md">
-                                    Notifications
-                                    <b class="caret"></b>
-                                </p>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a href="#">Mike John responded to your email</a>
-                                </li>
-                                <li>
-                                    <a href="#">You have 5 new tasks</a>
-                                </li>
-                                <li>
-                                    <a href="#">You're now friend with Andrew</a>
-                                </li>
-                                <li>
-                                    <a href="#">Another Notification</a>
-                                </li>
-                                <li>
-                                    <a href="#">Another One</a>
-                                </li>
-                            </ul>
-                        </li>
+
                         <li>
-                            <a href="#pablo" class="dropdown-toggle" data-toggle="dropdown">
-                                <i class="material-icons">person</i>
+                            <a href="{{route('logout')}}"  title="Sair">
+                                <i class="material-icons">exit_to_app</i>
                                 <p class="hidden-lg hidden-md">Profile</p>
                             </a>
                         </li>

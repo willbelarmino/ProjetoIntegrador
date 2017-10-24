@@ -10,7 +10,7 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header card-header-icon" data-background-color="purple">
-                        <i class="mdi mdi-credit-card-multiple"></i>
+                        <i class="mdi mdi-cards-outline"></i>
                     </div>
                     <div class="card-content">
                         <h4 class="card-title">{{$page}}</h4>
@@ -23,7 +23,6 @@
                                     <table id="datatables" class="table table-striped table-no-bordered table-hover" cellspacing="0" width="100%" style="width:100%">
                                         <thead>
                                         <tr>
-                                            <th class="disabled-sorting text-right"></th>
                                             <th>Nome</th>
                                             <th>Limite</th>
                                             <th>Data de fechamento</th>
@@ -55,6 +54,7 @@
                                                     </button>
                                                     <button type="button" rel="tooltip" class="btn btn-success"
                                                             onclick="alterar(
+                                                                    '{{ $cartao->id }}',
                                                                     '{{ 'R$ '.number_format($cartao->limite, 2, ',', '.')}}',
                                                                     '{{ date('d/m/Y', strtotime($cartao->dt_fechamento)) }}',
                                                                     '{{ date('d/m/Y', strtotime($cartao->dt_vencimento)) }}'
@@ -63,16 +63,20 @@
                                                     </button>
                                                     <button type="button" rel="tooltip" class="btn btn-danger"
                                                             onclick="deletar(
-                                                                {{$cartao->id}}
+                                                                '{{$cartao->id}}',
+                                                                '{{$cartao->conta->id}}',
+                                                                '{{$cartao->cartao_independente}}'
                                                             );">
                                                         <i class="material-icons">close</i>
                                                     </button>
                                                 </td>
                                             </tr>
                                         @endforeach
-
                                         </tbody>
                                     </table>
+                                    <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
+                                        <i class="material-icons">add</i> ADICIONAR
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -105,25 +109,25 @@
                 <div class="card">
                     <form id="formCartao" enctype="multipart/form-data">
                         <div class="card-header card-header-icon" data-background-color="purple">
-                            <i class="mdi mdi-credit-card-multiple"></i>
+                            <i class="mdi mdi-cards-outline"></i>
                         </div>
                         <div class="card-content">
                             <h4 class="card-title">Cartão</h4>
 
                             <div class="togglebutton">
                                 <label style="color: #AAAAAA;">
-                                    <input type="checkbox" id="check-tipo" name="tipo"> Cartão independente
+                                    <input type="checkbox" id="check-tipo"  name="tipo"> Cartão independente
                                 </label>
                             </div>
 
-                            <div class="form-group label-floating">
+                            <div class="form-group label-floating" id="nome-form" style="display:none;">
                                 <label class="control-label">Nome</label>
                                 <input class="form-control" id="nome" name="nome" type="text" required="true" />
                             </div>
 
-                            <div class="form-group label-floating">
+                            <div class="form-group label-floating" id="conta-form">
                                 <label class="control-label">Conta</label>
-                                <select id="categoria" name="categoria"  class="selectpicker" data-style="select-with-transition" title="Selecionar" data-size="7">
+                                <select id="conta" name="conta"  class="selectpicker" data-style="select-with-transition" title="Selecionar" data-size="7">
                                     @foreach ($contas as $conta)
                                         <option value="{{$conta->id}}">{{$conta->nome}}</option>
                                     @endforeach
@@ -154,7 +158,37 @@
                             </div>
                         </div>
                     </form>
+                    <form id="formCartao-edit" enctype="multipart/form-data" style="display:none;">
+                        <div class="card-header card-header-icon" data-background-color="purple">
+                            <i class="mdi mdi-cards-outline"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="card-title">Cartão</h4>
+                            <input id="id-edit" name="id" type="hidden"/>
+                            <div class="form-group label-floating">
+                                <label class="control-label">Data de fechamento</label>
+                                <input class="form-control datepicker" id="fechamento-edit" name="fechamento" value="{{date('d/m/Y')}}" required="true" />
+                            </div>
 
+                            <div class="form-group label-floating">
+                                <label class="control-label">Data de vencimento</label>
+                                <input class="form-control datepicker" id="vencimento-edit" name="vencimento" value="{{date('d/m/Y')}}" required="true" />
+                            </div>
+
+                            <div class="form-group label-floating">
+                                <label class="control-label">Limite</label>
+                                <input class="form-control money-format" id="limite-edit" name="limite" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
+                            </div>
+
+
+                            <div class="text-center">
+                                <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Salvar</button>
+                            </div>
+                            <div class="text-center">
+                                <button type="button" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal" data-dismiss="modal">Cancelar</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -170,7 +204,7 @@
                     <form class="form-horizontal">
                         <div class="card-header card-header-text" data-background-color="gray">
                             <h4 class="card-title" id="view-conta-image">
-
+                                <i class="mdi mdi-cards-outline"></i>
                             </h4>
                         </div>
                         <div class="card-content">
@@ -178,39 +212,31 @@
                                 <label class="col-sm-3 label-on-left">Nome</label>
                                 <div class="col-sm-9">
                                     <div class="form-group">
-                                        <p class="form-control-static" id="view-conta-nome">R$ 187,45</p>
+                                        <p class="form-control-static" id="view-cartao-nome">R$ 187,45</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
-                                <label class="col-sm-3 label-on-left">Saldo</label>
+                                <label class="col-sm-3 label-on-left">Limite</label>
                                 <div class="col-sm-9">
                                     <div class="form-group">
-                                        <p class="form-control-static" id="view-conta-saldo">R$ 187,45</p>
+                                        <p class="form-control-static" id="view-cartao-limite">R$ 187,45</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
-                                <label class="col-sm-3 label-on-left">Tipo de conta</label>
+                                <label class="col-sm-3 label-on-left">Data de fechamento</label>
                                 <div class="col-sm-9">
                                     <div class="form-group">
-                                        <p class="form-control-static" id="view-conta-tipo">1/4</p>
+                                        <p class="form-control-static" id="view-cartao-fechamento">20/09/2017</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
-                                <label class="col-sm-3 label-on-left">Exibir indicador</label>
+                                <label class="col-sm-3 label-on-left">Data de vencimento</label>
                                 <div class="col-sm-9">
                                     <div class="form-group">
-                                        <p class="form-control-static" id="view-conta-indicador">Alimentação</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <label class="col-sm-3 label-on-left">Último movimento</label>
-                                <div class="col-sm-9">
-                                    <div class="form-group">
-                                        <p class="form-control-static" id="view-conta-movimento">20/09/2017</p>
+                                        <p class="form-control-static" id="view-cartao-vencimento">20/09/2017</p>
                                     </div>
                                 </div>
                             </div>
@@ -229,6 +255,23 @@
 
 @section('scripts')
     <script type="text/javascript">
+
+        function limpaSelect() {
+            var selects = $(".btn.dropdown-toggle.select-with-transition");
+            $(selects).each (function(){
+                $(this).addClass("bs-placeholder");
+                $(this).attr('title','Selecione')
+            });
+            var textSelect = $('.filter-option.pull-left');
+            $(textSelect).each (function(){
+                $(this).text('Selecione')
+            });
+            $("#nome").val("")
+            $("#nome-form").removeClass("valid");
+            $("#nome-form").addClass("label-floating")
+            $("#nome-form").addClass("is-empty")
+
+        }
 
         function validationFile(form, input) {
             file = $(input).val();
@@ -263,21 +306,19 @@
             return false;
         }
 
-        function visualizar(imagem,nome,saldo,tipo,indicador,movimento) {
-            $("#view-conta-image").html('<img  style="width: 50px; height: 40px" src="'+imagem+'" alt="...">');
-            $("#view-conta-nome").html(nome);
-            $("#view-conta-saldo").html(saldo);
-            $("#view-conta-tipo").html(tipo);
-            $("#view-conta-indicador").html(indicador);
-            $("#view-conta-movimento").html(movimento);
+        function visualizar(nome,limite,fechamento,vencimento) {
+            $("#view-cartao-nome").html(nome);
+            $("#view-cartao-limite").html(limite);
+            $("#view-cartao-fechamento").html(fechamento);
+            $("#view-cartao-vencimento").html(vencimento);
             $("#modal-panel-view").modal("toggle");
         }
 
-        function deletar(id) {
+        function deletar(id,conta,independente) {
             $.ajax({
                 type: "POST",
-                url: '{{route('deletar.conta')}}',
-                data: { id : id },
+                url: '{{route('deletar.cartao')}}',
+                data: { id : id, conta : conta, independente: independente },
                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                 dataType: 'json',
                 cache: false,
@@ -300,48 +341,21 @@
             });
         }
 
-        '{{$conta->id}}',
-            '{{$conta->nome}}',
-            '{{$conta->tipo}}',
-            '{{$conta->exibir_indicador}}'
-
-
-        function alterar(id,nome,tipo,indicador,imagem) {
-            $("#formConta-edit").css("display","block");
-            $("#formConta").css("display","none");
+        function alterar(id,limite,fechamento,vencimento) {
+            $("#formCartao-edit").css("display","block");
+            $("#formCartao").css("display","none");
             $("#id-edit").val(id);
-            $("#imagem-edit").val(imagem);
-
-            $("#nome-edit").val(nome);
-            var inputNome = $("#nome-edit").parent()[0];
-            $(inputNome).removeClass('is-empty');
-            $(inputNome).addClass('label-floating');
-
-            var nomeTipo = 'Outros';
-            if(tipo=='C') {
-                nomeTipo = 'Corrente';
-            } else if (tipo=='P') {
-                nomeTipo = 'Poupança';
-            }
-
-            $("#tipo-edit").val(tipo);
-            var selectTipoEdit = $(".btn.dropdown-toggle.select-with-transition")[1];
-            $(selectTipoEdit).removeClass("bs-placeholder");
-            $(selectTipoEdit).attr('title',nomeTipo);
-            var textTipoSelect = $('.filter-option.pull-left')[1];
-            $(textTipoSelect).text(nomeTipo);
-
-            if (indicador!=null && indicador=='S') {
-                $("#check-indicador-edit").prop("checked", true);
-            } else if (indicador!=null && indicador=='N') {
-                $("#check-indicador-edit").prop("checked", false);
-            }
-
+            $("#limite-edit").val(limite);
+            $("#fechamento-edit").val(fechamento);
+            $("#vencimento-edit").val(vencimento);
+            var inputLimite = $("#limite-edit").parent()[0];
+            $(inputLimite).removeClass('is-empty');
+            $(inputLimite).addClass('label-floating');
             $("#modal-panel").modal("toggle");
         }
 
         function loadTable() {
-            $('.content-table-view').load("{{route('contas')}} .content-table-view2", function() {
+            $('.content-table-view').load("{{route('cartoes')}} .content-table-view2", function() {
                 $('#datatables').DataTable({
                     "pagingType": "full_numbers",
                     "lengthMenu": [
@@ -370,6 +384,23 @@
         }
 
         $(document).ready(function() {
+
+            /* Habilitar input do nome*/
+            $( ".toggle" ).click(function() {
+                setTimeout(function(){
+                    if ($("#check-tipo").is(':checked')==true) {
+                        $("#nome-form").css( "display", "block" );
+                        $("#conta-form").css( "display", "none" );
+                        limpaSelect();
+                    }else {
+                        $("#nome-form").css( "display", "none" );
+                        $("#conta-form").css( "display", "block" );
+                        limpaSelect();
+                    }
+
+
+                }, 300);
+            });
 
             
             /* Limpar formulário */
@@ -412,12 +443,17 @@
             });
 
             /* Submita o formualário via Ajax*/
-            $( "#formConta" ).submit(function( e ) {
-                if ($("#formConta" ).valid()) {
-                    var formData = new FormData($("#formConta")[0]);
+            $( "#formCartao" ).submit(function( e ) {
+                if ($("#formCartao" ).valid()) {
+                    var formData = new FormData($("#formCartao")[0]);
+                    if ($("#check-tipo").is(':checked')==true) {
+                        formData.append("independente", "true");
+                    } else {
+                        formData.append("independente", "false");
+                    }
                     $.ajax({
                         type: "POST",
-                        url: '{{route('criar.conta')}}',
+                        url: '{{route('criar.cartao')}}',
                         data: formData,
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                         dataType: 'json',
@@ -447,12 +483,12 @@
                 e.preventDefault(); // avoid to execute the actual submit of the form.
             });
 
-            $( "#formConta-edit" ).submit(function( e ) {
-                if ($("#formConta-edit" ).valid()) {
-                    var formData = new FormData($("#formConta-edit")[0]);
+            $( "#formCartao-edit" ).submit(function( e ) {
+                if ($("#formCartao-edit" ).valid()) {
+                    var formData = new FormData($("#formCartao-edit")[0]);
                     $.ajax({
                         type: "POST",
-                        url: '{{route('alterar.conta')}}',
+                        url: '{{route('alterar.cartao')}}',
                         data: formData,
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                         dataType: 'json',

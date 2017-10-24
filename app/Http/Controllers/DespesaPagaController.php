@@ -10,6 +10,7 @@ use App\Http\Model\Usuario;
 use App\Http\Model\ParcelaPendente;
 use App\Http\Model\ParcelaPaga;
 use App\Http\Model\Categoria;
+use App\Http\Model\Conta;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Exception;
@@ -18,18 +19,21 @@ use PDF;
 use App;
 use Barryvdh\Snappy;
 
-class DespesaPendenteController extends Controller
+class DespesaPagaController extends Controller
 {
 
     public function index(Request $request){
         $usuarioLogado = $request->session()->get('usuarioLogado');
         $periodo = UtilsController::getPeriodo($request);
         $periodo = $periodo->getData();
-        $categorias = Categoria::from('categoria AS c')
+
+        $contas = Categoria::from('conta AS c')
             ->where("c.id_usuario",$usuarioLogado->id)
             ->get();
 
-        $contas = DB::table('conta')->where('id_usuario', $usuarioLogado->id)->get();
+        $categorias = Categoria::from('categoria AS c')
+            ->where("c.id_usuario",$usuarioLogado->id)
+            ->get();    
 
         $cartoes = CartaoCredito::from('cartao_credito AS cc')
             ->join('conta AS c','cc.id_conta','=','c.id')
@@ -37,49 +41,21 @@ class DespesaPendenteController extends Controller
             ->select('cc.*')
             ->get();
 
-
-        $parcelasPendentes = ParcelaPendente::with(['despesa.categoria' => function ($query) use ($usuarioLogado) {
+        $parcelasPagas = ParcelaPaga::with(['parcelaPendente.despesa.categoria' => function ($query) use ($usuarioLogado) {
             $query->where('categoria.id_usuario', '=', $usuarioLogado->id);
-        }])->whereBetween('dt_vencimento', [
+        }])->whereBetween('dt_pagamento', [
             $periodo->periodoSelecionadoInicio,
             $periodo->periodoSelecionadoFim
         ])->get();
+        
 
-
-
-
-        foreach($parcelasPendentes as $key => $subarray) {
-            $parcelaPaga =  ParcelaPaga::from('parcela_paga')
-                ->where("id_pendente",$parcelasPendentes[$key]->id)
-                ->get();
-
-            if ($parcelaPaga!='[]') {
-                unset($parcelasPendentes[$key]);
-            } else {
-                $allParcelas = ParcelaPendente::with('despesa')
-                    ->where('id_despesa', '=', $parcelasPendentes[$key]->despesa->id)
-                    ->orderBy('dt_vencimento', 'asc')
-                    ->get();
-
-                $size = count($allParcelas);
-
-                foreach($allParcelas as $key2 => $subsubarray) {
-                    //$parcelasPendentes[$key]->referencia=$allParcelas;
-                    if ( ($allParcelas[$key2]->id) == ($parcelasPendentes[$key]->id) ) {
-                        $parcelasPendentes[$key]->referencia=($key2+1).'/'.$size;
-                        break;
-                    }
-                }
-            }
-        }       
-
-        return view('despesas/pendente',
-            ['menuView'=>'pendentes',
-                'page'=>'Despesas Pendentes',
-                'parcelas'=>$parcelasPendentes,
+        return view('despesas/paga',
+            ['menuView'=>'pagas',
+                'page'=>'Despesas Pagas',
+                'parcelas'=>$parcelasPagas,
                 'categorias'=>$categorias,
-                'cartoes'=>$cartoes,
                 'contas'=>$contas,
+                'cartoes'=>$cartoes,
                 'nomeMes'=>$periodo->mes,
                 'resize'=>$periodo->resize,
                 'usuario'=>$usuarioLogado
@@ -96,26 +72,28 @@ class DespesaPendenteController extends Controller
                 $valor = str_replace(".", "", $valor);
                 $valor = str_replace(",", ".", $valor);
 
-                $dia = substr($param['vencimento'], 0, -8);
-                $mes = substr($param['vencimento'], 3, -5);
-                $ano = substr($param['vencimento'], -4);
-                $vencimento = $ano.$mes.$dia;
+                $dia = substr($param['pagamento'], 0, -8);
+                $mes = substr($param['pagamento'], 3, -5);
+                $ano = substr($param['pagamento'], -4);
+                $pagamento = $ano.$mes.$dia;
 
                 if (!empty($param['credito'])) {
-                    DB::select("CALL criarDespesaPendente(
+                    DB::select("CALL criarDespesaPaga(
                     '".$param['nome']."', 
                     ".$valor.", 
                     ".$param['parcela']." ,
-                    '".$vencimento."',
+                    '".$pagamento."',
                     ".$param['categoria'].",
+                    ".$param['conta'].",
                     ".$param['credito'].")");
                 } else {
-                    DB::select("CALL criarDespesaPendente(
+                    DB::select("CALL criarDespesaPaga(
                     '".$param['nome']."', 
                     ".$valor.", 
                     ".$param['parcela']." ,
-                    '".$vencimento."',  
+                    '".$pagamento."',  
                     ".$param['categoria'].",
+                    ".$param['conta'].",
                     null)");
 
                 }
@@ -210,34 +188,16 @@ class DespesaPendenteController extends Controller
         $usuarioLogado = $request->session()->get('usuarioLogado');
         $periodoSelecionadoInicio = $request->session()->get('periodoSelecionadoInicio');
         $periodoSelecionadoFim = $request->session()->get('periodoSelecionadoFim');
-        $parcelasPendentes = ParcelaPendente::with(['despesa.categoria' => function ($query) use ($usuarioLogado) {
+        
+        $parcelasPagas = ParcelaPaga::with(['parcelaPendente.despesa.categoria' => function ($query) use ($usuarioLogado) {
             $query->where('categoria.id_usuario', '=', $usuarioLogado->id);
-        }])->whereBetween('dt_vencimento', [
+        }])->whereBetween('dt_pagamento', [
             $periodoSelecionadoInicio,
             $periodoSelecionadoFim
         ])->get();
-        $pdf = PDF::loadView('despesas/relatorios/pendente-rel', ['link'=>$parcelasPendentes, 'title'=>'Despesas Pendentes']);
+
+        $pdf = PDF::loadView('despesas/relatorios/paga-rel', ['link'=>$parcelasPagas, 'title'=>'Despesas Pagas']);
         return $pdf->stream();
-    }
-
-    protected function pagar(Request $request){
-
-        try {
-            $param = $request->all();
-            DB::select("CALL pagarDespesa(                    
-                        " . $param['id'] . ",
-                        " . $param['conta'] . "
-                        )");
-            return response()->json([
-                'status' => 'success',
-                'message' =>  'Despesa paga com sucesso.',
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' =>  $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
-            ]);
-        }
     }
 
 }

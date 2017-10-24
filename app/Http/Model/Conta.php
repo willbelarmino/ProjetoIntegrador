@@ -19,4 +19,8 @@ class Conta extends Model
     public function cartoes() {
         return $this->hasMany('App\Http\Model\CartaoCredito');
     }
+
+     public function usuario() {
+        return $this->belongsTo('App\Http\Model\Usuario','id_usuario', 'id');
+    }
 }

@@ -277,7 +277,7 @@
                         },
                         success: function (data) {
                             if (data.status == "success") {
-                                window.location.href = "{{route('categorias')}}";
+                                window.location.href = "{{route('home')}}";
                             } else {
                                 setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
                                 setTimeout(function(){ showErrorNotification(data.message); }, 2500);

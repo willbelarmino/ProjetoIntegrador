@@ -18,7 +18,12 @@ Route::group(['prefix'=>'periodo','where'=>['id'=>'[0-9]+']], function() {
     Route::post('alterarPeriodoData', ['as'=>'periodo.alteraData', 'uses'=>'UtilsController@alterarPeriodoData']);
 });
 
+Route::group(['prefix'=>'dashboard','where'=>['id'=>'[0-9]+']], function() {
+    Route::get('home', ['as'=>'home', 'uses'=>'HomeController@index']);
+});
+
 Route::group(['prefix'=>'acesso','where'=>['id'=>'[0-9]+']], function() {
+    Route::get('logout', ['as'=>'logout', 'uses'=>'Auth\LoginController@logout']);
     Route::get('login', ['as'=>'login', 'uses'=>'Auth\LoginController@index']);
     Route::get('registro', ['as'=>'registro', 'uses'=>'Auth\RegisterController@index']);
     Route::post('criarCadastro', ['as'=>'criar.cadastro', 'uses'=>'Auth\RegisterController@create']);
@@ -40,11 +45,18 @@ Route::group(['prefix'=>'conta','where'=>['id'=>'[0-9]+']], function() {
 });
 
 Route::group(['prefix'=>'despesa','where'=>['id'=>'[0-9]+']], function() {
-    Route::get('pdfView', ['as'=>'generate.pdf', 'uses'=>'DespesaPendenteController@toPDF']);
-    Route::get('pendentes', ['as'=>'pendentes', 'uses'=>'DespesaPendenteController@index']);
+    Route::get('pdfViewPendente', ['as'=>'generate.relPendente', 'uses'=>'DespesaPendenteController@toPDF']);
+    Route::get('pendentes', ['as'=>'pendentes', 'uses'=>'DespesaPendenteController@index']);   
     Route::post('criarPendente', ['as'=>'criar.pendente', 'uses'=>'DespesaPendenteController@create']);
     Route::post('alterarPendente', ['as'=>'alterar.pendente', 'uses'=>'DespesaPendenteController@edit']);
     Route::post('deletarPendente', ['as'=>'deletar.pendente', 'uses'=>'DespesaPendenteController@delete']);
+    Route::post('pagarDespesa', ['as'=>'pagar', 'uses'=>'DespesaPendenteController@pagar']);
+
+    Route::get('pdfViewPaga', ['as'=>'generate.relPaga', 'uses'=>'DespesaPagaController@toPDF']);
+    Route::get('pagas', ['as'=>'pagas', 'uses'=>'DespesaPagaController@index']);
+    Route::post('criarPaga', ['as'=>'criar.paga', 'uses'=>'DespesaPagaController@create']);
+    Route::post('alterarPaga', ['as'=>'alterar.paga', 'uses'=>'DespesaPagaController@edit']);
+    Route::post('deletarPaga', ['as'=>'deletar.paga', 'uses'=>'DespesaPagaController@delete']);
 });
 
 Route::group(['prefix'=>'cartao','where'=>['id'=>'[0-9]+']], function() {
@@ -55,9 +67,12 @@ Route::group(['prefix'=>'cartao','where'=>['id'=>'[0-9]+']], function() {
 });
 
 Route::group(['prefix'=>'renda','where'=>['id'=>'[0-9]+']], function() {
-    Route::get('pdfView', ['as'=>'generate.renda.pdf', 'uses'=>'RendaController@toPDF']);
+    Route::get('pdfViewRenda', ['as'=>'generate.relRenda.pdf', 'uses'=>'RendaController@toPDF']);
     Route::get('rendas', ['as'=>'rendas', 'uses'=>'RendaController@index']);
     Route::post('criarRenda', ['as'=>'criar.renda', 'uses'=>'RendaController@create']);
     Route::post('alterarRenda', ['as'=>'alterar.renda', 'uses'=>'RendaController@edit']);
     Route::post('deletarRenda', ['as'=>'deletar.renda', 'uses'=>'RendaController@delete']);
 });
+
+
+
