@@ -79,7 +79,7 @@ class HomeController extends Controller
 
 
         } catch (Exception $e) {
-            $totalRenda = "ERRO";
+
         }
 
 

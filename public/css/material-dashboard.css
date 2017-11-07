@@ -36,6 +36,11 @@
   }
 }
 
+.title-conta {
+  color: #3e3b3b;
+  font-weight: bold;
+}
+
 .not-view {
  display:none;
 }
@@ -10448,6 +10453,12 @@ footer .btn {
 .card .tab-content {
   margin-top: 20px;
 }
+
+.card [data-background-color="transparent"] {
+  background: linear-gradient(60deg, #d6cad4, #ada7a7);
+  box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(244, 67, 54, 0.4);
+}
+
 .card [data-background-color="purple"] {
   background: linear-gradient(60deg, #ab47bc, #8e24aa);
   box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(156, 39, 176, 0.4);
@@ -10572,6 +10583,8 @@ footer .btn {
   font-size: 15px;
   text-align: center;
 }
+
+
 
 .card-stats .card-header-categoria .header-categoria .title-categoria {
   font-size: 15px;

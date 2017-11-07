@@ -63,7 +63,7 @@ var seq2 = 0, delays2 = 80, durations2 = 500;
 
 
 $(document).ready(function(){
-    $(".money-format").maskMoney();
+
 
     $sidebar = $('.sidebar');
 
@@ -94,11 +94,15 @@ $(document).ready(function(){
     $('[rel="tooltip"]').tooltip();
 
     //removed class label and label-color from tag span and replaced with data-color
+
+    /*
     var tagClass = $('.tagsinput').data('color');
 
     $('.tagsinput').tagsinput({
         tagClass: ' tag-'+ tagClass +' '
     });
+
+    */
 
     //    Activate bootstrap-select
     $(".select").dropdown({ "dropdownClass": "dropdown-menu", "optionClass": "" });

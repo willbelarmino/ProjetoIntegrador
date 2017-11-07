@@ -18,11 +18,6 @@
                                 <p class="category">Saldo Atual</p>
                                 <h3 class="card-title">{{ 'R$ '.number_format($saldoAtual, 2, ',', '.') }}</h3>
                             </div>
-                            <div class="card-footer">
-                                <div class="stats">
-                                    <i class="material-icons">list</i> Detalhes
-                                </div>
-                            </div>
                         </div>
                     </div>
                     <div class="col-lg-2 col-md-6 col-sm-6">
@@ -33,11 +28,6 @@
                             <div class="card-content">
                                 <p class="category">Saldo Estimado</p>
                                 <h3 class="card-title">{{ 'R$ '.number_format($saldoEstimado, 2, ',', '.') }}</h3>
-                            </div>
-                            <div class="card-footer">
-                                <div class="stats">
-                                    <i class="material-icons">list</i> Detalhes
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -50,11 +40,6 @@
                                 <p class="category">Despesas Pendentes</p>
                                 <h3 class="card-title">{{ 'R$ '.number_format($totalDespesaPendente, 2, ',', '.') }}</h3>
                             </div>
-                            <div class="card-footer">
-                                <div class="stats">
-                                    <i class="material-icons">list</i> Detalhes
-                                </div>
-                            </div>
                         </div>
                     </div>
                     <div class="col-lg-2 col-md-6 col-sm-6">
@@ -65,11 +50,6 @@
                             <div class="card-content">
                                 <p class="category">Despesas Pagas</p>
                                 <h3 class="card-title">{{ 'R$ '.number_format($totalDespesaPaga, 2, ',', '.') }}</h3>
-                            </div>
-                            <div class="card-footer">
-                                <div class="stats">
-                                    <i class="material-icons">list</i> Detalhes
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -82,9 +62,108 @@
                                 <p class="category">Rendas</p>
                                 <h3 class="card-title">{{ 'R$ '.number_format($totalRenda, 2, ',', '.') }}</h3>
                             </div>
-                            <div class="card-footer">
-                                <div class="stats">
-                                    <i class="material-icons">list</i> Detalhes
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="card">
+                        <div class="card-header card-header-icon" data-background-color="grey" style="cursor:pointer;" data-toggle="collapse" data-target="#panel-contas">
+                            <i class="mdi mdi-account-card-details"></i>
+                        </div>
+
+                        <div class="card-content">
+                            <h4 class="card-title">
+                                Contas
+                                <i class="mdi mdi-settings" title="Configurações" style="cursor: pointer; float: right" onclick="alert('Config')"></i>
+                            </h4>
+
+                            <div id="panel-contas" class="collapse-conta in">
+                                <div class="col-lg-3 col-md-6 col-sm-6">
+                                    <div class="card card-stats">
+                                        <div class="card-header-conta" data-background-color="transparent">
+                                            <div class="header-conta">
+                                                <div class="title-conta-default">
+                                                    <img  style="width: 30px; height: 25px; margin-right: 25px;"
+                                                          src="{{ asset('storage/contas/321507811744.jpg') }}" alt="...">
+                                                    <span class="title-conta">Bradesco</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-content">
+                                            <div class="card-content-conta">
+                                                <h3 class="card-title-saldo">Saldo: R$ 80.654,65</h3>
+                                                <h3 class="card-title-movimenta">Última movimentação: 10/07/2017</h3>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <div class="stats">
+                                                <i class="material-icons">list</i> Ver extrato
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3 col-md-6 col-sm-6">
+                                    <div class="card card-stats">
+                                        <div class="card-header-conta" data-background-color="transparent">
+                                            <div class="header-conta">
+                                                <div class="title-conta">Itaú</div>
+                                            </div>
+                                        </div>
+                                        <div class="card-content">
+                                            <div class="card-content-conta">
+                                                <h3 class="card-title-saldo">Saldo: R$ 80.654,65</h3>
+                                                <h3 class="card-title-movimenta">Última movimentação: 10/07/2017</h3>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <div class="stats">
+                                                <i class="material-icons">list</i> Ver extrato
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3 col-md-6 col-sm-6">
+                                    <div class="card card-stats">
+                                        <div class="card-header-conta" data-background-color="transparent">
+                                            <div class="header-conta">
+                                                <div class="title-conta">Caixa</div>
+                                            </div>
+                                        </div>
+                                        <div class="card-content">
+                                            <div class="card-content-conta">
+                                                <h3 class="card-title-saldo">Saldo: R$ 80.654,65</h3>
+                                                <h3 class="card-title-movimenta">Última movimentação: 10/07/2017</h3>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <div class="stats">
+                                                <i class="material-icons">list</i> Ver extrato
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3 col-md-6 col-sm-6">
+                                    <div class="card card-stats">
+                                        <div class="card-header-conta" data-background-color="transparent">
+                                            <div class="header-conta">
+                                                <div class="title-conta">Santander</div>
+                                            </div>
+                                        </div>
+                                        <div class="card-content">
+                                            <div class="card-content-conta">
+                                                <h3 class="card-title-saldo">Saldo: R$ 80.654,65</h3>
+                                                <h3 class="card-title-movimenta">Última movimentação: 10/07/2017</h3>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <div class="stats">
+                                                <i class="material-icons">list</i> Ver extrato
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

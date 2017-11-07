@@ -55,11 +55,10 @@ class UtilsController extends Controller
         try {
             $param = $request->all();
             $periodoSelecionadoInicio = $request->session()->get('periodoSelecionadoInicio');
-            $periodoSelecionadoFim = $request->session()->get('periodoSelecionadoFim');
             if ($param['id']=='next') {
-                $novoPeriodo = date("Ymd", strtotime(date("Y-m-d", strtotime($periodoSelecionadoFim)) . " +1 month"));
+                $novoPeriodo = date('Ymd', strtotime("+1 month", strtotime($periodoSelecionadoInicio)));// date("Ymd", strtotime(date("Y-m-d", strtotime($periodoSelecionadoFim)) . " +1 month"));
             } else {
-                $novoPeriodo = date("Ymd", strtotime(date("Y-m-d", strtotime($periodoSelecionadoInicio)) . " -1 month"));
+                $novoPeriodo = date('Ymd', strtotime("-1 month", strtotime($periodoSelecionadoInicio)));//date("Ymd", strtotime(date("Y-m-d", strtotime($periodoSelecionadoInicio)) . " -1 month"));
             }
             $request->session()->put('periodoSelecionadoInicio', date("Ym01",  strtotime($novoPeriodo)));
             $request->session()->put('periodoSelecionadoFim', date("Ymt",  strtotime($novoPeriodo)));
@@ -76,7 +75,7 @@ class UtilsController extends Controller
             return response()->json([
                 'status' => 'success',
                 'nomeMes' => $mes[$mesNumber]." - ".substr($novoPeriodo, -8, -4),
-                'message' =>  'Mês alterado com sucesso.'
+                'message' =>  'Mês alterado com sucesso!'
             ]);
         } catch (Exception $e) {
             return response()->json([
