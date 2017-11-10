@@ -2,88 +2,71 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Model\CartaoCredito;
-use Carbon\Carbon;
-use DateTime;
-use App\Http\Model\Despesa;
-use App\Http\Model\Usuario;
-use App\Http\Model\ParcelaPendente;
-use App\Http\Model\ParcelaPaga;
-use App\Http\Model\Categoria;
+use App\Http\Facade\DespesaFacade;
+use App\Http\Facade\CategoriaFacade;
+use App\Http\Facade\ContaFacade;
+use App\Http\Facade\CartaoFacade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Exception;
 use App\Exceptions\CustomException;
 use PDF;
 use App;
-use Barryvdh\Snappy;
+use Session;
 
 class DespesaPendenteController extends Controller
 {
+    public function getUsuario() {
+        try {
+            return UtilsController::getUsuarioLogado();
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    public function getPeriodo() {
+        try {
+            $periodo = UtilsController::getPeriodo();
+            $periodo = $periodo->getData();
+            return $periodo;
+        } catch (Exception $ex) {
+            return null;
+        }
+    }
 
     public function index(Request $request){
-        $usuarioLogado = $request->session()->get('usuarioLogado');
-        $periodo = UtilsController::getPeriodo($request);
-        $periodo = $periodo->getData();
-        $categorias = Categoria::from('categoria AS c')
-            ->where("c.id_usuario",$usuarioLogado->id)
-            ->get();
 
-        $contas = DB::table('conta')->where('id_usuario', $usuarioLogado->id)->get();
-
-        $cartoes = CartaoCredito::from('cartao_credito AS cc')
-            ->join('conta AS c','cc.id_conta','=','c.id')
-            ->where("c.id_usuario",$usuarioLogado->id)
-            ->select('cc.*')
-            ->get();
-
-
-        $parcelasPendentes = ParcelaPendente::with(['despesa.categoria' => function ($query) use ($usuarioLogado) {
-            $query->where('categoria.id_usuario', '=', $usuarioLogado->id);
-        }])->whereBetween('dt_vencimento', [
-            $periodo->periodoSelecionadoInicio,
-            $periodo->periodoSelecionadoFim
-        ])->get();
-
-
-
-
-        foreach($parcelasPendentes as $key => $subarray) {
-            $parcelaPaga =  ParcelaPaga::from('parcela_paga')
-                ->where("id_pendente",$parcelasPendentes[$key]->id)
-                ->get();
-
-            if ($parcelaPaga!='[]') {
-                unset($parcelasPendentes[$key]);
-            } else {
-                $allParcelas = ParcelaPendente::with('despesa')
-                    ->where('id_despesa', '=', $parcelasPendentes[$key]->despesa->id)
-                    ->orderBy('dt_vencimento', 'asc')
-                    ->get();
-
-                $size = count($allParcelas);
-
-                foreach($allParcelas as $key2 => $subsubarray) {
-                    //$parcelasPendentes[$key]->referencia=$allParcelas;
-                    if ( ($allParcelas[$key2]->id) == ($parcelasPendentes[$key]->id) ) {
-                        $parcelasPendentes[$key]->referencia=($key2+1).'/'.$size;
-                        break;
-                    }
-                }
+        try {
+            $usuarioLogado = self::getUsuario();
+            $periodo = self::getPeriodo();
+            if ($periodo == null || $usuarioLogado == null) {
+                throw new Exception();
             }
-        }       
 
-        return view('despesas/pendente',
-            ['menuView'=>'pendentes',
-                'page'=>'Despesas Pendentes',
-                'parcelas'=>$parcelasPendentes,
-                'categorias'=>$categorias,
-                'cartoes'=>$cartoes,
-                'contas'=>$contas,
-                'nomeMes'=>$periodo->mes,
-                'resize'=>$periodo->resize,
-                'usuario'=>$usuarioLogado
-            ]);
+            $categorias = CategoriaFacade::getCategorias($usuarioLogado);
+
+            $contas = ContaFacade::getContas($usuarioLogado);
+
+            $cartoes = CartaoFacade::getCartoes($usuarioLogado);
+
+            $parcelasPendentes = DespesaFacade::getParcelasPendentes($usuarioLogado, $periodo);
+
+            return view('despesas/pendente',
+                [
+                    'menuView' => 'pendentes',
+                    'page' => 'Despesas Pendentes',
+                    'parcelas' => $parcelasPendentes,
+                    'categorias' => $categorias,
+                    'cartoes' => $cartoes,
+                    'contas' => $contas,
+                    'nomeMes' => $periodo->mes,
+                    'resize' => $periodo->resize,
+                    'usuario' => $usuarioLogado
+                ]);
+        } catch (Exception $ex) {
+            return view ('despesas/error');
+        }
+
     }
 
     protected function create(Request $request){
@@ -207,18 +190,11 @@ class DespesaPendenteController extends Controller
     }
 
     protected function toPDF(Request $request){
-        $usuarioLogado = $request->session()->get('usuarioLogado');
-        $periodoSelecionadoInicio = $request->session()->get('periodoSelecionadoInicio');
-        $periodoSelecionadoFim = $request->session()->get('periodoSelecionadoFim');
-        $parcelasPendentes = ParcelaPendente::with(['despesa.categoria' => function ($query) use ($usuarioLogado) {
-            $query->where('categoria.id_usuario', '=', $usuarioLogado->id);
-        }])->whereBetween('dt_vencimento', [
-            $periodoSelecionadoInicio,
-            $periodoSelecionadoFim
-        ])->get();
+        $parcelasPendentes = self::getParcelasPendentes($request);
         $pdf = PDF::loadView('despesas/relatorios/pendente-rel', ['link'=>$parcelasPendentes, 'title'=>'Despesas Pendentes']);
         return $pdf->stream();
     }
+
 
     protected function pagar(Request $request){
 

@@ -16,42 +16,57 @@ use App\Exceptions\CustomException;
 use PDF;
 use App;
 use Barryvdh\Snappy;
+use Session;
 
 class UtilsController extends Controller
 {
-    public static function getPeriodo(Request $request) {
-        $periodoSelecionadoInicio = $request->session()->get('periodoSelecionadoInicio');
-        $periodoSelecionadoFim = $request->session()->get('periodoSelecionadoFim');
 
-        $mesInicio = substr($periodoSelecionadoInicio, -4, -2);
-        $mesFim = substr($periodoSelecionadoFim, -4, -2);
-        if ($mesInicio==$mesFim) {
-            $mes=array('', 'Janeiro', 'Fevereiro',
-                'Março', 'Abril', 'Maio', 'Junho', 'Julho',
-                'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro');
-
-            if (substr($periodoSelecionadoInicio, -4, -3) == '0') {
-                $mesNumber = substr($periodoSelecionadoInicio, -3, -2);
-            } else {
-                $mesNumber = substr($periodoSelecionadoInicio, -4, -2);
-            }
-            return response()->json([
-                'mes' => $mes[$mesNumber]." - ".substr($periodoSelecionadoInicio, -8, -4),
-                'resize' => '130',
-                'periodoSelecionadoInicio' => $periodoSelecionadoInicio,
-                'periodoSelecionadoFim' => $periodoSelecionadoFim
-            ]);
-        } else {
-            return response()->json([
-                'mes' => date('d/m/Y', strtotime($periodoSelecionadoInicio))." - ".date('d/m/Y', strtotime($periodoSelecionadoFim)),
-                'resize' => '165',
-                'periodoSelecionadoInicio' => $periodoSelecionadoInicio,
-                'periodoSelecionadoFim' => $periodoSelecionadoFim
-            ]);
+    public static function getUsuarioLogado() {
+        try {
+            $usuario =  Session::get('usuarioLogado');
+            return $usuario;
+        } catch (Exception $ex) {
+            return null;
         }
     }
 
-    protected function alterarPeriodoMes (Request $request) {
+    public static function getPeriodo()  {
+        try {
+            $periodoSelecionadoInicio = Session::get('periodoSelecionadoInicio');
+            $periodoSelecionadoFim = Session::get('periodoSelecionadoFim');
+
+            $mesInicio = substr($periodoSelecionadoInicio, -4, -2);
+            $mesFim = substr($periodoSelecionadoFim, -4, -2);
+            if ($mesInicio == $mesFim) {
+                $mes = array('', 'Janeiro', 'Fevereiro',
+                    'Março', 'Abril', 'Maio', 'Junho', 'Julho',
+                    'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro');
+
+                if (substr($periodoSelecionadoInicio, -4, -3) == '0') {
+                    $mesNumber = substr($periodoSelecionadoInicio, -3, -2);
+                } else {
+                    $mesNumber = substr($periodoSelecionadoInicio, -4, -2);
+                }
+                return response()->json([
+                    'mes' => $mes[$mesNumber] . " - " . substr($periodoSelecionadoInicio, -8, -4),
+                    'resize' => '130',
+                    'periodoSelecionadoInicio' => $periodoSelecionadoInicio,
+                    'periodoSelecionadoFim' => $periodoSelecionadoFim
+                ]);
+            } else {
+                return response()->json([
+                    'mes' => date('d/m/Y', strtotime($periodoSelecionadoInicio)) . " - " . date('d/m/Y', strtotime($periodoSelecionadoFim)),
+                    'resize' => '165',
+                    'periodoSelecionadoInicio' => $periodoSelecionadoInicio,
+                    'periodoSelecionadoFim' => $periodoSelecionadoFim
+                ]);
+            }
+        } catch (Exception $ex) {
+            return null;
+        }
+    }
+
+    public function alterarPeriodoMes (Request $request) {
         try {
             $param = $request->all();
             $periodoSelecionadoInicio = $request->session()->get('periodoSelecionadoInicio');
@@ -80,12 +95,12 @@ class UtilsController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage()
+                'message' => 'Falha ao alterar data!'
             ]);
         }
     }
 
-    protected function alterarPeriodoData (Request $request) {
+    public function alterarPeriodoData (Request $request) {
         try {
             $param = $request->all();
 
@@ -106,12 +121,12 @@ class UtilsController extends Controller
             return response()->json([
                 'status' => 'success',
                 'nomeMes' => date('d/m/Y', strtotime($inicio))." - ".date('d/m/Y', strtotime($final)),
-                'message' =>  'Mês alterado com sucesso.'
+                'message' =>  'Período alterado com sucesso.'
             ]);
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage()
+                'message' => 'Falha ao alterar o período!'
             ]);
         }
     }
