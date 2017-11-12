@@ -3,115 +3,99 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Model\CartaoCredito;
-use App\Http\Model\Conta;
-use Carbon\Carbon;
-use DateTime;
-use App\Http\Model\Despesa;
-use App\Http\Model\Usuario;
-use App\Http\Model\ParcelaPendente;
-use App\Http\Model\Categoria;
-use Illuminate\Support\Facades\DB;
+use App\Http\Facade\ContaFacade;
+use App\Http\Facade\CartaoFacade;
 use Illuminate\Http\Request;
 use Exception;
 use App\Exceptions\CustomException;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
+
 
 
 class CartaoController extends Controller
 {
 
-    public function index(Request $request){
-        $usuarioLogado = $request->session()->get('usuarioLogado');
-        $periodo = UtilsController::getPeriodo($request);
-        $periodo = $periodo->getData();
-        $cartoes = CartaoCredito::from('cartao_credito AS cc')
-            ->join('conta AS c','cc.id_conta','=','c.id')
-            ->where("c.id_usuario",$usuarioLogado->id)
-            ->select('cc.*')
-            ->get();
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
 
-        $contas = DB::table('conta')->where('id_usuario', $usuarioLogado->id)->get();
-     
-        return view('cartoes/cartoes',[
-            'menuView'=>'cartoes',
-            'page'=>'Cartões',
-            'cartoes'=>$cartoes,
-            'contas'=>$contas,
-            'usuario'=>$usuarioLogado,
-            'nomeMes'=>$periodo->mes,
-            'resize'=>$periodo->resize
-        ]);
+    protected function getUsuario() {
+        try {
+            return UtilsController::getUsuarioLogado();
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    protected function getPeriodo() {
+        try {
+            $periodo = UtilsController::getPeriodo();
+            $periodo = $periodo->getData();
+            return $periodo;
+        } catch (Exception $ex) {
+            return null;
+        }
+    }
+
+    public function index(Request $request){
+        try {      
+
+            $usuarioLogado = self::getUsuario();
+            $periodo = self::getPeriodo();
+            
+            if ($periodo == null || $usuarioLogado == null) {
+                throw new Exception();
+            }
+
+            $cartoes = CartaoFacade::getCartoes($usuarioLogado);
+
+            $contas = ContaFacade::getContas($usuarioLogado);
+         
+            return view('cartoes/cartoes',[
+                'menuView'=>'cartoes',
+                'page'=>'Cartões',
+                'cartoes'=>$cartoes,
+                'contas'=>$contas,
+                'usuario'=>$usuarioLogado,
+                'nomeMes'=>$periodo->mes,
+                'resize'=>$periodo->resize
+            ]);
+
+        } catch (Exception $ex) {
+            return view ('cartoes/error');
+        }
     }
 
     protected function create(Request $request){
         try {
-            $usuarioLogado = $request->session()->get('usuarioLogado');
+            $usuarioLogado = self::getUsuario();
             $param = $request->all();
 
-            $limite = str_replace("R$", "", $param['limite']);
-            $limite = str_replace(".", "", $limite);
-            $limite = str_replace(",", ".", $limite);
+            try {
 
-            $dia = substr($param['vencimento'], 0, -8);
-            $mes = substr($param['vencimento'], 3, -5);
-            $ano = substr($param['vencimento'], -4);
-            $vencimento = $ano.$mes.$dia;
+                CartaoFacade::criarCartao($param['limite'], $param['vencimento'], $param['fechamento'], $param['independente'], $param['nome'], $param['conta'], $usuarioLogado);
 
-            $diaF = substr($param['fechamento'], 0, -8);
-            $mesF = substr($param['fechamento'], 3, -5);
-            $anoF = substr($param['fechamento'], -4);
-            $fechamento = $anoF.$mesF.$diaF;
-
-            if (!empty($param['independente']) &&  $param['independente']=='true') {
-                $new_conta = Conta::create([
-                    'nome' => $param['nome'],
-                    'tipo' => 'O',
-                    'exibir_indicador' => 'N',
-                    'dt_movimento' => date('Ymd'),
-                    'id_usuario' => $usuarioLogado->id
+                return response()->json([
+                    'status' => 'success',
+                    'message' =>  'Cartão cadastrado com sucesso.',
                 ]);
 
-                if (empty($new_conta)) {
-                    throw new CustomException('Ops. Erro ao cadastrar cartão. Tente novamente mais tarde.');
-                }
-
-                $new_cartao = CartaoCredito::create([
-                    'limite' => $limite,
-                    'dt_fechamento' => $fechamento,
-                    'dt_vencimento' => $vencimento,
-                    'id_conta' => $new_conta->id,
-                    'cartao_independente' => true
-                ]);
-            } else {
-                $new_cartao = CartaoCredito::create([
-                    'limite' => $limite,
-                    'dt_fechamento' => $fechamento,
-                    'dt_vencimento' => $vencimento,
-                    'id_conta' => $param['conta'],
-                    'cartao_independente' => false
+            } catch (CustomException $ex) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Erro ao cadastrar cartão. Tente novamente mais tarde.'
                 ]);
             }
-
-            if (empty($new_cartao)) {
-                throw new CustomException('Ops. Erro ao cadastrar cartão. Tente novamente mais tarde.');
-            }
-
-            return response()->json([
-                'status' => 'success',
-                'message' =>  'Cartão cadastrado com sucesso.',
-            ]);
-
-        }catch (CustomException $ex) {
-            return response()->json([
-                'status' => 'error',
-                'message' =>  $param['independente']
-            ]);
+       
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $param['independente'] //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -120,65 +104,55 @@ class CartaoController extends Controller
         try {
             $param = $request->all();
 
-            if ($param['independente']=='1') {
-                DB::table('cartao_credito')->where('id',$param['id'])->delete();
-                DB::table('conta')->where('id',$param['conta'])->delete();
-            } else {
-                DB::table('cartao_credito')->where('id',$param['id'])->delete();
-            }
-            return response()->json([
-                'status' => 'success',
-                'message' =>  'Cartão removido com sucesso.'
-            ]);
+             try {
+
+                CartaoFacade::deletarCartao($param['id'], $param['independente'], $param['conta']);
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' =>  'Cartão removido com sucesso.'
+                ]);
+
+            } catch (CustomException $ex) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Erro ao remover cartão. Tente novamente mais tarde.'
+                ]);
+            }   
+
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage() //'Ops. Erro ao remover registro. Tente novamente mais tarde.'
+                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
 
     protected function edit(Request $request){
         try {
-            $usuarioLogado = $request->session()->get('usuarioLogado');
+            $usuarioLogado = self::getUsuario();
             $param = $request->all();
 
-            $limite = str_replace("R$", "", $param['limite']);
-            $limite = str_replace(".", "", $limite);
-            $limite = str_replace(",", ".", $limite);
+            try {
 
-            $dia = substr($param['vencimento'], 0, -8);
-            $mes = substr($param['vencimento'], 3, -5);
-            $ano = substr($param['vencimento'], -4);
-            $vencimento = $ano.$mes.$dia;
+                CartaoFacade::editarCartao($param['id'], $param['limite'], $param['vencimento'], $param['fechamento']);
 
-            $diaF = substr($param['fechamento'], 0, -8);
-            $mesF = substr($param['fechamento'], 3, -5);
-            $anoF = substr($param['fechamento'], -4);
-            $fechamento = $anoF.$mesF.$diaF;
-
-            DB::table('cartao_credito')
-                ->where('id', $param['id'])
-                ->update([
-                    'limite' => $limite,
-                    'dt_fechamento' => $fechamento,
-                    'dt_vencimento' => $vencimento
+                return response()->json([
+                    'status' => 'success',
+                    'message' =>  'Cartão alterado com sucesso.',
                 ]);
 
-            return response()->json([
-                'status' => 'success',
-                'message' =>  'Cartão alterado com sucesso.',
-            ]);
-
-        }catch (CustomException $ex) {
-            return response()->json([
-                'status' => 'error',
-                'message' =>  $ex->getMessage()
-            ]);
+            } catch (CustomException $ex) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Erro ao editar cartão. Tente novamente mais tarde.'
+                ]);
+            } 
+        
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }

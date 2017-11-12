@@ -3,88 +3,92 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Model\CartaoCredito;
-use App\Http\Model\Conta;
-use Carbon\Carbon;
-use DateTime;
-use App\Http\Model\Despesa;
-use App\Http\Model\Usuario;
-use App\Http\Model\ParcelaPendente;
-use App\Http\Model\Categoria;
-use Illuminate\Support\Facades\DB;
+
+use App\Http\Facade\ContaFacade;
 use Illuminate\Http\Request;
 use Exception;
 use App\Exceptions\CustomException;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
+
 
 
 class ContaController extends Controller
 {
 
-    public function index(Request $request){
-        $usuarioLogado = $request->session()->get('usuarioLogado');
-        $periodo = UtilsController::getPeriodo($request);
-        $periodo = $periodo->getData();
-        $contas = DB::table('conta')->where('id_usuario', $usuarioLogado->id)->get();
-        foreach($contas as $key => $subarray) {
-            $contas[$key]->saldo=100.0;
-        }
-        return view('contas/contas',[
-            'menuView'=>'contas',
-            'page'=>'Contas',
-            'contas'=>$contas,
-            'usuario'=>$usuarioLogado,
-            'nomeMes'=>$periodo->mes,
-            'resize'=>$periodo->resize
-        ]);
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
     }
+
+    protected function getUsuario() {
+        try {
+            return UtilsController::getUsuarioLogado();
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    protected function getPeriodo() {
+        try {
+            $periodo = UtilsController::getPeriodo();
+            $periodo = $periodo->getData();
+            return $periodo;
+        } catch (Exception $ex) {
+            return null;
+        }
+    }
+
+    public function index(Request $request){
+        try {
+
+            $usuarioLogado = self::getUsuario();
+            $periodo = self::getPeriodo();
+
+            $contas = ContaFacade::getContas($usuarioLogado);
+            
+            return view('contas/contas',[
+                'menuView'=>'contas',
+                'page'=>'Contas',
+                'contas'=>$contas,
+                'usuario'=>$usuarioLogado,
+                'nomeMes'=>$periodo->mes,
+                'resize'=>$periodo->resize
+            ]);
+
+        } catch (Exception $e) {
+            return view ('contas/error');
+        }
+        
+    }
+    
 
     protected function create(Request $request){
         try {
 
-
             $usuarioLogado = $request->session()->get('usuarioLogado');
             $param = $request->all();
-
-            if (!empty($param['indicador']) &&  $param['indicador']=='on') {
-                $indicador = 'S';
-            } else {
-                $indicador = 'N';
-            }
-
-            $new_conta = Conta::create([
-                'nome' => $param['nome'],
-                'tipo' => $param['tipo'],
-                'exibir_indicador' => $indicador,
-                'dt_movimento' => date('Ymd'),
-                'id_usuario' => $usuarioLogado->id
-            ]);
-
-
             $file = $request->file('image');
-            if (!empty($file)) {
-                $image = Image::make($file)->resize(128, 128)->encode('jpg')->stream();
-                $file_image_name = $new_conta->id.time().'.jpg';
-                Storage::disk('local-conta')->put($file_image_name,$image->__toString());
-                DB::table('conta')->where('id', $new_conta->id)->update(['image' => $file_image_name]);
-            }
 
+            try {
+                
+                ContaFacade::criarConta($param['nome'], $param['tipo'], $param['indicador'], $file, $usuarioLogado);     
 
-            if (empty($new_conta)) {
-                throw new CustomException('Ops. Erro ao cadastrar conta. Tente novamente mais tarde.');
-            }
+                return response()->json([
+                    'status' => 'success',
+                    'message' =>  'Conta cadastrada com sucesso.',
+                ]);
 
-            return response()->json([
-                'status' => 'success',
-                'message' =>  'Conta cadastrada com sucesso.',
-            ]);
-
-        }catch (CustomException $ex) {
-            return response()->json([
-                'status' => 'error',
-                'message' =>  $ex->getMessage()
-            ]);
+            } catch (CustomException $ex) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' =>  'Ops. Erro ao cadastrar conta. Tente novamente mais tarde.'
+                ]);
+            }  
+       
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
@@ -95,16 +99,28 @@ class ContaController extends Controller
 
     protected function delete(Request $request){
         try {
+
             $param = $request->all();
-            DB::table('conta')->where('id',$param['id'])->delete();
-            return response()->json([
-                'status' => 'success',
-                'message' =>  'Conta removida com sucesso.'
-            ]);
+
+            try {
+                
+                ContaFacade::deletarConta($param['id']);     
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' =>  'Conta removida com sucesso.',
+                ]);
+
+            } catch (CustomException $ex) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' =>  'Ops. Erro ao remover conta. Tente novamente mais tarde.'
+                ]);
+            }  
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ops. Erro ao remover registro. Tente novamente mais tarde.'
+                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -112,44 +128,28 @@ class ContaController extends Controller
     protected function edit(Request $request){
         try {
             $param = $request->all();
-
-            if (!empty($param['indicador']) &&  $param['indicador']=='on') {
-                $indicador = 'S';
-            } else {
-                $indicador = 'N';
-            }
-           
             $file = $request->file('conta-view');
-            if (!empty($file)) {
-                $image = Image::make($file)->resize(128, 128)->encode('jpg')->stream();
-                $file_image_name_old = $param['imagem'];
-                $file_image_name = $param['id'].time().'.jpg';
-                Storage::disk('local-conta')->delete($file_image_name_old);
-                Storage::disk('local-conta')->put($file_image_name,$image->__toString());
-            }
 
-            DB::table('conta')
-                ->where('id', $param['id'])
-                ->update([
-                    'nome' => $param['nome'],
-                    'tipo' => $param['tipo'],
-                    'exibir_indicador' => $indicador,
-                    'image' => $file_image_name
-            ]);
+            try {
+                
+                ContaFacade::editarConta($param['id'], $param['nome'], $param['indicador'], $param['imagem'], $param['tipo'], $file);     
 
-            return response()->json([
-                'status' => 'success',
-                'message' =>  'Conta alterada com sucesso.'
-            ]);
-        } catch (CustomException $ex) {
-            return response()->json([
-                'status' => 'error',
-                'message' =>  $ex->getMessage()
-            ]);
+                return response()->json([
+                    'status' => 'success',
+                    'message' =>  'Conta alterada com sucesso.',
+                ]);
+
+            } catch (CustomException $ex) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' =>  'Ops. Erro ao alterar conta. Tente novamente mais tarde.'
+                ]);
+            }  
+        
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  'Ops. Erro ao alterar registro. Tente novamente mais tarde.'
+                'message' =>  'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
 

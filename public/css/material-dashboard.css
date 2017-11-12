@@ -5382,7 +5382,7 @@ h2.title {
 .wrapper {
   position: relative;
   top: 0;
-  height: 100vh;
+  height: 105vh;
 }
 
 .sidebar,
@@ -5610,8 +5610,8 @@ h2.title {
 }
 .sidebar .user .photo,
 .off-canvas-sidebar .user .photo {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   overflow: hidden;
   border-radius: 50%;
   margin: 0 auto;
@@ -8584,7 +8584,7 @@ fieldset[disabled] .form-group.is-focused .togglebutton label {
 .wrapper {
   position: relative;
   top: 0;
-  height: 100vh;
+  height: 105vh;
 }
 .wrapper:after {
   display: table;

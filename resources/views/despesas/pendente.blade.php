@@ -88,7 +88,7 @@
                                         <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
                                             <i class="material-icons">add</i> ADICIONAR
                                         </button>
-                                        <button type="button"  class="btn btn-danger btn-xs" onclick="window.open('{{ route('generate.relPendente') }}','_blank');"  style="float:right">
+                                        <button type="button"  class="btn btn-danger btn-xs" onclick="gerarPDF();"  style="float:right">
                                             <i class="material-icons">print</i> IMPRIMIR
                                         </button>
 
@@ -351,8 +351,9 @@
 
 @section('scripts')
     <script type="text/javascript">
-        var messages = new Array();
+        
         function validacaoExtraForm() {
+            var messages = new Array();
             if ($("#categoria").val()=="" || $("#categoria").val()=="Selecione") {
                 messages.push("Favor, informar categoria");
             } else if ($("#check-credito").is(':checked')==true && ($("#credito").val()=="" || $("#credito").val()=="Selecione")) {
@@ -367,6 +368,14 @@
                 return false;
             }
             return true;
+        }
+
+        function gerarPDF() {
+            try  {
+                window.open('{{ route('generate.relPendente') }}','_blank');     
+            } catch(err) {
+                setTimeout(function(){ showErrorNotification('Erro ao gerar PDF!'); }, 2500);
+            }      
         }
 
         function visualizar(nome,valor,categoria,parcela,credito) {

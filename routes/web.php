@@ -11,7 +11,15 @@
 |
 */
 
+
 Route::get('/', 'Auth\LoginController@index');
+
+Route::group(['prefix'=>'acesso','where'=>['id'=>'[0-9]+']], function() {
+    Route::get('sair', ['as'=>'sair', 'uses'=>'Auth\LoginController@sair']);
+    Route::get('registro', ['as'=>'registro', 'uses'=>'Auth\RegisterController@index']);
+    Route::post('criarCadastro', ['as'=>'criar.cadastro', 'uses'=>'Auth\RegisterController@create']);
+    Route::post('entrar', ['as'=>'autenticar.usuario', 'uses'=>'Auth\LoginController@doLogin']);
+});
 
 Route::group(['prefix'=>'periodo','where'=>['id'=>'[0-9]+']], function() {
     Route::post('alterarPeriodo', ['as'=>'periodo.alteraMes', 'uses'=>'UtilsController@alterarPeriodoMes']);
@@ -20,14 +28,7 @@ Route::group(['prefix'=>'periodo','where'=>['id'=>'[0-9]+']], function() {
 
 Route::group(['prefix'=>'dashboard','where'=>['id'=>'[0-9]+']], function() {
     Route::get('home', ['as'=>'home', 'uses'=>'HomeController@index']);
-});
-
-Route::group(['prefix'=>'acesso','where'=>['id'=>'[0-9]+']], function() {
-    Route::get('logout', ['as'=>'logout', 'uses'=>'Auth\LoginController@logout']);
-    Route::get('login', ['as'=>'login', 'uses'=>'Auth\LoginController@index']);
-    Route::get('registro', ['as'=>'registro', 'uses'=>'Auth\RegisterController@index']);
-    Route::post('criarCadastro', ['as'=>'criar.cadastro', 'uses'=>'Auth\RegisterController@create']);
-    Route::post('entrar', ['as'=>'autenticar.usuario', 'uses'=>'Auth\LoginController@doLogin']);
+    Route::post('home', ['as'=>'home', 'uses'=>'HomeController@index']);
 });
 
 Route::group(['prefix'=>'categoria','where'=>['id'=>'[0-9]+']], function() {
@@ -73,6 +74,12 @@ Route::group(['prefix'=>'renda','where'=>['id'=>'[0-9]+']], function() {
     Route::post('alterarRenda', ['as'=>'alterar.renda', 'uses'=>'RendaController@edit']);
     Route::post('deletarRenda', ['as'=>'deletar.renda', 'uses'=>'RendaController@delete']);
 });
+
+Auth::routes();
+
+
+
+
 
 
 

@@ -37,4 +37,76 @@ class CategoriaFacade
       }
    }
 
+    public static function criarCategoriaSemLimite($nome, $user) {
+        try {
+
+            $new_categoria = Categoria::create([
+                'nome' => $nome,
+                'id_usuario' => $user->id
+            ]);
+
+            if (empty($new_categoria)) {
+                throw new Exception();
+            }
+              
+        } catch (Exception $e) {
+            throw new CustomException("Erro Facade: ".$e->getMessage());
+        }
+    }
+
+    public static function criarCategoriaComLimite($nome, $limite, $user) {
+        try {
+             $limite = str_replace("R$", "", $limite);
+             $limite = str_replace(".", "", $limite);
+             $limite = str_replace(",", ".", $limite);
+
+             $new_categoria = Categoria::create([
+                    'nome' => $nome,
+                    'limite' => $limite,
+                    'id_usuario' => $user->id
+             ]);
+
+            if (empty($new_categoria)) {
+                throw new Exception();
+            }
+
+        } catch (Exception $e) {
+            throw new CustomException();
+        }
+    }
+
+    public static function deletarCategoria($categoria) {
+        try {
+           
+            DB::table('categoria')->where('id',$categoria)->delete();          
+            
+              
+        } catch (Exception $e) {
+            throw new CustomException();
+        }
+    }
+
+    public static function editarCategoria($categoria, $limite, $nome) {
+        try {
+           
+            if ($limite!=null) {
+                $limite = str_replace("R$", "", $limite);
+                $limite = str_replace(".", "", $limite);
+                $limite = str_replace(",", ".", $limite);
+            }
+
+            DB::table('categoria')
+                ->where('id', $categoria)
+                ->update([
+                    'nome' => $nome,
+                    'limite' => $limite
+            ]);
+              
+        } catch (Exception $e) {
+            throw new CustomException();
+        }
+    }
+
+
+
 }

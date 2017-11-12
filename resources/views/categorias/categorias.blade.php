@@ -111,18 +111,16 @@
                             </div>
 
                             <div class="checkbox">
-                                <label>
+                                <label class="label-check">
                                     <input type="checkbox" id="habilitar-limite" name="optionsCheckboxes">
-                                    <a style="font-size:12px"  >Inserir limite</a>.
+                                    <a style="font-size:12px" class="label-check"  >Inserir limite</a>.
                                 </label>
                             </div>
 
 
 
                             <div class="form-group label-floating" id="input-limite" style="display:none;">
-                                <label class="control-label">Limite
-                                    <star>*</star>
-                                </label>
+                                <label class="control-label">Limite</label>
                                 <input class="form-control money-format" disabled id="limite" name="limite" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
                             </div>
                             <div class="category form-category">
@@ -151,16 +149,14 @@
                             </div>
 
                             <div class="checkbox">
-                                <label>
+                                <label class="label-check">
                                     <input type="checkbox" id="habilitar-limite-edit" name="optionsCheckboxes">
-                                    <a style="font-size:12px"  >Inserir limite</a>.
+                                    <a style="font-size:12px" class="label-check"  >Inserir limite</a>.
                                 </label>
                             </div>
 
                             <div class="form-group label-floating" id="input-limite-edit" style="display:none;">
-                                <label class="control-label">Limite
-                                    <star>*</star>
-                                </label>
+                                <label class="control-label">Limite</label>
                                 <input class="form-control money-format" disabled id="limite-edit" name="limite" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
                             </div>
                             <div class="category form-category">
@@ -305,7 +301,8 @@
         $(document).ready(function() {
 
             /* Habilitar input do limite*/
-            $( ".check" ).click(function() {
+            $( ".check, .checkbox-material, .check, .label-check" ).click(function() {
+
                 setTimeout(function(){
                     if ($("#habilitar-limite").is(':checked')==true) {
                         $("#limite").removeAttr('disabled');
@@ -325,6 +322,7 @@
                         $("#input-limite-edit").css( "display", "none" );
                     }
                 }, 300);
+
             });
 
             /* Limpar formulário */
@@ -367,6 +365,12 @@
             $( "#formCategoria" ).submit(function( e ) {
                 if ($("#formCategoria" ).valid()) {
                     var formData = new FormData($("#formCategoria")[0]);
+                    if ($("#habilitar-limite").is(':checked')==false) {
+                        formData.append("hasLimite","false");
+                    }  else {
+                        formData.append("hasLimite","true");
+                    }
+
                     $.ajax({
                         type: "POST",
                         url: '{{route('criar.categoria')}}',
@@ -402,6 +406,11 @@
             $( "#formCategoria-edit" ).submit(function( e ) {
                 if ($("#formCategoria-edit" ).valid()) {
                     var formData = new FormData($("#formCategoria-edit")[0]);
+                    if ($("#habilitar-limite-edit").is(':checked')==false) {
+                        formData.append("hasLimite",false);
+                    }  else {
+                        formData.append("hasLimite",true);
+                    }
                     $.ajax({
                         type: "POST",
                         url: '{{route('alterar.categoria')}}',

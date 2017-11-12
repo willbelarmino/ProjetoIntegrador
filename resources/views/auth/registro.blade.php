@@ -5,14 +5,14 @@
 @endsection
 
 @section('link')
-    <a href="{{route('login')}}">
+    <a href="{{url('/')}}">
         <i class="material-icons">lock</i> Login
     </a>
 @endsection
 
 
 @section('content')
-    <div class="full-page register-page" filter-color="black" data-image="../img/register.jpeg">
+    <div class="full-page register-page" filter-color="black" data-image="../img/gestao-financeira.jpg">
         <div class="container">
             <div id="content-view" class="row">
                 <div class="col-md-10 col-md-offset-1">
@@ -102,6 +102,14 @@
                                                 </span>
                                             <input type="password" placeholder="Senha" class="form-control" name="senha" id="senha" required="true" />
                                             <label id="senha-error"></label>
+                                        </div>
+
+                                        <div class="input-group">
+                                                <span class="input-group-addon">
+                                                    <i class="material-icons">lock</i>
+                                                </span>
+                                            <input type="password" placeholder="Confirma Senha" class="form-control" name="senha2" id="senha2" required="true" equalTo="#senha" />
+                                            <label id="senha2-error"></label>
                                         </div>
 
                                         <!-- If you want to add a checkbox to this form, uncomment this code -->
@@ -251,7 +259,12 @@
                     },
                     senha: {
                         required: "Campo de preenchimento obrigatório."
+                    },
+                    senha2: {
+                        required: "Campo de preenchimento obrigatório.",
+                        equalTo: "Senhas não conferem."
                     }
+
                 },
                 errorPlacement: function(error, element) {
                     $(element).parent('div').addClass('has-error');

@@ -20,7 +20,7 @@
     <link href="../css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="../css/css.css" />
 </head>
-
+<?php flush(); ?>
 <body>
 <nav class="navbar navbar-primary navbar-transparent navbar-absolute">
     <div class="container">

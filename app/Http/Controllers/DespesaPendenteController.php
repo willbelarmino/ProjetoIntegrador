@@ -6,7 +6,6 @@ use App\Http\Facade\DespesaFacade;
 use App\Http\Facade\CategoriaFacade;
 use App\Http\Facade\ContaFacade;
 use App\Http\Facade\CartaoFacade;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Exception;
 use App\Exceptions\CustomException;
@@ -16,7 +15,18 @@ use Session;
 
 class DespesaPendenteController extends Controller
 {
-    public function getUsuario() {
+
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    protected function getUsuario() {
         try {
             return UtilsController::getUsuarioLogado();
         } catch (Exception $e) {
@@ -24,7 +34,7 @@ class DespesaPendenteController extends Controller
         }
     }
 
-    public function getPeriodo() {
+    protected function getPeriodo() {
         try {
             $periodo = UtilsController::getPeriodo();
             $periodo = $periodo->getData();
@@ -72,127 +82,104 @@ class DespesaPendenteController extends Controller
     protected function create(Request $request){
         try {
 
-            $usuarioLogado = $request->session()->get('usuarioLogado');
+            $usuarioLogado = self::getUsuario();
             $param = $request->all();
-            if (!empty($param['valor']) && $param['valor']!="R$ 0,00") {
-                $valor = str_replace("R$", "", $param['valor']);
-                $valor = str_replace(".", "", $valor);
-                $valor = str_replace(",", ".", $valor);
+                                    
+            try {
 
-                $dia = substr($param['vencimento'], 0, -8);
-                $mes = substr($param['vencimento'], 3, -5);
-                $ano = substr($param['vencimento'], -4);
-                $vencimento = $ano.$mes.$dia;
+                DespesaFacade::criarDespesaPendente($param['nome'], $param['valor'], $param['vencimento'], $param['parcela'], $param['categoria'], $param['credito']);
 
-                if (!empty($param['credito'])) {
-                    DB::select("CALL criarDespesaPendente(
-                    '".$param['nome']."', 
-                    ".$valor.", 
-                    ".$param['parcela']." ,
-                    '".$vencimento."',
-                    ".$param['categoria'].",
-                    ".$param['credito'].")");
-                } else {
-                    DB::select("CALL criarDespesaPendente(
-                    '".$param['nome']."', 
-                    ".$valor.", 
-                    ".$param['parcela']." ,
-                    '".$vencimento."',  
-                    ".$param['categoria'].",
-                    null)");
+                return response()->json([
+                    'status' => 'success',
+                    'message' =>  'Despesa cadastrada com sucesso.'
+                ]);
 
-                }
-
-            } else {
-                throw new CustomException('Ops. O valor não pode ser R$ 0,00.');
+            } catch (CustomException $ex) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' =>  'Ops. Erro ao cadastrar despesa. Tente novamente mais tarde.'
+                ]);
             }
-
-            return response()->json([
-                'status' => 'success',
-                'message' =>  'Despesa cadastrada com sucesso.'
-            ]);
-
-        }catch (CustomException $ex) {
-            return response()->json([
-                'status' => 'error',
-                'message' =>  $ex->getMessage()
-            ]);
+        
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
 
     protected function delete(Request $request){
         try {
-            $periodoSelecionadoInicio = $request->session()->get('periodoSelecionadoInicio');
-            $periodoSelecionadoFim = $request->session()->get('periodoSelecionadoFim');
+
+            $periodo = self::getPeriodo();
             $param = $request->all();
-            DB::select("CALL excluirDespesaPendente(                    
-                    ".$param['id'].",
-                    '".$periodoSelecionadoInicio."',
-                    '".$periodoSelecionadoFim."')");
-            return response()->json([
-                'status' => 'success',
-                'message' =>  'Despesa removida com sucesso.'
-            ]);
+            
+            try {
+
+                 DespesaFacade::deletarDespesaPendente($param['id'], $periodo);  
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' =>  'Despesa removida com sucesso.'
+                ]);
+
+            } catch (CustomException $ex) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Ops. Erro ao remover despesa. Tente novamente mais tarde.'
+                ]);  
+            }            
+
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ops. Erro ao remover registro. Tente novamente mais tarde.'
+                'message' => 'Ops. ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
 
     protected function edit(Request $request){
         try {
+
             $param = $request->all();
 
-            $valor = str_replace("R$", "", $param['valor']);
-            $valor = str_replace(".", "", $valor);
-            $valor = str_replace(",", ".", $valor);
+            try {
 
-            $dia = substr($param['vencimento'], 0, -8);
-            $mes = substr($param['vencimento'], 3, -5);
-            $ano = substr($param['vencimento'], -4);
-            $vencimento = $ano.$mes.$dia;
+                DespesaFacade::editarDespesaPendente($param['id'], $param['nome'], $param['valor'], $param['vencimento'], $param['categoria'], $param['credito']); 
+               
+                return response()->json([
+                    'status' => 'success',
+                    'message' =>  'Despesa alterada com sucesso.'
+                ]);
 
-            if (!empty($param['credito'])) {
-                DB::select("CALL alterarDespesaPendente(                    
-                    ".$param['id'].",
-                    '".$param['nome']."',
-                    ".$valor.",
-                    '".$vencimento."',
-                    ".$param['categoria'].",
-                    ".$param['credito'].")");
-            } else {
-                DB::select("CALL alterarDespesaPendente(                    
-                    ".$param['id'].",
-                    '".$param['nome']."',
-                    ".$valor.",
-                    '".$vencimento."',
-                    ".$param['categoria'].",
-                    null)");
-            }
+            } catch (CustomException $ex) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Ops. Erro ao alterar despesa. Tente novamente mais tarde.'
+                ]);  
+            }  
 
-            return response()->json([
-                'status' => 'success',
-                'message' =>  'Despesa alterada com sucesso.'
-            ]);
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage() //'Ops. Erro ao alterar registro. Tente novamente mais tarde.'
+                'message' => 'Ops. correu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
 
     protected function toPDF(Request $request){
-        $parcelasPendentes = self::getParcelasPendentes($request);
-        $pdf = PDF::loadView('despesas/relatorios/pendente-rel', ['link'=>$parcelasPendentes, 'title'=>'Despesas Pendentes']);
-        return $pdf->stream();
+        try {
+
+            $usuarioLogado = self::getUsuario();
+            $periodo = self::getPeriodo();
+            $parcelasPendentes = DespesaFacade::getParcelasPendentes($usuarioLogado, $periodo);
+            $pdf = PDF::loadView('despesas/relatorios/pendente-rel', ['link'=>$parcelasPendentes, 'title'=>'Despesas Pendentes']);
+            return $pdf->stream();
+
+        } catch (Exception $e) {
+            
+        }
     }
 
 
@@ -200,18 +187,27 @@ class DespesaPendenteController extends Controller
 
         try {
             $param = $request->all();
-            DB::select("CALL pagarDespesa(                    
-                        " . $param['id'] . ",
-                        " . $param['conta'] . "
-                        )");
-            return response()->json([
-                'status' => 'success',
-                'message' =>  'Despesa paga com sucesso.',
-            ]);
+            
+            try {
+
+                DespesaFacade::pagarDespesa($param['id'], $param['conta']);
+               
+                return response()->json([
+                    'status' => 'success',
+                    'message' =>  'Despesa paga com sucesso.',
+                ]);
+
+            } catch (CustomException $ex) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Ops. Erro ao pagar despesa. Tente novamente mais tarde.'
+                ]);  
+            }  
+
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }

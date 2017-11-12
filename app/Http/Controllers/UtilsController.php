@@ -8,22 +8,32 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Model\Categoria;
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Exception;
 use App\Exceptions\CustomException;
 use PDF;
 use App;
-use Barryvdh\Snappy;
 use Session;
+use Auth;
 
 class UtilsController extends Controller
 {
 
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public static function getUsuarioLogado() {
         try {
-            $usuario =  Session::get('usuarioLogado');
+            $usuario =  Auth::user();
             return $usuario;
         } catch (Exception $ex) {
             return null;
@@ -130,5 +140,41 @@ class UtilsController extends Controller
             ]);
         }
     }
+
+    public static function getSaldoAtual($user, $periodo) {
+        try {
+            
+            $saldoAtual =  DB::select("SELECT showSaldoAtual(
+                   $periodo->periodoSelecionadoInicio,
+                   $periodo->periodoSelecionadoFim,                 
+                   $user->id
+            ) AS saldoAtual ");
+
+            $saldoAtual = json_decode(json_encode($saldoAtual), true);
+            
+            return $saldoAtual[0]['saldoAtual'];
+
+        } catch (Exception $e) {
+            throw new CustomException();
+        }
+    } 
+
+    public static function getSaldoEstimado($user, $periodo) {
+        try {
+            
+            $saldoEstimado =  DB::select("SELECT showSaldoEstimado(
+                   $periodo->periodoSelecionadoInicio,
+                   $periodo->periodoSelecionadoFim,                 
+                   $user->id
+            ) AS saldoEstimado ");
+            
+            $saldoEstimado = json_decode(json_encode($saldoEstimado), true);
+            
+            return $saldoEstimado[0]['saldoEstimado'];
+
+        } catch (Exception $e) {
+            throw new CustomException();
+        }
+    } 
 
 }

@@ -9,13 +9,13 @@ use App\Http\Model\Usuario;
 use App\Http\Controllers\Controller;
 use Exception;
 use App\Exceptions\CustomException;
-use App\Exceptions\FormException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Intervention\Image\Facades\Image;
+use Auth;
 
 
 
@@ -39,7 +39,7 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = 'home';
 
     /**
      * Create a new controller instance.
@@ -97,16 +97,20 @@ class RegisterController extends Controller
                     Storage::disk('local-avatar')->put($file_avatar_name,$avatar->__toString());
                     DB::table('usuario')->where('id', $new_user->id)->update(['image' => $file_avatar_name]);
                 }
-                $new_user =  DB::table('usuario')->where([
-                    ['id', '=', $new_user->id]
+
+                $new_user = Usuario::from('usuario AS u')
+                    ->where([
+                        ['u.id', '=', $new_user->id]
                 ])->first();
+
+                Auth::login($new_user);
                 $request->session()->put('usuarioLogado', $new_user);
                 $request->session()->put('periodoSelecionadoInicio', date('Ym01'));
                 $request->session()->put('periodoSelecionadoFim', date('Ymt'));
 
                 return response()->json([
                     'status' => 'success',
-                    'message' =>  'categorias'
+                    'message' =>  'home'
                 ]);
             } else {
                 throw new CustomException('Login já cadastrado no sistema');
@@ -125,6 +129,6 @@ class RegisterController extends Controller
     }
 
     public function index(){
-        return view('registro');
+        return view('auth/registro');
     }
 }

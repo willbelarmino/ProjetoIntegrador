@@ -8,7 +8,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @yield('title')
-    <title>Despesas Pendentes - MoneyCash</title>
+    <title>MoneyCash</title>
     <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
     <meta name="viewport" content="width=device-width" />
     <!-- Bootstrap core CSS     -->
@@ -144,13 +144,6 @@
         </nav>
         <div class="content">
 
-            <div class="row" style="margin-bottom: 20px;">
-                <div class="periodo-bar text-center">
-                    <span onclick="alteraPeriodo('previous');" class="btn btn-primary btn-sm"> <i class="material-icons">keyboard_arrow_left</i> </span>
-                    <span id="nomeMes" data-toggle="modal" data-target="#modal-periodo" class="btn btn-primary btn-fill btn-sm button-modal" style="width: {{$resize}}px !important;"> {{$nomeMes}} </span>
-                    <span onclick="alteraPeriodo('next');" class="btn btn-primary btn-sm"> <i class="material-icons">keyboard_arrow_right</i> </span>
-                </div>
-            </div>
 
             @yield('content')
 
@@ -171,42 +164,6 @@
 
 @yield('modal')
 
-<!-- MODAL ALTERA PERIODO FORM -->
-<div class="modal fade" tabindex="-1" role="dialog" id="modal-periodo">
-    <div class="modal-dialog modal-sm" role="document">
-        <div class="modal-content">
-            <div class="card">
-                <form id="formPeriodo">
-                    <div class="card-header card-header-icon" data-background-color="purple">
-                        <i class="material-icons">date_range</i>
-                    </div>
-                    <div class="card-content">
-                        <h4 class="card-title">Período</h4>
-
-                         <div class="form-group label-floating">
-                            <label class="control-label">Data inicial</label>
-                            <input class="form-control datepicker" id="inicio" name="inicio" value="{{date('01/m/Y')}}" required="true" />
-                        </div>
-
-                        <div class="form-group label-floating">
-                            <label class="control-label">Data final</label>
-                            <input class="form-control datepicker" id="final" name="final" value="{{date('t/m/Y')}}" required="true" />
-                        </div>
-
-
-                        <div class="text-center" style="margin-top: 20px;">
-                            <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Salvar</button>
-                        </div>
-                        <div class="text-center">
-                            <button type="button" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal" data-dismiss="modal">Cancelar</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- /MODAL -->
 
 
 </body>
@@ -241,151 +198,6 @@
 <!-- Jquery Mask Money -->
 <script src="../js/jquery.maskMoney.js" type="text/javascript"></script>
 
-<script type="text/javascript">
-    function setFormValidation(id) {
-        $(id).validate({
-            errorPlacement: function(error, element) {
-                $(element).parent('div').addClass('has-error');
-            }
-        });
-    }
-
-    function alteraPeriodo(id) {
-        $.ajax({
-            type: "POST",
-            url: '{{route('periodo.alteraMes')}}',
-            data: { id : id },
-            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-            dataType: 'json',
-            cache: false,
-            beforeSend: function () {
-                setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
-            },
-            success: function (data) {
-                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                if (data.status == "success") {
-                    setTimeout(function(){
-                        loadTable();
-                        $("#nomeMes").html(data.nomeMes);
-                        $("#nomeMes").css('cssText', 'width: 130px !important');
-                    }, 2000);
-                    setTimeout(function(){ showSucessNotification(data.message); }, 2500);
-                } else {
-                    setTimeout(function(){ showErrorNotification(data.message); }, 2500);
-                }
-            },
-            error: function (request, status, error) {
-                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                setTimeout(function(){ showErrorNotification(error); }, 2500);
-            }
-        });
-    }
-
-    $(document).ready(function() {
-        $(".money-format").maskMoney();
-
-        $('#datatables').DataTable({
-            "pagingType": "full_numbers",
-            "deferRender": true,
-            "processing": true,
-            "lengthMenu": [
-                [10, 25, 50, -1],
-                [10, 25, 50, "All"]
-            ],
-            responsive: true,
-            language: {
-                search: "_INPUT_",
-                searchPlaceholder: "Filtrar",
-                lengthMenu: "Exibindo _MENU_ registros por página",
-                zeroRecords: "Nenhum registro encontrado",
-                info: "Visualizando página _PAGE_ de _PAGES_",
-                infoEmpty: "Nenhum registro encontrado",
-                infoFiltered: "(filtered from _MAX_ total records)",
-                paginate: {
-                    "first":      "Primeiro",
-                    "last":       "Último",
-                    "next":       "Próximo",
-                    "previous":   "Anterior"
-                }
-            },
-        });
-
-
-        $('.datepicker').datetimepicker({
-            format: 'DD/MM/YYYY',
-            locale: 'pt-br',
-            icons: {
-                time: "fa fa-clock-o",
-                date: "fa fa-calendar",
-                up: "fa fa-chevron-up",
-                down: "fa fa-chevron-down",
-                previous: 'fa fa-chevron-left',
-                next: 'fa fa-chevron-right',
-                today: 'fa fa-screenshot',
-                clear: 'fa fa-trash',
-                close: 'fa fa-remove',
-                inline: true
-            }
-
-        });
-
-        $('.card .material-datatables label').addClass('form-group');
-
-        /* Limpar modal periodo */
-        $("#modal-periodo").on("hide.bs.modal", function () {
-            var form = $("#modal-panel").find("form")
-            $(form).each (function(){
-                var formID = $(this).attr("id");
-                $("#"+formID).each (function(){
-                    this.reset();
-                });
-            });
-            //$("#inicio").val("");
-            //$("#final").val("");
-        });
-
-        /* Submita o formualário via Ajax*/
-        $( "#formPeriodo" ).submit(function( e ) {
-            if ($("#formPeriodo" ).valid()) {
-                var formData = new FormData($("#formPeriodo")[0]);
-                    $.ajax({
-                        type: "POST",
-                        url: '{{route('periodo.alteraData')}}',
-                        data: formData,
-                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                        dataType: 'json',
-                        processData: false,
-                        contentType: false,
-                        cache: false,
-                        beforeSend: function () {
-                            $("#modal-periodo").modal('toggle');
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
-
-                        },
-                        success: function (data) {
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                            if (data.status == "success") {
-                                setTimeout(function(){
-                                    loadTable();
-                                    $("#nomeMes").html(data.nomeMes);
-                                    $("#nomeMes").css('cssText', 'width: 165px !important');
-                                }, 2000);
-                                setTimeout(function(){ showSucessNotification(data.message); }, 2500);
-                            } else {
-                                setTimeout(function(){ showErrorNotification(data.message); }, 2500);
-                            }
-                        },
-                        error: function (request, status, error) {
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                            setTimeout(function(){ showErrorNotification(error); }, 2500);
-                        }
-                    });
-            }
-            e.preventDefault(); // avoid to execute the actual submit of the form.
-        });
-
-    });
-</script>
 
 @yield('scripts')
 

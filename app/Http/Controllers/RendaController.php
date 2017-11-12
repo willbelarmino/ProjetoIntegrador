@@ -2,168 +2,180 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Model\CartaoCredito;
-use Carbon\Carbon;
-use DateTime;
-use App\Http\Model\Despesa;
-use App\Http\Model\Usuario;
-use App\Http\Model\ParcelaPendente;
-use App\Http\Model\Renda;
-use App\Http\Model\RendaFixa;
-use Illuminate\Support\Facades\DB;
+use App\Http\Facade\RendaFacade;
+use App\Http\Facade\ContaFacade;
 use Illuminate\Http\Request;
 use Exception;
 use App\Exceptions\CustomException;
 use PDF;
 use App;
-use Barryvdh\Snappy;
+
 
 class RendaController extends Controller
 {
 
-    public function index(Request $request){
-        $usuarioLogado = $request->session()->get('usuarioLogado');
-        $periodo = UtilsController::getPeriodo($request);
-        $periodo = $periodo->getData();
 
-
-        $rendas = Renda::with(['conta' => function ($query) use ($usuarioLogado) {
-            $query->where('conta.id_usuario', '=', $usuarioLogado->id);
-        }])->whereBetween('dt_recebimento', [
-            $periodo->periodoSelecionadoInicio,
-            $periodo->periodoSelecionadoFim
-        ])->get();
-
-        $contas = DB::table('conta')->where('id_usuario', $usuarioLogado->id)->get();
-
-        //$rendas = Renda::all();
-
-        return view('rendas/rendas',
-            ['menuView'=>'rendas',
-                'page'=>'Rendas',                
-                'rendas'=>$rendas,
-                'contas'=>$contas,
-                'nomeMes'=>$periodo->mes,
-                'resize'=>$periodo->resize,
-                'usuario'=>$usuarioLogado
-            ]);
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
     }
 
-    protected function create(Request $request){
+    protected function getUsuario() {
         try {
+            return UtilsController::getUsuarioLogado();
+        } catch (Exception $e) {
+            return null;
+        }
+    }
 
-            $usuarioLogado = $request->session()->get('usuarioLogado');
-            $param = $request->all();
+    protected function getPeriodo() {
+        try {
+            $periodo = UtilsController::getPeriodo();
+            $periodo = $periodo->getData();
+            return $periodo;
+        } catch (Exception $ex) {
+            return null;
+        }
+    }
 
-            if (!empty($param['valor']) && $param['valor']!="R$ 0,00") {
-                $valor = str_replace("R$", "", $param['valor']);
-                $valor = str_replace(".", "", $valor);
-                $valor = str_replace(",", ".", $valor);
+    public function index(Request $request) {
 
-                $dia = substr($param['recebimento'], 0, -8);
-                $mes = substr($param['recebimento'], 3, -5);
-                $ano = substr($param['recebimento'], -4);
-                $recebimento = $ano.$mes.$dia;
+        try {
+            $usuarioLogado = self::getUsuario();
+            $periodo = self::getPeriodo();
+            if ($periodo == null || $usuarioLogado == null) {
+                throw new Exception();
+            }                        
 
-                $new_renda = Renda::create([
-                    'nome' => $param['nome'],
-                    'valor' => $valor,
-                    'dt_recebimento' => $recebimento,
-                    'id_conta' => $param['conta']
+            $rendas = RendaFacade::getRendas($usuarioLogado, $periodo);  
+
+            $contas = ContaFacade::getContas($usuarioLogado);
+
+            return view('rendas/rendas',
+                ['menuView'=>'rendas',
+                    'page'=>'Rendas',                
+                    'rendas'=>$rendas,
+                    'contas'=>$contas,
+                    'nomeMes'=>$periodo->mes,
+                    'resize'=>$periodo->resize,
+                    'usuario'=>$usuarioLogado
                 ]);
 
-                if (empty($new_renda)) {
-                throw new CustomException('Ops. Erro ao cadastrar renda. Tente novamente mais tarde.');
+        } catch (Exception $ex) {
+            return view ('rendas/error');
+        }
+
+    }
+
+ 
+    protected function create(Request $request) {
+        try {
+
+            $usuarioLogado = self::getUsuario();
+            $param = $request->all();
+                                    
+            try {
+
+                RendaFacade::criarRenda($param['nome'], $param['valor'], $param['recebimento'], $param['conta']);
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' =>  'Renda cadastrada com sucesso.'
+                ]);
+
+            } catch (CustomException $ex) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' =>  'Ops. Erro ao cadastrar renda. Tente novamente mais tarde.'
+                ]);
             }
-
-            } else {
-                throw new CustomException('Ops. O valor não pode ser R$ 0,00.');
-            }
-
-            return response()->json([
-                'status' => 'success',
-                'message' =>  'Renda cadastrada com sucesso.'
-            ]);
-
-        }catch (CustomException $ex) {
-            return response()->json([
-                'status' => 'error',
-                'message' =>  $ex->getMessage()
-            ]);
+        
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
 
-    protected function delete(Request $request){
+
+    protected function delete(Request $request) {
         try {
+           
             $param = $request->all();
-            DB::table('renda')->where('id',$param['id'])->delete();
-            return response()->json([
-                'status' => 'success',
-                'message' =>  'Renda removida com sucesso.'
-            ]);
+            
+            try {
+
+                 RendaFacade::deletarRenda($param['id']);  
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' =>  'Renda removida com sucesso.'
+                ]);
+
+            } catch (CustomException $ex) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Ops. Erro ao remover renda. Tente novamente mais tarde.'
+                ]);  
+            }            
+
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ops. Erro ao remover registro. Tente novamente mais tarde.'
+                'message' => 'Ops. ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
 
     protected function edit(Request $request){
         try {
+
             $param = $request->all();
 
-            $valor = str_replace("R$", "", $param['valor']);
-            $valor = str_replace(".", "", $valor);
-            $valor = str_replace(",", ".", $valor);
+            try {
 
-            $dia = substr($param['recebimento'], 0, -8);
-            $mes = substr($param['recebimento'], 3, -5);
-            $ano = substr($param['recebimento'], -4);
-            $recebimento = $ano.$mes.$dia;
+                RendaFacade::editarRenda($param['id'], $param['nome'], $param['valor'], $param['recebimento'], $param['conta']); 
+               
+                return response()->json([
+                    'status' => 'success',
+                    'message' =>  'Renda alterada com sucesso.'
+                ]);
 
-            DB::table('renda')
-                ->where('id', $param['id'])
-                ->update([
-                    'nome' => $param['nome'],
-                    'valor' => $valor,
-                    'dt_recebimento' => $recebimento,
-                    'id_conta' => $param['conta']
-            ]);
+            } catch (CustomException $ex) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Ops. Erro ao alterar renda. Tente novamente mais tarde.'
+                ]);  
+            }  
 
-            
-
-            return response()->json([
-                'status' => 'success',
-                'message' =>  'Renda alterada com sucesso.'
-            ]);
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage() //'Ops. Erro ao alterar registro. Tente novamente mais tarde.'
+                'message' => 'Ops. correu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
 
     protected function toPDF(Request $request){
-        $usuarioLogado = $request->session()->get('usuarioLogado');
-        $periodoSelecionadoInicio = $request->session()->get('periodoSelecionadoInicio');
-        $periodoSelecionadoFim = $request->session()->get('periodoSelecionadoFim');
-        
-        $rendas = Renda::with(['conta' => function ($query) use ($usuarioLogado) {
-            $query->where('conta.id_usuario', '=', $usuarioLogado->id);
-        }])->whereBetween('dt_recebimento', [
-            $periodoSelecionadoInicio,
-            $periodoSelecionadoFim
-        ])->get();
+        try {
 
-        $pdf = PDF::loadView('rendas/relatorios/renda-rel', ['link'=>$rendas, 'title'=>'Rendas']);
-        return $pdf->stream();
+            $usuarioLogado = self::getUsuario();
+            $periodo = self::getPeriodo();
+            $rendas = RendaFacade::getRendas($usuarioLogado, $periodo);  
+            $pdf = PDF::loadView('rendas/relatorios/renda-rel', ['link'=>$rendas, 'title'=>'Rendas']);
+            return $pdf->stream();
+
+        } catch (Exception $e) {
+            
+        }
     }
+
+
 
 }

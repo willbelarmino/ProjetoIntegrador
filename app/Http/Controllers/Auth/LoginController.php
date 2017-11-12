@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Model\Usuario;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Exception;
 use App\Exceptions\CustomException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Auth;
+use App\Http\Model\Usuario;
 
 class LoginController extends Controller
 {
@@ -30,7 +31,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = 'home';
 
     /**
      * Create a new controller instance.
@@ -39,25 +40,29 @@ class LoginController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest')->except('logout');
+        $this->middleware('guest')->except('sair');
     }
 
     public function index(){
-        return view('login');
+        return view('auth/login');
     }
 
     protected function doLogin(Request $request)
     {
         try {
             $param = $request->all();
-            $login_exist = DB::table('usuario')->where([
-                ['email', '=', $param['email']],
-                ['senha', '=', md5($param['senha'])]
-            ])->first();
+
+
+            $login_exist = Usuario::from('usuario AS u')
+                ->where([
+                    ['email', '=', $param['email']],
+                    ['senha', '=', md5($param['senha'])]
+                ])->first();
+
             if (empty($login_exist)) {
                 throw new CustomException('E-mail ou senha inválidos!');
             } else {
-
+                Auth::login($login_exist);
                 $request->session()->put('usuarioLogado', $login_exist);
                 $request->session()->put('periodoSelecionadoInicio', date('Ym01'));
                 $request->session()->put('periodoSelecionadoFim', date('Ymt'));
@@ -75,13 +80,14 @@ class LoginController extends Controller
         }catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  $e->getMessage()//'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
 
-    public function logout(Request $request){
-        $request->session()->flush();
-        return view('login');
+    protected function sair(Request $request){
+        Auth::logout();
+        $request->session()->invalidate();
+        return redirect('/');
     }
 }

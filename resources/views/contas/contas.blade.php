@@ -156,7 +156,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group label-floating">
+                            <div class="form-group label-floating" style="margin: -20px 0 0 0;">
                                 <label class="control-label">Nome</label>
                                 <input class="form-control" id="nome" name="nome" type="text" required="true" />
                             </div>
