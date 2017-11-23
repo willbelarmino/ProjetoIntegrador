@@ -107,6 +107,39 @@ class CategoriaFacade
         }
     }
 
+    public static function getExtratoCategoria($categoria, $periodo) {
+        try {           
+            
+            $parcelasPagas = DespesaFacade::getParcelasPagasPorCategoria($categoria, $periodo);  
+            $parcelasPendentes = DespesaFacade::getParcelasPendentesPorCategoria($categoria, $periodo);  
+
+            $extrato = [];
+
+            foreach($parcelasPagas as $key2 => $subarray2) {
+                $extrato['data'][] = array (
+                      0 => date_format(date_create($parcelasPagas[$key2]->dt_pagamento),"d/m/Y"), 
+                      1 => $parcelasPagas[$key2]->parcelaPendente->despesa->nome, 
+                      2 => 'R$ '.number_format($parcelasPagas[$key2]->valor, 2, ',', '.'),
+                      3 => 'Pago'
+                ); 
+            } 
+
+            foreach($parcelasPendentes as $key => $subarray) {
+                $extrato['data'][] = array (
+                      0 => date_format(date_create($parcelasPagas[$key]->dt_pagamento),"d/m/Y"), 
+                      1 => $parcelasPagas[$key]->parcelaPendente->despesa->nome, 
+                      2 => 'R$ '.number_format($parcelasPagas[$key]->valor, 2, ',', '.'),
+                      3 => 'Pendente'
+                ); 
+            } 
+             
+            return $extrato;  
+              
+        } catch (Exception $e) {
+            throw new CustomException($e->getMessage());
+        }
+    }
+
 
 
 }

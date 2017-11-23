@@ -13,13 +13,22 @@
 
 
 Route::get('/', 'Auth\LoginController@index');
+Route::get('sair', 'Auth\LoginController@sair');
+Route::get('registro', 'Auth\RegisterController@index');
+Route::post('criar.cadastro', 'Auth\RegisterController@create');
+Route::post('autenticar.usuario', 'Auth\LoginController@doLogin');
+Route::get('autenticar.usuario', 'Auth\LoginController@doLogin');
 
+
+/*
 Route::group(['prefix'=>'acesso','where'=>['id'=>'[0-9]+']], function() {
     Route::get('sair', ['as'=>'sair', 'uses'=>'Auth\LoginController@sair']);
     Route::get('registro', ['as'=>'registro', 'uses'=>'Auth\RegisterController@index']);
     Route::post('criarCadastro', ['as'=>'criar.cadastro', 'uses'=>'Auth\RegisterController@create']);
     Route::post('entrar', ['as'=>'autenticar.usuario', 'uses'=>'Auth\LoginController@doLogin']);
 });
+
+*/
 
 Route::group(['prefix'=>'periodo','where'=>['id'=>'[0-9]+']], function() {
     Route::post('alterarPeriodo', ['as'=>'periodo.alteraMes', 'uses'=>'UtilsController@alterarPeriodoMes']);
@@ -31,11 +40,18 @@ Route::group(['prefix'=>'dashboard','where'=>['id'=>'[0-9]+']], function() {
     Route::post('home', ['as'=>'home', 'uses'=>'HomeController@index']);
 });
 
+Route::group(['prefix'=>'usuario','where'=>['id'=>'[0-9]+']], function() {
+    Route::get('minhaConta', ['as'=>'minha.conta', 'uses'=>'UsuarioController@index']);
+    Route::post('alterarDados', ['as'=>'alterar.dados', 'uses'=>'UsuarioController@edit']);
+});
+
 Route::group(['prefix'=>'categoria','where'=>['id'=>'[0-9]+']], function() {
     Route::get('categorias', ['as'=>'categorias', 'uses'=>'CategoriaController@index']);
     Route::post('criarCategoria', ['as'=>'criar.categoria', 'uses'=>'CategoriaController@create']);
     Route::post('alterarCategoria', ['as'=>'alterar.categoria', 'uses'=>'CategoriaController@edit']);
-    Route::post('deletarCategoria', ['as'=>'deletar.categoria', 'uses'=>'CategoriaController@delete']);
+    Route::post('deletarCategoria', ['as'=>'deletar.categoria', 'uses'=>'CategoriaController@delete']); 
+    Route::post('verExtratoCategoria', ['as'=>'view-extrato-categoria', 'uses'=>'CategoriaController@view']);
+    Route::get('verExtratoCategoria', ['as'=>'view-extrato-categoria', 'uses'=>'CategoriaController@view']); 
 });
 
 Route::group(['prefix'=>'conta','where'=>['id'=>'[0-9]+']], function() {
@@ -43,6 +59,9 @@ Route::group(['prefix'=>'conta','where'=>['id'=>'[0-9]+']], function() {
     Route::post('criarConta', ['as'=>'criar.conta', 'uses'=>'ContaController@create']);
     Route::post('alterarConta', ['as'=>'alterar.conta', 'uses'=>'ContaController@edit']);
     Route::post('deletarConta', ['as'=>'deletar.conta', 'uses'=>'ContaController@delete']);
+    Route::post('verExtrato', ['as'=>'extrato-conta', 'uses'=>'HomeController@visualizarExtratoConta']);
+    Route::get('verExtrato', ['as'=>'extrato-conta', 'uses'=>'HomeController@visualizarExtratoConta']);
+    Route::get('pdfViewExtrato', ['as'=>'relatorio.conta', 'uses'=>'HomeController@toPDF']);
 });
 
 Route::group(['prefix'=>'despesa','where'=>['id'=>'[0-9]+']], function() {

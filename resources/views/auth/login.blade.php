@@ -5,7 +5,7 @@
 @endsection
 
 @section('link')
-    <a href="{{route('registro')}}">
+    <a href="{{url('registro')}}">
         <i class="material-icons">person_add</i> Registrar
     </a>
 @endsection
@@ -93,7 +93,7 @@
                     var formData = new FormData($("#loginForm")[0]);
                     $.ajax({
                         type: "POST",
-                        url: '{{route('autenticar.usuario')}}',
+                        url: '{{url('autenticar.usuario')}}',
                         data: formData,
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                         dataType: 'json',
@@ -113,7 +113,7 @@
                         },
                         error: function (request, status, error) {
                             setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                            setTimeout(function(){ showErrorNotification(error); }, 2500);
+                            setTimeout(function(){ showErrorNotification(request+'|||'+error+'||'+status); }, 2500);
                         }
                     });
                 }

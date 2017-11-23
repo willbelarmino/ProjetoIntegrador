@@ -55,8 +55,8 @@ class LoginController extends Controller
 
             $login_exist = Usuario::from('usuario AS u')
                 ->where([
-                    ['email', '=', $param['email']],
-                    ['senha', '=', md5($param['senha'])]
+                    ['u.email', '=', $param['email']],
+                    ['u.senha', '=', md5($param['senha'])]
                 ])->first();
 
             if (empty($login_exist)) {

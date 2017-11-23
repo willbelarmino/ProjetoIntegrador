@@ -9,6 +9,7 @@
 namespace App\Http\Facade;
 
 use App\Http\Model\Categoria;
+use App\Http\Model\Conta;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Exception;
@@ -39,7 +40,7 @@ class ContaFacade
 
     public static function criarConta($nome, $tipo, $indicador, $file, $user) {
         try {
-           
+
             if (!empty($indicador) &&  $indicador=='on') {
                 $indicador = 'S';
             } else {
@@ -53,7 +54,7 @@ class ContaFacade
                 'dt_movimento' => date('Ymd'),
                 'id_usuario' => $user->id
             ]);
-            
+
             if (!empty($file)) {
                 $image = Image::make($file)->resize(128, 128)->encode('jpg')->stream();
                 $file_image_name = $new_conta->id.time().'.jpg';
@@ -64,7 +65,7 @@ class ContaFacade
             if (empty($new_conta)) {
                 throw new Exception();
             }
-              
+
         } catch (Exception $e) {
             throw new CustomException();
         }
@@ -108,6 +109,38 @@ class ContaFacade
             
         } catch (Exception $e) {
             throw new CustomException();
+        }
+    }
+
+
+    public static function getExtratoConta($conta, $periodo) {
+        try {
+           
+            $rendas = RendaFacade::getRendasPorConta($conta, $periodo);
+            $parcelasPagas = DespesaFacade::getParcelasPagasPorConta($conta, $periodo);            
+            $extrato = [];
+
+            
+            foreach($rendas as $key => $subarray) {                
+                $extrato['data'][] = array (
+                      0 => date_format(date_create($rendas[$key]->dt_recebimento),"d/m/Y"),
+                      1 => $rendas[$key]->nome, 
+                      2 => 'R$ '.number_format($rendas[$key]->valor, 2, ',', '.')
+                );                 
+            }           
+            
+            foreach($parcelasPagas as $key2 => $subarray2) {
+                $extrato['data'][] = array (
+                      0 => date_format(date_create($parcelasPagas[$key2]->dt_pagamento),"d/m/Y"), 
+                      1 => $parcelasPagas[$key2]->parcelaPendente->despesa->nome, 
+                      2 => 'R$ '.number_format($parcelasPagas[$key2]->valor, 2, ',', '.')
+                ); 
+            } 
+             
+            return $extrato;  
+              
+        } catch (Exception $e) {
+            throw new CustomException($e->getMessage());
         }
     }
 

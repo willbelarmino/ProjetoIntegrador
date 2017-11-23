@@ -11,7 +11,7 @@
                 <div class="header text-center">
                     <h3 class="title">Error</h3>
                     <p class="category">
-                        Página indisponível no momento. Favor tente novamente mais tarde.
+                        Menssagem: {{ $message }}
                     </p>
                 </div>
             </div>

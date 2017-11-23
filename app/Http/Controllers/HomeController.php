@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 use App\Http\Facade\RendaFacade;
 use App\Http\Facade\DespesaFacade;
+use App\Http\Facade\ContaFacade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Exception;
@@ -60,6 +61,8 @@ class HomeController extends Controller
 
             $saldoEstimado =  UtilsController::getSaldoEstimado($usuarioLogado, $periodo);
 
+            $contas = ContaFacade::getContas($usuarioLogado);
+
             return view('home',
                 ['menuView'=>'dashboard',
                     'page'=>'Dashboard',
@@ -68,6 +71,7 @@ class HomeController extends Controller
                     'totalDespesaPaga'=>$totalDespesaPaga,
                     'saldoAtual'=>$saldoAtual,
                     'saldoEstimado'=>$saldoEstimado,
+                    'contas'=>$contas,
                     'nomeMes'=>$periodo->mes,
                     'resize'=>$periodo->resize,
                     'usuario'=>$usuarioLogado
@@ -82,4 +86,46 @@ class HomeController extends Controller
         }
 
     }
+
+    public function visualizarExtratoConta(Request $request) {
+        try {
+
+            $param = $request->all();
+
+            $periodo = self::getPeriodo();
+
+            $extrato = ContaFacade::getExtratoConta($param['id'], $periodo);
+
+            return response()->json($extrato);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'data' => 'error'
+            ]);
+        }
+    }
+
+
+    protected function toPDF(Request $request){
+        try {
+
+            $usuarioLogado = self::getUsuario();
+            $periodo = self::getPeriodo();
+            
+
+            $pdf = PDF::loadView('relatorios/extratoConta', ['title'=>'Extrato']);
+            return $pdf->stream();
+
+        } catch (Exception $e) {
+
+        }
+    }
+
+
+
+
+
+
+
+
 }

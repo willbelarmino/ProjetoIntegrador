@@ -36,6 +36,10 @@
   }
 }
 
+.nav>li>a {
+   padding: 3px 15px !important;
+}
+
 .title-conta {
   color: #3e3b3b;
   font-weight: bold;
@@ -10254,7 +10258,7 @@ footer .btn {
 }
 .card .card-content .category {
   margin-bottom: 0;
-  font-size: 11px;
+  font-size: 10px;
 }
 .card .card-actions {
   position: absolute;

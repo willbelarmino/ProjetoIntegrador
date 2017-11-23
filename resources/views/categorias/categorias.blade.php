@@ -43,6 +43,7 @@
                                                 <td class="td-actions text-right">
                                                     <button type="button" rel="tooltip" class="btn btn-info"
                                                             onclick="visualizar(
+                                                                '{{$categoria->id}}',
                                                                 '{{$categoria->nome}}',
                                                                 '{{ 'R$ '.number_format($categoria->limite, 2, ',', '.')}}'
                                                             );">
@@ -178,42 +179,103 @@
 
 
     <!-- MODAL VIEW -->
-    <div class="modal fade" tabindex="-1" role="dialog" id="modal-panel-view">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
+    <div class="modal fade" id="modal-panel-view" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="left: 16% !important;">
                 <div class="card">
-                    <form class="form-horizontal">
-                        <div class="card-header card-header-text" data-background-color="purple">
-                            <h4 class="card-title" id="view-categoria-nome">Stock Center</h4>
+                    <div class="card-header card-header-icon" data-background-color="purple">
+                        <i class="material-icons">assignment</i>
+                    </div>
+                    <div class="card-content">
+                        <h4 class="card-title" id="view-categoria-nome"></h4>
+                        <div class="toolbar">
+                            <!--        Here you can write extra buttons/actions for the toolbar              -->
+                            <span class="btn btn-primary btn-xs">
+                                <p class="form-control-static" id="view-categoria-limite">Limite: R$ 187,45</p>
+                            </span>
                         </div>
-                        <div class="card-content">
-                            <div class="row">
-                                <label class="col-sm-3 label-on-left">Limite</label>
-                                <div class="col-sm-9">
-                                    <div class="form-group">
-                                        <p class="form-control-static" id="view-categoria-limite">R$ 187,45</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="text-center">
-                                <button type="button" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal" data-dismiss="modal">Ok</button>
-                            </div>
+                        <div class="table-responsive">                            
+                            <table id="extratoCategoriatables" class="table table-striped table-no-bordered table-hover" cellspacing="0" width="100%" style="width:100%">
+                                <thead class="text-primary">
+                                    <tr>
+                                        <th>Data de movimento</th>
+                                        <th>Descrição</th>
+                                        <th>Valor</th>
+                                        <th>Status</th>                                           
+                                    </tr>
+                                </thead>                                    
+                            </table>
                         </div>
-                    </form>
+                        <div class="text-center">
+                            <button type="button" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal" data-dismiss="modal">Ok</button>
+                        </div>
+                    </div>
+                    <!-- end content-->
                 </div>
             </div>
         </div>
     </div>
-    <!-- /MODAL -->
+    <!-- /MODAL VIEW -->
+
 @endsection
 
 @section('scripts')
     <script type="text/javascript">
 
-        function visualizar(nome,limite) {
+        function visualizar(id,nome,limite) {
             $("#view-categoria-nome").html(nome);
-            $("#view-categoria-limite").html(limite);
-            $("#modal-panel-view").modal("toggle");
+            $("#view-categoria-limite").html("Limite: "+limite); 
+            gerarModalView(id);           
+        }
+
+        function gerarModalView(id) {           
+
+            $('#extratoCategoriatables').DataTable({
+                ajax: {
+                    url: '{{ route('view-extrato-categoria') }}',
+                    data: { id : id },
+                    cache: true,
+                    beforeSend: function () {
+                        setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
+                    },
+                    dataSrc: function ( json ) {
+                        setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                        if (json.data!='error') {
+                            setTimeout(function(){ $("#modal-panel-view").modal("toggle"); }, 2500);
+                            return json.data;
+                        } else {
+                            setTimeout(function(){ showErrorNotification('Erro ao visualizar categoria. Tente novamente mais tarde.'); }, 2500);
+                        }
+                    },
+                    error: function (request, status, error) {
+                        setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                        setTimeout(function(){ showErrorNotification(error); }, 2500);
+                    },
+                },                              
+                bPaginate: true,
+                bLengthChange: false,
+                bFilter: false,
+                bInfo: true,   
+                destroy: true,            
+                iDisplayLength: 10, 
+                searching: false,           
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Filtrar",
+                    lengthMenu: "Exibindo _MENU_ registros por página",
+                    zeroRecords: "Nenhum registro encontrado",
+                    info: "Visualizando página _PAGE_ de _PAGES_",
+                    infoEmpty: "Nenhum registro encontrado",
+                    infoFiltered: "(filtered from _MAX_ total records)",
+                    paginate: {
+                        "first":      "Primeiro",
+                        "last":       "Último",
+                        "next":       "Próximo",
+                        "previous":   "Anterior"
+                    }
+                }              
+            }); 
+
         }
 
         function deletar(id) {

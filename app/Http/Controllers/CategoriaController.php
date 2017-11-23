@@ -167,4 +167,22 @@ class CategoriaController extends Controller
         }
     }
 
+    public function view(Request $request) {
+        try {
+
+            $param = $request->all();
+
+            $periodo = self::getPeriodo();
+
+            $extrato = CategoriaFacade::getExtratoCategoria($param['id'], $periodo);
+
+            return response()->json($extrato);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'data' => 'error'
+            ]);
+        }
+    }
+
 }

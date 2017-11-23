@@ -37,6 +37,22 @@ class RendaFacade
         }
     }
 
+    public static function getRendasPorConta($conta, $periodo) {
+        try {
+
+            $rendas = Renda::with(['conta' => function ($query) use ($conta) {
+                $query->where('conta.id', '=', $conta);
+            }])->whereBetween('dt_recebimento', [
+                $periodo->periodoSelecionadoInicio,
+                $periodo->periodoSelecionadoFim
+            ])->get();
+
+            return $rendas;
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
     public static function criarRenda($nome, $valor, $rec, $cont) {
         try {
            

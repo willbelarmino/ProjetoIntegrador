@@ -69,30 +69,30 @@ class ContaController extends Controller
     protected function create(Request $request){
         try {
 
-            $usuarioLogado = $request->session()->get('usuarioLogado');
+            $usuarioLogado = self::getUsuario();
             $param = $request->all();
             $file = $request->file('image');
 
             try {
-                
-                ContaFacade::criarConta($param['nome'], $param['tipo'], $param['indicador'], $file, $usuarioLogado);     
+
+                ContaFacade::criarConta($param['nome'], $param['tipo'], $param['indicador'], $file, $usuarioLogado);
 
                 return response()->json([
                     'status' => 'success',
-                    'message' =>  'Conta cadastrada com sucesso.',
+                    'message' =>  $param['indicador'] //'Conta cadastrada com sucesso.',
                 ]);
 
             } catch (CustomException $ex) {
                 return response()->json([
                     'status' => 'error',
-                    'message' =>  'Ops. Erro ao cadastrar conta. Tente novamente mais tarde.'
+                    'message' =>  'CustomEX: '.$ex->getMessage() //'Ops. Erro ao cadastrar conta. Tente novamente mais tarde.'
                 ]);
             }  
        
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  'EX: '.$ex->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }

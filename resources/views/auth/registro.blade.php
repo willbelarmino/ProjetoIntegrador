@@ -278,7 +278,7 @@
                     var formData = new FormData($("#cadastroForm")[0]);
                     $.ajax({
                         type: "POST",
-                        url: '{{route('criar.cadastro')}}',
+                        url: '{{url('criar.cadastro')}}',
                         data: formData,
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                         dataType: 'json',

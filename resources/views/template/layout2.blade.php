@@ -54,10 +54,10 @@
                     </a>
                     <div class="collapse" id="collapseExample">
                         <ul class="nav">
-                            <li>
-                                <a href="#">Minha conta</a>
+                            <li class="@if ($menuView == 'minhaconta') active @endif">
+                                <a href="{{route('minha.conta')}}">Minha conta</a>
                             </li>
-                            <li>
+                            <li class="@if ($menuView == 'config') active @endif">
                                 <a href="#">Configurações</a>
                             </li>
                         </ul>
@@ -132,7 +132,7 @@
                     <ul class="nav navbar-nav navbar-right">
 
                         <li>
-                            <a href="{{route('sair')}}"  title="Sair">
+                            <a href="{{url('sair')}}"  title="Sair">
                                 <i class="material-icons">exit_to_app</i>
                                 <p class="hidden-lg hidden-md">Profile</p>
                             </a>
@@ -154,6 +154,7 @@
 
             @yield('content')
 
+
         </div>
         <footer class="footer">
             <div class="container-fluid">
@@ -166,7 +167,9 @@
                 </p>
             </div>
         </footer>
-    </div>
+
+         
+    </div>   
 </div>
 
 @yield('modal')
