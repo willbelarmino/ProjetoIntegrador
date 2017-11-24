@@ -20,7 +20,7 @@
                                             <div class="col-md-12">
                                                 <div class="form-group label-floating">
                                                     <label class="control-label">E-mail</label>
-                                                    <input type="text" class="form-control" value="admin@admin.com" >
+                                                    <input type="text" class="form-control" value="{{ $usuario->email }}" >
                                                 </div>
                                             </div> 
                                         </div>  
@@ -28,7 +28,7 @@
                                             <div class="col-md-12">
                                                 <div class="form-group label-floating">
                                                     <label class="control-label">Nome</label>
-                                                    <input type="text" class="form-control" value="Aministrador" disabled>
+                                                    <input type="text" class="form-control" value="{{$usuario->nome}}" disabled>
                                                 </div>
                                             </div>
                                         </div>
@@ -96,6 +96,7 @@
                                 </div>
                             </div>
 
+                            <input type="hidden" id="id" name="id" value="{{ $usuario->id }}">
                             <div class="input-group space-error">
                                 <span class="input-group-addon">
                                     <i class="material-icons">face</i>

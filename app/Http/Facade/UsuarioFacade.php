@@ -23,6 +23,27 @@ use App\Http\Model\ParcelaPaga;
 class UsuarioFacade
 {
 
+    public static function alterarDadosComImagem($id, $nome, $senha, $file) {
+        try {
+
+            $image = Image::make($file)->resize(128, 128)->encode('jpg')->stream();
+            $file_image_name_old = $imagem;
+            $file_image_name = $conta.time().'.jpg';
+            Storage::disk('local-conta')->delete($file_image_name_old);
+            Storage::disk('local-conta')->put($file_image_name,$image->__toString());
+
+            DB::table('usuario')
+                ->where('id', $id)
+                ->update([
+                    'nome' => $nome,
+                    'senha' => $senha,
+                    'image' => $file_image_name
+            ]);
+
+        } catch (Exception $ex) {
+            return null;
+        }
+    }
 
 
 }

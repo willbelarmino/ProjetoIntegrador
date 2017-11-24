@@ -100,7 +100,13 @@ class UsuarioController extends Controller
 
             try {
 
-                UsuarioFacade::alterarDados($param['id'], null, $param['nome']);
+                $file = $request->file('avatar');
+
+                if (!empty($file)) {
+                    UsuarioFacade::alterarDadosComImagem($param['id'], $param['nome'], $param['senha'], $file);
+                } else {
+                    UsuarioFacade::alterarDadosSemImagem($param['id'], $param['nome'], $param['senha']);
+                }
 
                 return response()->json([
                     'status' => 'success',
