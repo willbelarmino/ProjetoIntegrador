@@ -133,8 +133,8 @@ class ContaFacade
         try {
            
             $rendas = RendaFacade::getRendasPorConta($conta, $periodo);
-            $parcelasPagas = DespesaFacade::getParcelasPagasPorConta($conta, $periodo);            
-            $extrato = [];
+            $parcelasPagas = DespesaFacade::getParcelasPagasPorConta($conta, $periodo);
+            $extrato['data'] = [];
 
             
             foreach($rendas as $key => $subarray) {                

@@ -290,6 +290,7 @@
     $(document).ready(function() {
         $(".money-format").maskMoney();
 
+        /*
         $('#datatables').DataTable({
             "pagingType": "full_numbers",
             "deferRender": true,
@@ -299,6 +300,7 @@
                 [10, 25, 50, "All"]
             ],
             responsive: true,
+            iDisplayLength: 10,
             language: {
                 search: "_INPUT_",
                 searchPlaceholder: "Filtrar",
@@ -315,7 +317,7 @@
                 }
             },
         });
-
+        */
 
         $('.datepicker').datetimepicker({
             format: 'DD/MM/YYYY',

@@ -18,6 +18,7 @@ Route::get('registro', 'Auth\RegisterController@index');
 Route::post('criar.cadastro', 'Auth\RegisterController@create');
 Route::post('autenticar.usuario', 'Auth\LoginController@doLogin');
 Route::get('autenticar.usuario', 'Auth\LoginController@doLogin');
+Route::get('page.error', 'UtilsController@error');
 
 
 /*
@@ -93,6 +94,7 @@ Route::group(['prefix'=>'renda','where'=>['id'=>'[0-9]+']], function() {
     Route::post('criarRenda', ['as'=>'criar.renda', 'uses'=>'RendaController@create']);
     Route::post('alterarRenda', ['as'=>'alterar.renda', 'uses'=>'RendaController@edit']);
     Route::post('deletarRenda', ['as'=>'deletar.renda', 'uses'=>'RendaController@delete']);
+    Route::get('viewRendas', ['as'=>'popula.rendas', 'uses'=>'RendaController@populaTabela']);
 });
 
 Auth::routes();

@@ -50,16 +50,12 @@ class RendaController extends Controller
             $periodo = self::getPeriodo();
             if ($periodo == null || $usuarioLogado == null) {
                 throw new Exception();
-            }                        
-
-            $rendas = RendaFacade::getRendas($usuarioLogado, $periodo);  
-
+            }
             $contas = ContaFacade::getContas($usuarioLogado);
 
             return view('rendas/rendas',
                 ['menuView'=>'rendas',
-                    'page'=>'Rendas',                
-                    'rendas'=>$rendas,
+                    'page'=>'Rendas',
                     'contas'=>$contas,
                     'nomeMes'=>$periodo->mes,
                     'resize'=>$periodo->resize,
@@ -70,6 +66,23 @@ class RendaController extends Controller
             return view ('rendas/error');
         }
 
+    }
+
+    protected function populaTabela(Request $request) {
+        try {
+            $usuarioLogado = self::getUsuario();
+            $periodo = self::getPeriodo();
+            if ($periodo == null || $usuarioLogado == null) {
+                throw new Exception();
+            }
+
+            $tabela = RendaFacade::populaRendas($usuarioLogado, $periodo);
+
+            return response()->json($tabela);
+
+        } catch (Exception $ex) {
+            return view ('rendas/error');
+        }
     }
 
  

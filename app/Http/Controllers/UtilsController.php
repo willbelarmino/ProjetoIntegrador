@@ -175,6 +175,16 @@ class UtilsController extends Controller
         } catch (Exception $e) {
             throw new CustomException();
         }
-    } 
+    }
+
+    public function error(Request $request) {
+        $usuarioLogado = self::getUsuarioLogado();
+        return view('error',
+            ['menuView'=>'dashboard',
+                'page'=>'Dashboard',
+                'usuario'=>$usuarioLogado,
+                'message' => 'Erro!'
+            ]);
+    }
 
 }

@@ -30,46 +30,7 @@
                                             <th class="disabled-sorting text-right"></th>
                                         </tr>
                                         </thead>
-                                        <tbody>
 
-                                        @foreach ($rendas as $renda)
-                                            <tr>
-                                                <td>{{ $renda->nome }}</td>
-
-                                                <td>{{ date('d/m/Y', strtotime($renda->dt_recebimento)) }}</td>
-
-                                                <td>{{ 'R$ '.number_format($renda->valor, 2, ',', '.') }}</td>
-
-                                                <td>{{ $renda->conta->nome }}</td>
-
-                                                <td class="td-actions text-right">
-                                                    <button type="button" rel="tooltip" class="btn btn-info"
-                                                            onclick="visualizar(
-                                                                    '{{$renda->nome}}',
-                                                                    '{{ 'R$ '.number_format($renda->valor, 2, ',', '.')}}',
-                                                                    '{{ date('d/m/Y', strtotime($renda->dt_recebimento)) }}',
-                                                                    '{{$renda->conta->nome}}'
-                                                            )">
-                                                        <i class="material-icons">assignment</i>
-                                                    </button>
-                                                    <button type="button" rel="tooltip" class="btn btn-success"
-                                                            onclick="alterar(
-                                                                    '{{$renda->id}}',
-                                                                    '{{$renda->nome}}',
-                                                                    '{{ 'R$ '.number_format($renda->valor, 2, ',', '.')}}',
-                                                                    '{{ date('d/m/Y', strtotime($renda->dt_recebimento)) }}',
-                                                                    '{{$renda->id_conta}}',
-                                                                    '{{$renda->conta->nome}}'
-                                                            );">
-                                                        <i class="material-icons">edit</i>
-                                                    </button>
-                                                    <button type="button" rel="tooltip" class="btn btn-danger" onclick="deletar({{$renda->id}});">
-                                                        <i class="material-icons">close</i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                        </tbody>
                                     </table>
                                         <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
                                             <i class="material-icons">add</i> ADICIONAR
@@ -290,7 +251,7 @@
                 success: function (data) {
                     setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
                     if (data.status == "success") {
-                        setTimeout(function(){ loadTable(); }, 2000);
+                        setTimeout(function(){ carregaDataTables(); }, 2000);
                         setTimeout(function(){ showSucessNotification(data.message); }, 2500);
                         console.log(data.message);
                     } else {
@@ -333,35 +294,51 @@
             $("#modal-panel").modal("toggle");
         }
 
-        function loadTable() {
-            $('.content-table-view').load("{{route('rendas')}} .content-table-view2", function() {
-                $('#datatables').DataTable({
-                    "pagingType": "full_numbers",
-                    "lengthMenu": [
-                        [10, 25, 50, -1],
-                        [10, 25, 50, "All"]
-                    ],
-                    responsive: true,
-                    language: {
-                        search: "_INPUT_",
-                        searchPlaceholder: "Filtrar",
-                        lengthMenu: "Exibindo _MENU_ registros por página",
-                        zeroRecords: "Nenhum registro encontrado",
-                        info: "Visualizando página _PAGE_ de _PAGES_",
-                        infoEmpty: "Nenhum registro encontrado",
-                        infoFiltered: "(filtered from _MAX_ total records)",
-                        paginate: {
-                            "first":      "Primeiro",
-                            "last":       "Último",
-                            "next":       "Próximo",
-                            "previous":   "Anterior"
+        function carregaDataTables() {
+            $('#datatables').DataTable({
+                "pagingType": "full_numbers",
+                "lengthMenu": [
+                    [10, 25, 50, -1],
+                    [10, 25, 50, "All"]
+                ],
+                "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+                    $('td:eq(4)', nRow).addClass('td-actions text-right');
+                    return nRow;
+                },
+                ajax: {
+                    url: '{{ route('popula.rendas') }}',
+                    cache: false,
+                    dataSrc: function ( json ) {
+                        if (json.data!='error') {
+                            return json.data;
+                        } else {
+                            window.location.href = "{{url('page.error')}}";
                         }
+                    },
+                },
+                responsive: true,
+                destroy: true,
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Filtrar",
+                    lengthMenu: "Exibindo _MENU_ registros por página",
+                    zeroRecords: "Nenhum registro encontrado",
+                    info: "Visualizando página _PAGE_ de _PAGES_",
+                    infoEmpty: "Nenhum registro encontrado",
+                    infoFiltered: "(filtered from _MAX_ total records)",
+                    paginate: {
+                        "first":      "Primeiro",
+                        "last":       "Último",
+                        "next":       "Próximo",
+                        "previous":   "Anterior"
                     }
-                });
+                }
             });
         }
 
-        $(document).ready(function() {       
+        $(document).ready(function() {
+
+            carregaDataTables();
 
             /* Limpar formulário */
             $("#modal-panel").on("hide.bs.modal", function () {
@@ -439,7 +416,7 @@
                             success: function (data) {
                                 setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
                                 if (data.status == "success") {
-                                    setTimeout(function(){ loadTable(); }, 2000);
+                                    setTimeout(function(){ carregaDataTables(); }, 2000);
                                     setTimeout(function(){ showSucessNotification(data.message); }, 2500);
                                 } else {
                                     setTimeout(function(){ showErrorNotification(data.message); }, 2500);
@@ -475,7 +452,7 @@
                         success: function (data) {
                             setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
                             if (data.status == "success") {
-                                setTimeout(function(){ loadTable(); }, 2000);
+                                setTimeout(function(){ carregaDataTables(); }, 2000);
                                 setTimeout(function(){ showSucessNotification(data.message); }, 2500);
                             } else {
                                 setTimeout(function(){ showErrorNotification(data.message); }, 2500);

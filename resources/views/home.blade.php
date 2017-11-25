@@ -166,8 +166,8 @@
                             <table id="extratotables" class="table table-striped table-no-bordered table-hover" cellspacing="0" width="100%" style="width:100%">
                                 <thead class="text-primary">
                                     <tr>
-                                        <th class="disabled-sorting">Data de movimento</th>
-                                        <th class="disabled-sorting">Descrição</th>
+                                        <th class="disabled-sorting">Data</th>
+                                        <th class="disabled-sorting">Lançamento</th>
                                         <th class="disabled-sorting">Valor</th>                                           
                                     </tr>
                                 </thead>                                    
@@ -234,7 +234,7 @@
                 ajax: {
                     url: '{{ route('extrato-conta') }}',
                     data: { id : id },
-                    cache: true,
+                    cache: false,
                     beforeSend: function () {
                         setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
                     },

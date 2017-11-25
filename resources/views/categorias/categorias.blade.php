@@ -341,6 +341,8 @@
                         [10, 25, 50, "All"]
                     ],
                     responsive: true,
+                    iDisplayLength: 10,
+                    destroy: true,
                     language: {
                         search: "_INPUT_",
                         searchPlaceholder: "Filtrar",
@@ -355,7 +357,7 @@
                             "next":       "Próximo",
                             "previous":   "Anterior"
                         }
-                    }
+                    },
                 });
             });
         }
