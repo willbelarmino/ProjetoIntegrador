@@ -72,27 +72,29 @@ class ContaController extends Controller
             $usuarioLogado = self::getUsuario();
             $param = $request->all();
             $file = $request->file('image');
+            if ($param['exibir']=="false") {
+                $indicador = 'N';
+            } else {
+                $indicador = 'S';
+            }         
 
-            try {
+            if (!empty($file)) {
+                ContaFacade::criarContaComImagem($param['nome'], $param['tipo'], $indicador, $file, $usuarioLogado);
+            } else {
+                ContaFacade::criarContaSemImagem($param['nome'], $param['tipo'], $indicador, $usuarioLogado);
+            }
 
-                ContaFacade::criarConta($param['nome'], $param['tipo'], $param['indicador'], $file, $usuarioLogado);
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Conta cadastrada com sucesso.',
+            ]);
 
-                return response()->json([
-                    'status' => 'success',
-                    'message' =>  $param['indicador'] //'Conta cadastrada com sucesso.',
-                ]);
-
-            } catch (CustomException $ex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' =>  'CustomEX: '.$ex->getMessage() //'Ops. Erro ao cadastrar conta. Tente novamente mais tarde.'
-                ]);
-            }  
+          
        
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  'EX: '.$ex->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  $ex->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -100,27 +102,19 @@ class ContaController extends Controller
     protected function delete(Request $request){
         try {
 
-            $param = $request->all();
-
-            try {
+            $param = $request->all();          
                 
-                ContaFacade::deletarConta($param['id']);     
+            ContaFacade::deletarConta($param['id']);     
 
-                return response()->json([
-                    'status' => 'success',
-                    'message' =>  'Conta removida com sucesso.',
-                ]);
-
-            } catch (CustomException $ex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' =>  'Ops. Erro ao remover conta. Tente novamente mais tarde.'
-                ]);
-            }  
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Conta removida com sucesso.',
+            ]);
+           
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => $ex->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -130,26 +124,40 @@ class ContaController extends Controller
             $param = $request->all();
             $file = $request->file('conta-view');
 
-            try {
-                
-                ContaFacade::editarConta($param['id'], $param['nome'], $param['indicador'], $param['imagem'], $param['tipo'], $file);     
+            if ($param['exibir']=="false") {
+                $indicador = 'N';
+            } else {
+                $indicador = 'S';
+            }            
 
-                return response()->json([
-                    'status' => 'success',
-                    'message' =>  'Conta alterada com sucesso.',
-                ]);
+            if (!empty($file)) {
+                ContaFacade::editarContaComImagem(
+                    $param['id'], 
+                    $param['nome'], 
+                    $indicador, 
+                    $param['imagem'], 
+                    $param['tipo'], 
+                    $file
+                );   
+            } else {
+                  
+                ContaFacade::editarContaSemImagem(
+                    $param['id'], 
+                    $param['nome'], 
+                    $indicador, 
+                    $param['tipo']
+                );  
+            }                                 
 
-            } catch (CustomException $ex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' =>  'Ops. Erro ao alterar conta. Tente novamente mais tarde.'
-                ]);
-            }  
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Conta alterada com sucesso.',
+            ]);         
         
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  $ex->getMessage() //'Ops. Erro ao alterar conta. Tente novamente mais tarde.'
             ]);
         }
 

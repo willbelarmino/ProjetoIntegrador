@@ -117,6 +117,27 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="row">
+                    <div class="col-md-5">
+                                <div class="card">
+                                    <div class="card-header card-header-icon" data-background-color="red">
+                                        <i class="material-icons">pie_chart</i>
+                                    </div>
+                                    <div class="card-content">
+                                        <h4 class="card-title">Despesas / Categoria</h4>
+                                    </div>
+                                    <div id="chartPreferences" class="ct-chart"></div>
+                                    <div class="card-footer">
+                                        <h6>Legenda</h6>
+                                        <i class="fa fa-circle text-info"></i> Apple
+                                        <i class="fa fa-circle text-warning"></i> Samsung
+                                        <i class="fa fa-circle text-danger"></i> Windows Phone
+                                    </div>
+                                </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>    
@@ -261,9 +282,20 @@
 
        $(document).ready(function() {
 
-            
+            /*  **************** Public Preferences - Pie Chart ******************** */
 
-        });
+            var dataPreferences = {
+                labels: ['62%','22%','10%','6%'],
+                series: [62, 22, 10, 6]
+            };
+
+            var optionsPreferences = {
+                height: '230px'
+            };
+
+            Chartist.Pie('#chartPreferences', dataPreferences, optionsPreferences);
+
+            });
 
     </script>
 @endsection

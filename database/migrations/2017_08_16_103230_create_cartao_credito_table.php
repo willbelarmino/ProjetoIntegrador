@@ -16,8 +16,8 @@ class CreateCartaoCreditoTable extends Migration {
 		{
 			$table->bigInteger('id', true);
 			$table->decimal('limite');
-			$table->dateTime('dt_fechamento');
-			$table->dateTime('dt_vencimento');
+			$table->integer('dt_fechamento');
+			$table->integer('dt_vencimento');
 			$table->bigInteger('id_conta')->index('fk_Cartao_Credito_Conta1_idx');
 			$table->boolean('cartao_independente');
 		});

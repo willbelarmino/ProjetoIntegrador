@@ -44,7 +44,7 @@
                                             <button type="button" style="margin: 3px 1px; width: 145px !important;" class="btn btn-primary btn-fill btn-sm button-modal" data-toggle="modal" data-target="#modal-panel">Alterar dados</button>
                                         </div>
                                         <div class="text-center">
-                                            <button type="button" style="margin: 3px 1px; width: 145px !important;" class="btn btn-primary btn-fill btn-sm button-modal">Encerar cadastro</button>
+                                            <button type="button" style="margin: 3px 1px; width: 145px !important;" class="btn btn-primary btn-fill btn-sm button-modal" data-toggle="modal" data-target="#modal-alert">Encerar cadastro</button>
                                         </div>
                                     </form>
                                 </div>
@@ -64,6 +64,33 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL ALERT -->
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal-alert">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="card">
+                    <form id="formEncerrar">
+                        <div class="card-header card-header-icon" data-background-color="purple">
+                            <i class="mdi mdi-credit-card-multiple"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="card-title">Aviso</h4>
+                            <p>Está ação é irreversível!. Deseja realmente encerrar seu cadastro?</p>
+
+                            <div class="text-center">
+                                <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Sim</button>
+                            </div>
+                            <div class="text-center">
+                                <button type="button" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal" data-dismiss="modal">Não</button>
+                            </div>
+                        </div>
+                    </form>                 
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /MODAL ALERT -->
 
     <!-- MODAL -->
     <div class="modal fade" tabindex="-1" role="dialog" id="modal-panel">
@@ -265,6 +292,43 @@
                         }
                     });
                 }
+                e.preventDefault(); // avoid to execute the actual submit of the form.
+            });
+
+
+            /* Encerramento de cadastro */
+
+            $( "#formEncerrar" ).submit(function( e ) {               
+                    
+                    $.ajax({
+                        type: "POST",
+                        url: '{{route('encerrar.cadastro')}}',
+                        data: formData,
+                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                        dataType: 'json',
+                        processData: false,
+                        contentType: false,
+                        cache: false,
+                        beforeSend: function () {
+                            $("#modal-panel").modal('toggle');
+                            setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
+
+                        },
+                        success: function (data) {
+                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                            if (data.status == "success") {
+                                setTimeout(function(){ loadTable(); }, 2000);
+                                setTimeout(function(){ showSucessNotification(data.message); }, 2500);
+                            } else {
+                                setTimeout(function(){ showErrorNotification(data.message); }, 2500);
+                            }
+                        },
+                        error: function (request, status, error) {
+                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                            setTimeout(function(){ showErrorNotification(error); }, 2500);
+                        }
+                    });
+                
                 e.preventDefault(); // avoid to execute the actual submit of the form.
             });
            

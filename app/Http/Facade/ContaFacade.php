@@ -20,6 +20,8 @@ use Barryvdh\Snappy;
 use Session;
 use App\Http\Model\ParcelaPendente;
 use App\Http\Model\ParcelaPaga;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
 
 class ContaFacade
 {
@@ -38,14 +40,30 @@ class ContaFacade
         }
     }
 
-    public static function criarConta($nome, $tipo, $indicador, $file, $user) {
-        try {
+    public static function criarContaComImagem($nome, $tipo, $indicador, $file, $user) {
+        try {    
 
-            if (!empty($indicador) &&  $indicador=='on') {
-                $indicador = 'S';
-            } else {
-                $indicador = 'N';
-            }
+            $new_conta = Conta::create([
+                'nome' => $nome,
+                'tipo' => $tipo,
+                'exibir_indicador' => $indicador,
+                'dt_movimento' => date('Ymd'),
+                'id_usuario' => $user->id                
+            ]);          
+
+            
+            $image = Image::make($file)->resize(128, 128)->encode('jpg')->stream();
+            $file_image_name = $new_conta->id.time().'.jpg';
+            Storage::disk('local-conta')->put($file_image_name,$image->__toString());            
+            DB::table('conta')->where('id', $new_conta->id)->update(['image' => $file_image_name]);            
+            
+        } catch (Exception $e) {
+            throw new Exception("Erro Facade: ".$e->getMessage());
+        }
+    }
+
+    public static function criarContaSemImagem($nome, $tipo, $indicador, $user) {
+        try {           
 
             $new_conta = Conta::create([
                 'nome' => $nome,
@@ -54,20 +72,10 @@ class ContaFacade
                 'dt_movimento' => date('Ymd'),
                 'id_usuario' => $user->id
             ]);
-
-            if (!empty($file)) {
-                $image = Image::make($file)->resize(128, 128)->encode('jpg')->stream();
-                $file_image_name = $new_conta->id.time().'.jpg';
-                Storage::disk('local-conta')->put($file_image_name,$image->__toString());
-                DB::table('conta')->where('id', $new_conta->id)->update(['image' => $file_image_name]);
-            }
-
-            if (empty($new_conta)) {
-                throw new Exception();
-            }
+         
 
         } catch (Exception $e) {
-            throw new CustomException();
+            throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 
@@ -77,26 +85,18 @@ class ContaFacade
             DB::table('conta')->where('id',$conta)->delete(); 
               
         } catch (Exception $e) {
-            throw new CustomException();
+            throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 
-    public static function editarConta($conta, $nome, $indicador, $imagem, $tipo, $file) {
-        try {
-           
-            if (!empty($indicador) &&  $indicador=='on') {
-                $indicador = 'S';
-            } else {
-                $indicador = 'N';
-            }           
+    public static function editarContaComImagem($conta, $nome, $indicador, $imagem, $tipo, $file) {
+        try {   
             
-            if (!empty($file)) {
-                $image = Image::make($file)->resize(128, 128)->encode('jpg')->stream();
-                $file_image_name_old = $imagem;
-                $file_image_name = $conta.time().'.jpg';
-                Storage::disk('local-conta')->delete($file_image_name_old);
-                Storage::disk('local-conta')->put($file_image_name,$image->__toString());
-            }
+            $image = Image::make($file)->resize(128, 128)->encode('jpg')->stream();
+            $file_image_name_old = $imagem;
+            $file_image_name = $conta.time().'.jpg';
+            Storage::disk('local-conta')->delete($file_image_name_old);
+            Storage::disk('local-conta')->put($file_image_name,$image->__toString());
 
             DB::table('conta')
                 ->where('id', $conta)
@@ -108,7 +108,23 @@ class ContaFacade
             ]);
             
         } catch (Exception $e) {
-            throw new CustomException();
+            throw new Exception("Erro Facade: ".$e->getMessage());
+        }
+    }
+
+    public static function editarContaSemImagem($conta, $nome, $indicador, $tipo) {
+        try {  
+
+            DB::table('conta')
+                ->where('id', $conta)
+                ->update([
+                    'nome' => $nome,
+                    'tipo' => $tipo,
+                    'exibir_indicador' => $indicador,                    
+            ]);
+            
+        } catch (Exception $e) {
+            throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 
@@ -140,7 +156,7 @@ class ContaFacade
             return $extrato;  
               
         } catch (Exception $e) {
-            throw new CustomException($e->getMessage());
+            throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 

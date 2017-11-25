@@ -72,17 +72,17 @@ class UsuarioController extends Controller
             
             try {
 
-                CategoriaFacade::deletarCategoria($param['id']);
+                
 
                 return response()->json([
                     'status' => 'success',
-                    'message' =>  'Categoria removida com sucesso.'
+                    'message' =>  'O seu cadastro foi encerrado!'
                  ]);
 
             } catch (CustomException $ex) {
                 return response()->json([
                     'status' => 'error',
-                    'message' =>  'Ops. Erro ao remover categoria. Tente novamente mais tarde.'
+                    'message' =>  'Ops. Erro. Tente novamente mais tarde.'
                 ]);
             }             
 
@@ -99,19 +99,26 @@ class UsuarioController extends Controller
             $param = $request->all();
 
             try {
-
+                
                 $file = $request->file('avatar');
 
                 if (!empty($file)) {
-                    UsuarioFacade::alterarDadosComImagem($param['id'], $param['nome'], $param['senha'], $file);
+                    $new_user = UsuarioFacade::alterarDadosComImagem($param['id'], $param['nome'], $param['senha'], $file);
                 } else {
-                    UsuarioFacade::alterarDadosSemImagem($param['id'], $param['nome'], $param['senha']);
+                    $new_user = UsuarioFacade::alterarDadosSemImagem($param['id'], $param['nome'], $param['senha']);
                 }
 
+                if (empty($new_user)) {
+                    throw new Exception();
+                            
+                } else {                    
+                    $request->session()->put('usuarioLogado', $new_user);
+                }
+                
                 return response()->json([
                     'status' => 'success',
                     'message' =>  'Dados alterados com sucesso.'
-                 ]);
+                ]);
 
             } catch (CustomException $ex) {
                 return response()->json([

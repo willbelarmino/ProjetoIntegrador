@@ -43,6 +43,7 @@ Route::group(['prefix'=>'dashboard','where'=>['id'=>'[0-9]+']], function() {
 Route::group(['prefix'=>'usuario','where'=>['id'=>'[0-9]+']], function() {
     Route::get('minhaConta', ['as'=>'minha.conta', 'uses'=>'UsuarioController@index']);
     Route::post('alterarDados', ['as'=>'alterar.dados', 'uses'=>'UsuarioController@edit']);
+    Route::post('encerrarCadastro', ['as'=>'encerrar.cadastro', 'uses'=>'UsuarioController@delete']);
 });
 
 Route::group(['prefix'=>'categoria','where'=>['id'=>'[0-9]+']], function() {

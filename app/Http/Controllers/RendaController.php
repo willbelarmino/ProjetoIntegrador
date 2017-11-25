@@ -77,28 +77,23 @@ class RendaController extends Controller
         try {
 
             $usuarioLogado = self::getUsuario();
-            $param = $request->all();
-                                    
-            try {
-
+            $param = $request->all();                                  
+            
+            if ($param['isFixa']=="false") {
                 RendaFacade::criarRenda($param['nome'], $param['valor'], $param['recebimento'], $param['conta']);
+            } else {
+                RendaFacade::criarRendaFixa($param['nome'], $param['valor'], $param['recebimento'], $param['conta']);
+            }            
 
-                return response()->json([
-                    'status' => 'success',
-                    'message' =>  'Renda cadastrada com sucesso.'
-                ]);
-
-            } catch (CustomException $ex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' =>  'Ops. Erro ao cadastrar renda. Tente novamente mais tarde.'
-                ]);
-            }
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Renda cadastrada com sucesso.'
+            ]);           
         
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -109,26 +104,17 @@ class RendaController extends Controller
            
             $param = $request->all();
             
-            try {
+            RendaFacade::deletarRenda($param['id']);  
 
-                 RendaFacade::deletarRenda($param['id']);  
-
-                return response()->json([
-                    'status' => 'success',
-                    'message' =>  'Renda removida com sucesso.'
-                ]);
-
-            } catch (CustomException $ex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Ops. Erro ao remover renda. Tente novamente mais tarde.'
-                ]);  
-            }            
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Renda removida com sucesso.'
+            ]);                  
 
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ops. ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -136,28 +122,19 @@ class RendaController extends Controller
     protected function edit(Request $request){
         try {
 
-            $param = $request->all();
+            $param = $request->all();           
 
-            try {
-
-                RendaFacade::editarRenda($param['id'], $param['nome'], $param['valor'], $param['recebimento'], $param['conta']); 
+            RendaFacade::editarRenda($param['id'], $param['nome'], $param['valor'], $param['recebimento'], $param['conta']); 
                
-                return response()->json([
-                    'status' => 'success',
-                    'message' =>  'Renda alterada com sucesso.'
-                ]);
-
-            } catch (CustomException $ex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Ops. Erro ao alterar renda. Tente novamente mais tarde.'
-                ]);  
-            }  
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Renda alterada com sucesso.'
+            ]);           
 
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ops. correu um erro inesperado. Tente novamente mais tarde.'
+                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }

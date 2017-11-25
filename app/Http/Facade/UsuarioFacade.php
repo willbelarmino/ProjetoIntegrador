@@ -26,19 +26,45 @@ class UsuarioFacade
     public static function alterarDadosComImagem($id, $nome, $senha, $file) {
         try {
 
-            $image = Image::make($file)->resize(128, 128)->encode('jpg')->stream();
-            $file_image_name_old = $imagem;
-            $file_image_name = $conta.time().'.jpg';
-            Storage::disk('local-conta')->delete($file_image_name_old);
-            Storage::disk('local-conta')->put($file_image_name,$image->__toString());
+            $avatar = Image::make($file)->resize(128, 128)->encode('jpg')->stream();
+            $file_avatar_name = $id.time().'.jpg';
+            Storage::disk('local-avatar')->put($file_avatar_name,$avatar->__toString());            
 
-            DB::table('usuario')
+            $new_user_profile = DB::table('usuario')
                 ->where('id', $id)
                 ->update([
                     'nome' => $nome,
                     'senha' => $senha,
-                    'image' => $file_image_name
+                    'image' => $file_avatar_name
             ]);
+
+            if (empty($new_user_profile)) {
+                throw new Exception();
+            } else {
+                return $new_user_profile;
+            }
+
+        } catch (Exception $ex) {
+            return null;
+        }
+    }
+
+    public static function alterarDadosSemImagem($id, $nome, $senha) {
+        try {
+
+            $new_user_profile = DB::table('usuario')
+                ->where('id', $id)
+                ->update([
+                    'nome' => $nome,
+                    'senha' => $senha,
+                    'image' => 'avatar_default.jpg'
+            ]);
+
+            if (empty($new_user_profile)) {
+                throw new Exception();
+            } else {
+                return $new_user_profile;
+            }
 
         } catch (Exception $ex) {
             return null;

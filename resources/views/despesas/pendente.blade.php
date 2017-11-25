@@ -16,6 +16,9 @@
                         <h4 class="card-title">{{$page}}</h4>
                         <div class="toolbar">
                             <!--        Here you can write extra buttons/actions for the toolbar              -->
+                            <button type="button" rel="tooltip" class="btn btn-primary" title="Pagar">                                   
+                                    <i class="material-icons">attach_money</i> Pagar Fatura
+                            </button>
                         </div>
                         <div class="material-datatables">
                             <div class="content-table-view">
@@ -203,7 +206,7 @@
                             </div>
 
                             <div class="form-group label-floating" id="input-credito" style="display:none;">
-                                <select id="credito" name="credito" class="selectpicker" disabled data-style="select-with-transition" title="Selecione cartão" data-size="7">
+                                <select id="credito" name="credito" class="selectpicker" data-style="select-with-transition" title="Selecione cartão" data-size="7">
                                     @foreach ($cartoes as $cartao)
                                         <option value="{{$cartao->id}}">{{$cartao->conta->nome}}</option>
                                     @endforeach
@@ -511,12 +514,9 @@
             /* Habilitar input do limite*/
             $( "#check-credito" ).click(function() {
                 setInterval(function(){
-                    if ($("#check-credito").is(':checked')==true) {
-                        $("#select-credito").removeAttr('disabled');
+                    if ($("#check-credito").is(':checked')==true) {                        
                         $("#input-credito").css( "display", "block" );
-
-                    }else {
-                        $("#select-credito").attr('disabled','disabled');
+                    }else {                        
                         $("#input-credito").css( "display", "none" );
                     }
                 }, 300);
@@ -524,12 +524,9 @@
 
             $( "#check-credito-edit" ).click(function() {
                 setInterval(function(){
-                    if ($("#check-credito-edit").is(':checked')==true) {
-                        $("#select-credito-edit").removeAttr('disabled');
+                    if ($("#check-credito-edit").is(':checked')==true) {                       
                         $("#input-credito-edit").css( "display", "block" );
-
-                    }else {
-                        $("#select-credito-edit").attr('disabled','disabled');
+                    }else {                       
                         $("#input-credito-edit").css( "display", "none" );
                     }
                 }, 300);
@@ -597,6 +594,11 @@
                 if ($("#formPagamento" ).valid()) {
                     var formData = new FormData($("#formPagamento")[0]);
 
+                    if ($("#check-credito").is(':checked')==false) {
+                        formData.append("isCredito","false");
+                    }  else {
+                        formData.append("isCredito","true");
+                    }    
                         $.ajax({
                             type: "POST",
                             url: '{{route('pagar')}}',
@@ -635,6 +637,12 @@
             $( "#formDespesa" ).submit(function( e ) {
                 if ($("#formDespesa" ).valid()) {
                     var formData = new FormData($("#formDespesa")[0]);
+                    
+                    if ($("#check-credito").is(':checked')==false) {
+                        formData.append("isCredito","false");
+                    }  else {
+                        formData.append("isCredito","true");
+                    } 
                     if (validacaoExtraForm()) {
                         $.ajax({
                             type: "POST",
@@ -672,6 +680,11 @@
             $( "#formDespesa-edit" ).submit(function( e ) {
                 if ($("#formDespesa-edit" ).valid()) {
                     var formData = new FormData($("#formDespesa-edit")[0]);
+                    if ($("#check-credito-edit").is(':checked')==false) {
+                        formData.append("isCredito","false");
+                    }  else {
+                        formData.append("isCredito","true");
+                    } 
                     $.ajax({
                         type: "POST",
                         url: '{{route('alterar.pendente')}}',

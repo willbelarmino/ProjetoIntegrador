@@ -81,7 +81,8 @@ class HomeController extends Controller
             return view('error',
                 ['menuView'=>'dashboard',
                     'page'=>'Dashboard',
-                    'usuario'=>$usuarioLogado
+                    'usuario'=>$usuarioLogado,
+                    'message' => $e->getMessage()
                 ]);
         }
 

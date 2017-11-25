@@ -74,56 +74,46 @@ class CartaoController extends Controller
     protected function create(Request $request){
         try {
             $usuarioLogado = self::getUsuario();
-            $param = $request->all();
+            $param = $request->all();          
 
-            try {
+            CartaoFacade::criarCartao(
+                $param['limite'], 
+                $param['vencimento'], 
+                $param['fechamento'], 
+                $param['independente'], 
+                $param['nome'], 
+                $param['conta'], 
+                $usuarioLogado
+            );
 
-                CartaoFacade::criarCartao($param['limite'], $param['vencimento'], $param['fechamento'], $param['independente'], $param['nome'], $param['conta'], $usuarioLogado);
-
-                return response()->json([
-                    'status' => 'success',
-                    'message' =>  'Cartão cadastrado com sucesso.',
-                ]);
-
-            } catch (CustomException $ex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Erro ao cadastrar cartão. Tente novamente mais tarde.'
-                ]);
-            }
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Cartão cadastrado com sucesso.',
+            ]);           
        
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
 
     protected function delete(Request $request){
         try {
-            $param = $request->all();
+            $param = $request->all();          
 
-             try {
+            CartaoFacade::deletarCartao($param['id'], $param['independente'], $param['conta']);
 
-                CartaoFacade::deletarCartao($param['id'], $param['independente'], $param['conta']);
-
-                return response()->json([
-                    'status' => 'success',
-                    'message' =>  'Cartão removido com sucesso.'
-                ]);
-
-            } catch (CustomException $ex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Erro ao remover cartão. Tente novamente mais tarde.'
-                ]);
-            }   
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Cartão removido com sucesso.'
+            ]);          
 
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -131,28 +121,19 @@ class CartaoController extends Controller
     protected function edit(Request $request){
         try {
             $usuarioLogado = self::getUsuario();
-            $param = $request->all();
+            $param = $request->all();           
 
-            try {
+            CartaoFacade::editarCartao($param['id'], $param['limite'], $param['vencimento'], $param['fechamento']);
 
-                CartaoFacade::editarCartao($param['id'], $param['limite'], $param['vencimento'], $param['fechamento']);
-
-                return response()->json([
-                    'status' => 'success',
-                    'message' =>  'Cartão alterado com sucesso.',
-                ]);
-
-            } catch (CustomException $ex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Erro ao editar cartão. Tente novamente mais tarde.'
-                ]);
-            } 
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Cartão alterado com sucesso.',
+            ]);           
         
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }

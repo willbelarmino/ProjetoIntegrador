@@ -43,19 +43,9 @@ class CartaoFacade
     public static function criarCartao($limite, $venc, $fech, $indep, $nome, $conta, $user) {
         try {
            
-           $limite = str_replace("R$", "", $limite);
+            $limite = str_replace("R$", "", $limite);
             $limite = str_replace(".", "", $limite);
-            $limite = str_replace(",", ".", $limite);
-
-            $dia = substr($venc, 0, -8);
-            $mes = substr($venc, 3, -5);
-            $ano = substr($venc, -4);
-            $vencimento = $ano.$mes.$dia;
-
-            $diaF = substr($fech, 0, -8);
-            $mesF = substr($fech, 3, -5);
-            $anoF = substr($fech, -4);
-            $fechamento = $anoF.$mesF.$diaF;
+            $limite = str_replace(",", ".", $limite);         
 
             if (!empty($indep) &&  $indep=='true') {
                 $new_conta = Conta::create([
@@ -64,36 +54,27 @@ class CartaoFacade
                     'exibir_indicador' => 'N',
                     'dt_movimento' => date('Ymd'),
                     'id_usuario' => $user->id
-                ]);
-
-                if (empty($new_conta)) {
-                    throw new Exception();
-                }
+                ]);                
 
                 $new_cartao = CartaoCredito::create([
                     'limite' => $limite,
-                    'dt_fechamento' => $fechamento,
-                    'dt_vencimento' => $vencimento,
+                    'dt_fechamento' => $fech,
+                    'dt_vencimento' => $venc,
                     'id_conta' => $new_conta->id,
                     'cartao_independente' => true
                 ]);
             } else {
                 $new_cartao = CartaoCredito::create([
                     'limite' => $limite,
-                    'dt_fechamento' => $fechamento,
-                    'dt_vencimento' => $vencimento,
+                    'dt_fechamento' => $fech,
+                    'dt_vencimento' => $venc,
                     'id_conta' => $conta,
                     'cartao_independente' => false
                 ]);
-            }
-
-            if (empty($new_cartao)) {
-                throw new Exception();
-            }
-
+            }          
               
         } catch (Exception $e) {
-            throw new CustomException();
+            throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 
@@ -110,7 +91,7 @@ class CartaoFacade
             
               
         } catch (Exception $e) {
-            throw new CustomException();
+            throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 
@@ -141,7 +122,7 @@ class CartaoFacade
            
               
         } catch (Exception $e) {
-            throw new CustomException();
+            throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 

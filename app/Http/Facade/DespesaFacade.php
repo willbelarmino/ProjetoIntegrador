@@ -100,7 +100,7 @@ class DespesaFacade
 
             return $parcelasPendentes;
         } catch (Exception $e) {
-            throw new Exception($e->getMessage());
+            return null;
         }
     }
 
@@ -134,7 +134,7 @@ class DespesaFacade
 
             return $parcelasPagas;
         } catch (Exception $e) {
-            throw new Exception($e->getMessage());
+            return null;
         }
     }
 
@@ -150,12 +150,12 @@ class DespesaFacade
 
             return $parcelasPagas;
         } catch (Exception $e) {
-            throw new Exception($e->getMessage());
+            return null;
         }
     }
     
 
-    public static function criarDespesaPendente($nome, $valor, $venc, $parcela, $cat, $cred){
+    public static function criarDespesaPendenteSemCredito($nome, $valor, $venc, $parcela, $cat){
         try {
            
             if (!empty($valor) && $valor!="R$ 0,00") {
@@ -168,31 +168,52 @@ class DespesaFacade
                 $ano = substr($venc, -4);
                 $vencimento = $ano.$mes.$dia;
 
-                if (!empty($cred)) {
-                    DB::select("CALL criarDespesaPendente(
+                DB::select("CALL criarDespesaPendente(
                     '".$nome."', 
                     ".$valor.", 
                     ".$parcela." ,
                     '".$vencimento."',
                     ".$cat.",
-                    ".$cred.")");
-                } else {
-                    DB::select("CALL criarDespesaPendente(
-                    '".$nome."', 
-                    ".$valor.", 
-                    ".$parcela." ,
-                    '".$vencimento."',
-                    ".$cat.",
-                    null)");
-
-                }
+                    null)"
+                );
 
             } else {
-                throw new Exception();
+                throw new Exception("Favor, selecione um valor valido.");
             }
               
         } catch (Exception $e) {
-            throw new CustomException();
+            throw new Exception("Erro Facade: ".$e->getMessage());
+        }
+    }
+
+    public static function criarDespesaPendenteComCredito($nome, $valor, $venc, $parcela, $cat, $cred){
+        try {
+           
+            if (!empty($valor) && $valor!="R$ 0,00") {
+                $valor = str_replace("R$", "", $valor);
+                $valor = str_replace(".", "", $valor);
+                $valor = str_replace(",", ".", $valor);
+
+                $dia = substr($venc, 0, -8);
+                $mes = substr($venc, 3, -5);
+                $ano = substr($venc, -4);
+                $vencimento = $ano.$mes.$dia;
+
+                DB::select("CALL criarDespesaPendente(
+                    '".$nome."', 
+                    ".$valor.", 
+                    ".$parcela." ,
+                    '".$vencimento."',
+                    ".$cat.",
+                    ".$cred.")"
+                );
+
+            } else {
+                throw new Exception("Favor, selecione um valor valido.");
+            }
+              
+        } catch (Exception $e) {
+            throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 
@@ -231,11 +252,11 @@ class DespesaFacade
                 }
 
             } else {
-                throw new Exception();
+                throw new Exception("Favor, selecione um valor valido.");
             }
               
         } catch (Exception $e) {
-            throw new CustomException();
+            throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 
@@ -270,7 +291,7 @@ class DespesaFacade
             }
               
         } catch (Exception $e) {
-            throw new CustomException();
+            throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 
@@ -284,7 +305,7 @@ class DespesaFacade
             
               
         } catch (Exception $e) {
-            throw new CustomException();
+            throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 
@@ -297,7 +318,7 @@ class DespesaFacade
                     '".$periodo->periodoSelecionadoFim."')");          
               
         } catch (Exception $e) {
-            throw new CustomException();
+            throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 
@@ -310,7 +331,7 @@ class DespesaFacade
                         )");            
 
         } catch (Exception $e) {
-            throw new CustomException();
+            throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 
@@ -327,7 +348,7 @@ class DespesaFacade
             return $totalDespesaPendente[0]['totalDespesaPendente'];
 
         } catch (Exception $e) {
-            throw new CustomException();
+            return null;
         }
     } 
 
@@ -345,7 +366,7 @@ class DespesaFacade
             return $totalDespesaPaga[0]['totalDespesaPaga'];
 
         } catch (Exception $e) {
-            throw new CustomException();
+            return null;
         }
     } 
 

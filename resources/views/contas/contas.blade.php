@@ -499,6 +499,11 @@
             $( "#formConta" ).submit(function( e ) {
                 if ($("#formConta" ).valid()) {
                     var formData = new FormData($("#formConta")[0]);
+                    if ($("#check-indicador").is(':checked')==false) {
+                        formData.append("exibir","false");
+                    }  else {
+                        formData.append("exibir","true");
+                    }
                     $.ajax({
                         type: "POST",
                         url: '{{route('criar.conta')}}',
@@ -534,6 +539,11 @@
             $( "#formConta-edit" ).submit(function( e ) {
                 if ($("#formConta-edit" ).valid()) {
                     var formData = new FormData($("#formConta-edit")[0]);
+                    if ($("#check-indicador-edit").is(':checked')==false) {
+                        formData.append("exibir","false");
+                    }  else {
+                        formData.append("exibir","true");
+                    }
                     $.ajax({
                         type: "POST",
                         url: '{{route('alterar.conta')}}',

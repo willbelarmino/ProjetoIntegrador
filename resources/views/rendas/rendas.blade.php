@@ -140,6 +140,12 @@
                                 </select>
                             </div>
 
+                            <div class="togglebutton">
+                                <label style="color: #AAAAAA;">
+                                    <input type="checkbox" id="check-fixa" name="fixa"> Renda fixa
+                                </label>
+                            </div>
+
                             <div class="text-center" style="margin-top: 20px;">
                                 <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Salvar</button>
                             </div>
@@ -410,6 +416,11 @@
             $( "#formRenda" ).submit(function( e ) {
                 if ($("#formRenda" ).valid()) {
                     var formData = new FormData($("#formRenda")[0]);
+                    if ($("#check-fixa").is(':checked')==false) {
+                        formData.append("isFixa","false");
+                    }  else {
+                        formData.append("isFixa","true");
+                    }
                     if (validacaoExtraForm()) {
                         $.ajax({
                             type: "POST",

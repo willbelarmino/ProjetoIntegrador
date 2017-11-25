@@ -25,8 +25,8 @@
                                         <tr>
                                             <th>Nome</th>
                                             <th>Limite</th>
-                                            <th>Data de fechamento</th>
-                                            <th>Data de vencimento</th>
+                                            <th>Dia de fechamento</th>
+                                            <th>Dia de vencimento</th>
                                             <th class="disabled-sorting text-right"></th>
                                         </tr>
                                         </thead>
@@ -38,17 +38,17 @@
 
                                                 <td>{{ 'R$ '.number_format($cartao->limite, 2, ',', '.') }}</td>
 
-                                                <td> {{ date('d/m/Y', strtotime($cartao->dt_fechamento)) }} </td>
+                                                <td> {{ $cartao->dt_fechamento }} </td>
 
-                                                <td> {{ date('d/m/Y', strtotime($cartao->dt_vencimento)) }} </td>
+                                                <td> {{ $cartao->dt_vencimento }} </td>
 
                                                 <td class="td-actions text-right">
                                                     <button type="button" rel="tooltip" class="btn btn-info"
                                                             onclick="visualizar(
                                                                 '{{$cartao->conta->nome}}',
                                                                 '{{ 'R$ '.number_format($cartao->limite, 2, ',', '.')}}',
-                                                                '{{ date('d/m/Y', strtotime($cartao->dt_fechamento)) }}',
-                                                                '{{ date('d/m/Y', strtotime($cartao->dt_vencimento)) }}'
+                                                                '{{ $cartao->dt_fechamento }}',
+                                                                '{{ $cartao->dt_vencimento }}'
                                                             );">
                                                         <i class="material-icons">assignment</i>
                                                     </button>
@@ -56,8 +56,8 @@
                                                             onclick="alterar(
                                                                     '{{ $cartao->id }}',
                                                                     '{{ 'R$ '.number_format($cartao->limite, 2, ',', '.')}}',
-                                                                    '{{ date('d/m/Y', strtotime($cartao->dt_fechamento)) }}',
-                                                                    '{{ date('d/m/Y', strtotime($cartao->dt_vencimento)) }}'
+                                                                    '{{ $cartao->dt_fechamento }}',
+                                                                    '{{ $cartao->dt_vencimento }}'
                                                             );">
                                                         <i class="material-icons">edit</i>
                                                     </button>
@@ -135,13 +135,13 @@
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Data de fechamento</label>
-                                <input class="form-control datepicker" id="fechamento" name="fechamento" value="{{date('d/m/Y')}}" required="true" />
+                                <label class="control-label">Dia de fechamento</label>
+                                <input type="number" min="1" max="30" class="form-control" id="fechamento" name="fechamento" value="8" required="true" />
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Data de vencimento</label>
-                                <input class="form-control datepicker" id="vencimento" name="vencimento" value="{{date('d/m/Y')}}" required="true" />
+                                <label class="control-label">Dia de vencimento</label>
+                                <input type="number" min="1" max="30" class="form-control" id="vencimento" name="vencimento" value="15" required="true" />
                             </div>
 
                             <div class="form-group label-floating">
@@ -165,14 +165,15 @@
                         <div class="card-content">
                             <h4 class="card-title">Cartão</h4>
                             <input id="id-edit" name="id" type="hidden"/>
+                            
                             <div class="form-group label-floating">
-                                <label class="control-label">Data de fechamento</label>
-                                <input class="form-control datepicker" id="fechamento-edit" name="fechamento" value="{{date('d/m/Y')}}" required="true" />
+                                <label class="control-label">Dia de fechamento</label>
+                                <input type="number" min="1" max="30" class="form-control" id="fechamento-edit" name="fechamento" value="8" required="true" />
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Data de vencimento</label>
-                                <input class="form-control datepicker" id="vencimento-edit" name="vencimento" value="{{date('d/m/Y')}}" required="true" />
+                                <label class="control-label">Dia de vencimento</label>
+                                <input type="number" min="1" max="30" class="form-control" id="vencimento-edit" name="vencimento" value="15" required="true" />
                             </div>
 
                             <div class="form-group label-floating">

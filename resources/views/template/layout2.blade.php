@@ -223,6 +223,8 @@
 <script src="../js/jquery.validate.min.js"></script>
 <!--  Plugin for Date Time Picker and Full Calendar Plugin-->
 <script src="../js/moment.min.js"></script>
+<!--  Charts Plugin -->
+<script src="../js/chartist.min.js"></script>
 <!--  Notifications Plugin    -->
 <script src="../js/bootstrap-notify.js"></script>
 <!-- DateTimePicker Plugin JS -->
@@ -243,6 +245,7 @@
 <script src="../js/functions.js"></script>
 <!-- Jquery Mask Money -->
 <script src="../js/jquery.maskMoney.js" type="text/javascript"></script>
+
 
 <script type="text/javascript">
     function setFormValidation(id) {

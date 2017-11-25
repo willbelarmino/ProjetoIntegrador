@@ -73,33 +73,21 @@ class CategoriaController extends Controller
 
             $usuarioLogado = self::getUsuario();
             $param = $request->all();
+            
+            $nome =  $param['nome'];
 
-            try {
-                $nome =  $param['nome'];
-
-                if ($param['hasLimite']=="false" || $param['limite']=="R$ 0,00") {
+            if ($param['hasLimite']=="false" || $param['limite']=="R$ 0,00") {
                     CategoriaFacade::criarCategoriaSemLimite($nome, $usuarioLogado);
-                } else {
-                    $limite = $param['limite'];
-                    CategoriaFacade::criarCategoriaComLimite($nome, $limite, $usuarioLogado);
-                }
-                return response()->json([
-                    'status' => 'success',
-                    'message' =>  'Categoria cadastrada com sucesso.'
-                ]);
-
-            } catch (CustomException $ex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' =>  $ex->getMessage()
-                ]);
-            } catch (Exception $e) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $e->getMessage()
-                ]);
+            } else {
+                $limite = $param['limite'];
+                CategoriaFacade::criarCategoriaComLimite($nome, $limite, $usuarioLogado);
             }
-        
+
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Categoria cadastrada com sucesso.'
+            ]);
+                    
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
@@ -110,28 +98,19 @@ class CategoriaController extends Controller
 
     protected function delete(Request $request){
         try {
-            $param = $request->all();
-            
-            try {
+            $param = $request->all();                     
 
-                CategoriaFacade::deletarCategoria($param['id']);
+            CategoriaFacade::deletarCategoria($param['id']);
 
-                return response()->json([
-                    'status' => 'success',
-                    'message' =>  'Categoria removida com sucesso.'
-                 ]);
-
-            } catch (CustomException $ex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' =>  'Ops. Erro ao remover categoria. Tente novamente mais tarde.'
-                ]);
-            }             
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Categoria removida com sucesso.'
+            ]);                  
 
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -140,29 +119,22 @@ class CategoriaController extends Controller
         try {
             $param = $request->all();
 
-            try {
-                if ($param['hasLimite']=="false" || $param['limite']=="R$ 0,00") {
-                    CategoriaFacade::editarCategoria($param['id'], null, $param['nome']);
-                } else {
-                    CategoriaFacade::editarCategoria($param['id'], $param['limite'], $param['nome']);
-                }
+           
+            if ($param['hasLimite']=="false" || $param['limite']=="R$ 0,00") {
+                CategoriaFacade::editarCategoria($param['id'], null, $param['nome']);
+            } else {
+                CategoriaFacade::editarCategoria($param['id'], $param['limite'], $param['nome']);
+            }
 
-                return response()->json([
-                    'status' => 'success',
-                    'message' =>  'Categoria alterada com sucesso.'
-                 ]);
-
-            } catch (CustomException $ex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' =>  'Ops. Erro ao alterar categoria. Tente novamente mais tarde.'
-                ]);
-            }              
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Categoria alterada com sucesso.'
+            ]);                          
         
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }

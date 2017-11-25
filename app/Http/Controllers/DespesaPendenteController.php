@@ -83,28 +83,40 @@ class DespesaPendenteController extends Controller
         try {
 
             $usuarioLogado = self::getUsuario();
-            $param = $request->all();
-                                    
-            try {
+            $param = $request->all(); 
 
-                DespesaFacade::criarDespesaPendente($param['nome'], $param['valor'], $param['vencimento'], $param['parcela'], $param['categoria'], $param['credito']);
+            if ($param['isCredito']=='false') {
+                
+                DespesaFacade::criarDespesaPendenteSemCredito(
+                    $param['nome'], 
+                    $param['valor'], 
+                    $param['vencimento'], 
+                    $param['parcela'], 
+                    $param['categoria']
+                );
+               
+            } else {
+                
+                DespesaFacade::criarDespesaPendenteComCredito(
+                    $param['nome'], 
+                    $param['valor'], 
+                    $param['vencimento'], 
+                    $param['parcela'], 
+                    $param['categoria'], 
+                    $param['credito']
+                );
+               
+            }           
 
-                return response()->json([
-                    'status' => 'success',
-                    'message' =>  'Despesa cadastrada com sucesso.'
-                ]);
-
-            } catch (CustomException $ex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' =>  'Ops. Erro ao cadastrar despesa. Tente novamente mais tarde.'
-                ]);
-            }
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Despesa cadastrada com sucesso.'
+            ]);           
         
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -113,28 +125,19 @@ class DespesaPendenteController extends Controller
         try {
 
             $periodo = self::getPeriodo();
-            $param = $request->all();
-            
-            try {
+            $param = $request->all();            
+           
+            DespesaFacade::deletarDespesaPendente($param['id'], $periodo);  
 
-                 DespesaFacade::deletarDespesaPendente($param['id'], $periodo);  
-
-                return response()->json([
-                    'status' => 'success',
-                    'message' =>  'Despesa removida com sucesso.'
-                ]);
-
-            } catch (CustomException $ex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Ops. Erro ao remover despesa. Tente novamente mais tarde.'
-                ]);  
-            }            
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Despesa removida com sucesso.'
+            ]);                    
 
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ops. ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -142,28 +145,19 @@ class DespesaPendenteController extends Controller
     protected function edit(Request $request){
         try {
 
-            $param = $request->all();
+            $param = $request->all();           
 
-            try {
-
-                DespesaFacade::editarDespesaPendente($param['id'], $param['nome'], $param['valor'], $param['vencimento'], $param['categoria'], $param['credito']); 
+            DespesaFacade::editarDespesaPendente($param['id'], $param['nome'], $param['valor'], $param['vencimento'], $param['categoria'], $param['credito']); 
                
-                return response()->json([
-                    'status' => 'success',
-                    'message' =>  'Despesa alterada com sucesso.'
-                ]);
-
-            } catch (CustomException $ex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Ops. Erro ao alterar despesa. Tente novamente mais tarde.'
-                ]);  
-            }  
-
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Despesa alterada com sucesso.'
+            ]);
+           
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ops. correu um erro inesperado. Tente novamente mais tarde.'
+                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -186,28 +180,19 @@ class DespesaPendenteController extends Controller
     protected function pagar(Request $request){
 
         try {
-            $param = $request->all();
-            
-            try {
-
-                DespesaFacade::pagarDespesa($param['id'], $param['conta']);
+            $param = $request->all();          
+          
+            DespesaFacade::pagarDespesa($param['id'], $param['conta']);
                
-                return response()->json([
-                    'status' => 'success',
-                    'message' =>  'Despesa paga com sucesso.',
-                ]);
-
-            } catch (CustomException $ex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Ops. Erro ao pagar despesa. Tente novamente mais tarde.'
-                ]);  
-            }  
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Despesa paga com sucesso.',
+            ]);           
 
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }

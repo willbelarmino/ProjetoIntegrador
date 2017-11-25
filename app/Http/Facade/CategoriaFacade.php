@@ -43,14 +43,10 @@ class CategoriaFacade
             $new_categoria = Categoria::create([
                 'nome' => $nome,
                 'id_usuario' => $user->id
-            ]);
-
-            if (empty($new_categoria)) {
-                throw new Exception();
-            }
+            ]);            
               
         } catch (Exception $e) {
-            throw new CustomException("Erro Facade: ".$e->getMessage());
+            throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 
@@ -64,25 +60,21 @@ class CategoriaFacade
                     'nome' => $nome,
                     'limite' => $limite,
                     'id_usuario' => $user->id
-             ]);
-
-            if (empty($new_categoria)) {
-                throw new Exception();
-            }
+             ]);           
 
         } catch (Exception $e) {
-            throw new CustomException();
+             throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 
     public static function deletarCategoria($categoria) {
         try {
            
-            DB::table('categoria')->where('id',$categoria)->delete();          
+            DB::table('categoria')->where('id',$categoria)->delete();         
             
               
         } catch (Exception $e) {
-            throw new CustomException();
+            throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 
@@ -103,7 +95,7 @@ class CategoriaFacade
             ]);
               
         } catch (Exception $e) {
-            throw new CustomException();
+             throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 
@@ -136,7 +128,7 @@ class CategoriaFacade
             return $extrato;  
               
         } catch (Exception $e) {
-            throw new CustomException($e->getMessage());
+             throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
 

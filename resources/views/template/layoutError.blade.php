@@ -132,7 +132,7 @@
                     <ul class="nav navbar-nav navbar-right">
 
                         <li>
-                            <a href="{{route('sair')}}"  title="Sair">
+                            <a href="{{url('sair')}}"  title="Sair">
                                 <i class="material-icons">exit_to_app</i>
                                 <p class="hidden-lg hidden-md">Profile</p>
                             </a>
