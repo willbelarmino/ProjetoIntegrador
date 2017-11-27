@@ -9,10 +9,12 @@
 namespace App\Http\Facade;
 
 use App\Http\Model\Categoria;
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Exception;
 use App\Exceptions\CustomException;
+use Illuminate\Support\Facades\File;
 use PDF;
 use App;
 use Barryvdh\Snappy;
@@ -329,7 +331,8 @@ class DespesaFacade
             
             DB::select("CALL pagarDespesa(                    
                         " . $pendente . ",
-                        " . $conta . "
+                        " . $conta . ",
+                        @new_paga
                         )");            
 
         } catch (Exception $e) {
@@ -340,17 +343,20 @@ class DespesaFacade
     public static function pagarDespesaComComprovante($pendente, $conta, $file){
         try {
 
-            DB::select("CALL pagarDespesa(                    
+             DB::select("CALL pagarDespesa(                    
                         " . $pendente . ",
-                        " . $conta . "
+                        " . $conta . ",
+                        @new_paga
                         )");
-            $paga = DB::select("SELECT LAST_INSERT_ID() as paga");
 
-            //$image = Image::make($file)->resize(128, 128)->encode('jpg')->stream();
+            $paga = DB::select("SELECT @new_paga as paga");
+            $paga = json_decode(json_encode($paga), true);
+            $paga = $paga[0]['paga'];
+
             $file_image_name = $paga.time().'.pdf';
-            Storage::disk('local-comprovante')->put($file_image_name,$file->__toString());
-
-            //DB::table('parcela_paga')->where('id', $pendente->id)->update(['image' => $file_image_name]);
+            $content = File::get($file);
+            Storage::disk('local-comprovante')->put($file_image_name,$content);
+            DB::table('parcela_paga')->where('id', $paga)->update(['comprovante' => $file_image_name]);
 
 
         } catch (Exception $e) {

@@ -158,4 +158,9 @@ class DespesaPagaController extends Controller
         }
     }
 
+    protected function viewComprovante(Request $request){
+
+    }
+
+
 }

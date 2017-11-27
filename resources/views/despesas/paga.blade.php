@@ -47,6 +47,16 @@
                                                 <td>{{ $parcela->conta->nome }}</td>
 
                                                 <td class="td-actions text-right">
+
+                                                    @if(!empty($parcela->comprovante))
+                                                        <button type="button" rel="tooltip" class="btn"
+                                                                onclick="verComprovante(
+                                                                    '{{$parcela->comprovante}}'
+                                                                 );">
+                                                            <i class="material-icons">attach_file</i>
+                                                        </button>
+                                                    @endif
+
                                                     <button type="button" rel="tooltip" class="btn btn-info"
                                                             onclick="visualizar(
                                                                     '{{$parcela->parcelaPendente->despesa->nome}}',
@@ -344,6 +354,10 @@
                 $("#box-credito").css("display", "none");
             }
             $("#modal-panel-view").modal("toggle");
+        }
+
+        function verComprovante(filename) {
+            window.open('{{ route('view.comprovante') }}','_blank');
         }
 
         function deletar(id) {

@@ -79,6 +79,7 @@ Route::group(['prefix'=>'despesa','where'=>['id'=>'[0-9]+']], function() {
     Route::post('criarPaga', ['as'=>'criar.paga', 'uses'=>'DespesaPagaController@create']);
     Route::post('alterarPaga', ['as'=>'alterar.paga', 'uses'=>'DespesaPagaController@edit']);
     Route::post('deletarPaga', ['as'=>'deletar.paga', 'uses'=>'DespesaPagaController@delete']);
+    Route::get('viewComprovante', ['as'=>'view.comprovante', 'uses'=>'DespesaPagaController@viewComprovante']);
 });
 
 Route::group(['prefix'=>'cartao','where'=>['id'=>'[0-9]+']], function() {
