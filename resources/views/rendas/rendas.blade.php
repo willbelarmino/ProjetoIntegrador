@@ -16,6 +16,12 @@
                         <h4 class="card-title">{{$page}}</h4>
                         <div class="toolbar">
                             <!--        Here you can write extra buttons/actions for the toolbar              -->
+                            <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
+                                <i class="material-icons">add</i> ADICIONAR
+                            </button>
+                            <button type="button"  class="btn btn-danger btn-xs" onclick="window.open('{{ route('generate.relRenda.pdf') }}','_blank');"  style="float:right">
+                                <i class="material-icons">print</i> IMPRIMIR
+                            </button>
                         </div>
                         <div class="material-datatables">
                             <div class="content-table-view">
@@ -32,14 +38,6 @@
                                         </thead>
 
                                     </table>
-                                        <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
-                                            <i class="material-icons">add</i> ADICIONAR
-                                        </button>
-                                        <button type="button"  class="btn btn-danger btn-xs" onclick="window.open('{{ route('generate.relRenda.pdf') }}','_blank');"  style="float:right">
-                                            <i class="material-icons">print</i> IMPRIMIR
-                                        </button>
-
-
                                 </div>
                             </div>
                         </div>
@@ -90,7 +88,7 @@
                             <div class="form-group label-floating">
                                 <label class="control-label">Valor</label>
                                 <input class="form-control money-format" id="valor" name="valor" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
-                            </div>  
+                            </div>
 
                             <div class="form-group label-floating">
                                 <label class="control-label">Conta</label>
@@ -148,7 +146,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                           
+
                             <div class="text-center">
                                 <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Alterar</button>
                             </div>
@@ -163,6 +161,35 @@
     </div>
     <!-- /MODAL -->
 
+    <!-- MODAL CANCEL -->
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal-cancel">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="card">
+                    <form id="formCancel" enctype="multipart/form-data">
+                        <div class="card-header card-header-icon" data-background-color="purple">
+                            <i class="mdi mdi-square-inc-cash"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="card-title">Cancelar renda fixa</h4>
+
+                            <p>O cancelamento da renda não pode ser revertido. Deseja cancelar renda fixa?</p>
+
+                            <input id="id-cancel" name="id-cancel" type="hidden" />
+
+                            <div class="text-center" style="margin-top: 20px;">
+                                <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Sim</button>
+                            </div>
+                            <div class="text-center">
+                                <button type="button" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal" data-dismiss="modal">Não</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /MODAL CANCEL -->
 
     <!-- MODAL VIEW -->
     <div class="modal fade" tabindex="-1" role="dialog" id="modal-panel-view">
@@ -229,6 +256,11 @@
             return true;
         }
 
+        function cancelar(id) {
+            $("#id-cancel").val(id);
+            $("#modal-cancel").modal("toggle");
+        }
+
         function visualizar(nome,valor,dt_recebimento,conta) {
             $("#view-renda-nome").html(nome);
             $("#view-renda-valor").html(valor);
@@ -237,11 +269,11 @@
             $("#modal-panel-view").modal("toggle");
         }
 
-        function deletar(id) {
+        function deletar(id, isFixa) {
             $.ajax({
                 type: "POST",
                 url: '{{route('deletar.renda')}}',
-                data: { id : id },
+                data: { id : id, isFixa : isFixa  },
                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                 dataType: 'json',
                 cache: false,
@@ -265,6 +297,7 @@
                 }
             });
         }
+
 
 
         function alterar(id,nome,valor,recebimento,conta,nomeConta) {
@@ -292,6 +325,48 @@
             $(textContaSelect).text(nomeConta);            
             $("#recebimento-edit").val(recebimento);
             $("#modal-panel").modal("toggle");
+        }
+
+        function loadTable() {
+            $('#datatables').DataTable({
+                "pagingType": "full_numbers",
+                "lengthMenu": [
+                    [10, 25, 50, -1],
+                    [10, 25, 50, "All"]
+                ],
+                "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+                    $('td:eq(4)', nRow).addClass('td-actions text-right');
+                    return nRow;
+                },
+                ajax: {
+                    url: '{{ route('popula.rendas') }}',
+                    cache: false,
+                    dataSrc: function ( json ) {
+                        if (json.data!='error') {
+                            return json.data;
+                        } else {
+                            window.location.href = "{{url('page.error')}}";
+                        }
+                    },
+                },
+                responsive: true,
+                destroy: true,
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Filtrar",
+                    lengthMenu: "Exibindo _MENU_ registros por página",
+                    zeroRecords: "Nenhum registro encontrado",
+                    info: "Visualizando página _PAGE_ de _PAGES_",
+                    infoEmpty: "Nenhum registro encontrado",
+                    infoFiltered: "(filtered from _MAX_ total records)",
+                    paginate: {
+                        "first":      "Primeiro",
+                        "last":       "Último",
+                        "next":       "Próximo",
+                        "previous":   "Anterior"
+                    }
+                }
+            });
         }
 
         function carregaDataTables() {
@@ -466,6 +541,45 @@
                 }
                 e.preventDefault(); // avoid to execute the actual submit of the form.
             });
+
+
+
+            $( "#formCancel" ).submit(function( e ) {
+                    var formData = new FormData($("#formCancel")[0]);
+
+                        $.ajax({
+                            type: "POST",
+                            url: '{{route('cancelar.renda')}}',
+                            data: formData,
+                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                            dataType: 'json',
+                            processData: false,
+                            contentType: false,
+                            cache: false,
+                            beforeSend: function () {
+                                $("#modal-cancel").modal('toggle');
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
+
+                            },
+                            success: function (data) {
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                if (data.status == "success") {
+                                    setTimeout(function(){ carregaDataTables(); }, 2000);
+                                    setTimeout(function(){ showSucessNotification(data.message); }, 2500);
+                                } else {
+                                    setTimeout(function(){ showErrorNotification(data.message); }, 2500);
+                                }
+                            },
+                            error: function (request, status, error) {
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                setTimeout(function(){ showErrorNotification(error); }, 2500);
+                            }
+                        });
+
+                e.preventDefault(); // avoid to execute the actual submit of the form.
+            });
+
+
         })
 
     </script>

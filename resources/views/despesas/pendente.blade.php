@@ -38,7 +38,7 @@
                                         @foreach ($parcelas as $parcela)
                                             @php ($credito = null)
                                             @if (!empty($parcela->despesa->id_cartao_credito))
-                                                $credito = '{{$parcela->despesa->cartao->conta->nome}}'
+                                                @php ($credito = $parcela->despesa->cartao->conta->nome)
                                             @endif
                                             <tr>
                                                 <td>{{ $parcela->despesa->nome }}</td>
@@ -50,13 +50,13 @@
                                                 <td>{{ $parcela->despesa->categoria->nome }}</td>
 
                                                 <td class="td-actions text-right">
-                                                    <button type="button" rel="tooltip" class="btn btn-primary" title="Pagar"
+                                                    <button type="button" rel="tooltip" class="btn btn-primary btn-simple" title="Pagar"
                                                             onclick="pagar(
                                                                     '{{$parcela->id}}'
                                                                     )">
                                                         <i class="material-icons">attach_money</i>
                                                     </button>
-                                                    <button type="button" rel="tooltip" class="btn btn-info"
+                                                    <button type="button" rel="tooltip" class="btn btn-info btn-simple"
                                                             onclick="visualizar(
                                                                     '{{$parcela->despesa->nome}}',
                                                                     '{{ 'R$ '.number_format($parcela->valor, 2, ',', '.')}}',
@@ -66,7 +66,7 @@
                                                             )">
                                                         <i class="material-icons">assignment</i>
                                                     </button>
-                                                    <button type="button" rel="tooltip" class="btn btn-success"
+                                                    <button type="button" rel="tooltip" class="btn btn-success btn-simple"
                                                             onclick="alterar(
                                                                     '{{$parcela->id}}',
                                                                     '{{$parcela->despesa->nome}}',
@@ -80,7 +80,7 @@
                                                             );">
                                                         <i class="material-icons">edit</i>
                                                     </button>
-                                                    <button type="button" rel="tooltip" class="btn btn-danger" onclick="deletar({{$parcela->despesa->id}});">
+                                                    <button type="button" rel="tooltip" class="btn btn-danger btn-simple" onclick="deletar({{$parcela->despesa->id}});">
                                                         <i class="material-icons">close</i>
                                                     </button>
                                                 </td>
@@ -143,6 +143,17 @@
                                     @endforeach
                                 </select>
                             </div>
+
+
+                            <label class="control-label">Comprovante</label>
+                            <span class="btn btn-round btn-file btn-primary btn-xs" style="margin-left: 13%;" >
+                                <i class="material-icons">attach_file</i>
+                                <input  id="comprovante" name="comprovante" onChange="validationFile(this.form,this)" type="file"  />
+                            </span>
+                            <div class="text-center">
+                                 <div id="file-error"></div>
+                            </div>
+
                             <div class="text-center" style="margin-top: 20px;">
                                 <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Pagar</button>
                             </div>
@@ -155,7 +166,7 @@
             </div>
         </div>
     </div>
-    <!-- /MODAL -->
+    <!-- /MODAL PAGAMENTO -->
 
     <!-- MODAL FORM -->
     <div class="modal fade" tabindex="-1" role="dialog" id="modal-panel">
@@ -354,6 +365,39 @@
 
 @section('scripts')
     <script type="text/javascript">
+
+        function validationFile(form, input) {
+            file = $(input).val();
+            extensoes_permitidas = new Array(".pdf");
+            if (file) {
+                //recupera a extensão do arquivo
+                extensao = (file.substring(file.lastIndexOf("."))).toLowerCase();
+                // verifica se a extensão é permitida
+                valid_file = false;
+                for (var i = 0; i < extensoes_permitidas.length; i++) {
+                    if (extensoes_permitidas[i] == extensao) {
+                        valid_file = true;
+                        break;
+                    }
+                }
+                if (!valid_file) {
+                    // se a extensao for invalida mostra mensagem de erro
+                    $(input).val("");
+                    $("#file-error").html("Formato inválido.");
+                }else{
+                    // verifica tamanho da imagem
+                    var arquivo = input.files[0];
+                    if (arquivo.size>500999) {
+                        $(input).val("");
+                        $("#file-error").html("Tamanho do arquivo inválido.");
+                    } else {
+                        $("#file-error").html($("#comprovante").val().split("\\").pop());
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
         
         function validacaoExtraForm() {
             var messages = new Array();
@@ -450,30 +494,31 @@
                     $("#check-credito-edit").prop("checked", false);
                     $("#credito-edit").attr('disabled','disabled');
                     $("#input-credito-edit").css("display", "none");
-                    var selectCreditoEdit = $(".btn.dropdown-toggle.select-with-transition")[3];
+                    var selectCreditoEdit = $(".btn.dropdown-toggle.select-with-transition")[4];
                     $(selectCreditoEdit).addClass("bs-placeholder");
                     $(selectCreditoEdit).attr('title','Selecione');
-                    var textSelect = $('.filter-option.pull-left')[3];
+                    var textSelect = $('.filter-option.pull-left')[4];
                     $(textSelect).text('Selecione');
                 } else {
                     $("#check-credito-edit").prop("checked", true);
                     $("#credito-edit").removeAttr('disabled');
+                    $("#input-credito-edit").removeAttr('disabled');
                     $("#credito-edit").val(credito);
-                    var selectCreditoEdit = $(".btn.dropdown-toggle.select-with-transition")[3];
+                    var selectCreditoEdit = $(".btn.dropdown-toggle.select-with-transition")[4];
                     $(selectCreditoEdit).removeClass("bs-placeholder");
                     $(selectCreditoEdit).attr('title',nomeCredito);
-                    var textCreditoSelect = $('.filter-option.pull-left')[3];
+                    var textCreditoSelect = $('.filter-option.pull-left')[4];
                     $(textCreditoSelect).text(nomeCredito);
-                    $("#input-credito-edit").css("display", "block");
+                    $("#input-credito-edit").css( "display", "block" );
                 }
 
             }
 
             $("#categoria-edit").val(categoria);
-            var selectCategoriaEdit = $(".btn.dropdown-toggle.select-with-transition")[2];
+            var selectCategoriaEdit = $(".btn.dropdown-toggle.select-with-transition")[3];
             $(selectCategoriaEdit).removeClass("bs-placeholder");
             $(selectCategoriaEdit).attr('title',nomeCategoria);
-            var textCategoriaSelect = $('.filter-option.pull-left')[2];
+            var textCategoriaSelect = $('.filter-option.pull-left')[3];
             $(textCategoriaSelect).text(nomeCategoria);
             $("#parcela-edit").val(parcela);
             $("#vencimento-edit").val(vencimento);
@@ -511,6 +556,34 @@
 
         $(document).ready(function() {
 
+            $('#datatables').DataTable({
+                "pagingType": "full_numbers",
+                "deferRender": true,
+                "processing": true,
+                "lengthMenu": [
+                    [10, 25, 50, -1],
+                    [10, 25, 50, "All"]
+                ],
+                responsive: true,
+                iDisplayLength: 10,
+                destroy: true,
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Filtrar",
+                    lengthMenu: "Exibindo _MENU_ registros por página",
+                    zeroRecords: "Nenhum registro encontrado",
+                    info: "Visualizando página _PAGE_ de _PAGES_",
+                    infoEmpty: "Nenhum registro encontrado",
+                    infoFiltered: "(filtered from _MAX_ total records)",
+                    paginate: {
+                        "first":      "Primeiro",
+                        "last":       "Último",
+                        "next":       "Próximo",
+                        "previous":   "Anterior"
+                    }
+                },
+            });
+
             /* Habilitar input do limite*/
             $( "#check-credito" ).click(function() {
                 setInterval(function(){
@@ -533,6 +606,27 @@
             });
 
             /* Limpar formulário */
+            $("#modal-pagamento").on("hide.bs.modal", function () {
+                $("#conta").val($("#categoria option:first").val());
+                var selects = $(".btn.dropdown-toggle.select-with-transition");
+                $(selects).each (function(){
+                    $(this).addClass("bs-placeholder");
+                    $(this).attr('title','Selecione')
+                });
+                var textSelect = $('.filter-option.pull-left');
+                $(textSelect).each (function(){
+                    $(this).text('Selecione')
+                });
+                var form = $("#modal-pagamento").find("form");
+                $(form).each (function(){
+                    var formID = $(this).attr("id");
+                    $("#"+formID).each (function(){
+                        this.reset();
+                    });
+                });
+                $("#file-error").html("");
+            });
+
             $("#modal-panel").on("hide.bs.modal", function () {
                 $("#formDespesa-edit").css("display","none");
                 $("#formDespesa").css("display","block");
@@ -550,7 +644,7 @@
                 $(textSelect).each (function(){
                     $(this).text('Selecione')
                 });
-                var form = $("#modal-panel").find("form")
+                var form = $("#modal-panel").find("form");
                 $(form).each (function(){
                     var formID = $(this).attr("id");
                     $("#"+formID).each (function(){

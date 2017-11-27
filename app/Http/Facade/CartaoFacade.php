@@ -9,6 +9,7 @@
 namespace App\Http\Facade;
 
 use App\Http\Model\Categoria;
+use App\Http\Model\Conta;
 use App\Http\Model\CartaoCredito;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -40,38 +41,48 @@ class CartaoFacade
         }
     }
 
-    public static function criarCartao($limite, $venc, $fech, $indep, $nome, $conta, $user) {
+    public static function criarCartaoIndependente($limite, $venc, $fech, $nome, $user) {
+        try {
+
+            $limite = str_replace("R$", "", $limite);
+            $limite = str_replace(".", "", $limite);
+            $limite = str_replace(",", ".", $limite);
+
+            $new_conta = Conta::create([
+                'nome' => $nome,
+                'tipo' => 'I',
+                'exibir_indicador' => 'N',
+                'dt_movimento' => date('Ymd'),
+                'id_usuario' => $user->id
+            ]);
+
+            $new_cartao = CartaoCredito::create([
+                'limite' => $limite,
+                'dt_fechamento' => $fech,
+                'dt_vencimento' => $venc,
+                'id_conta' => $new_conta->id,
+                'cartao_independente' => true
+            ]);
+
+        } catch (Exception $e) {
+            throw new Exception("Erro Facade: ".$e->getMessage());
+        }
+    }
+
+    public static function criarCartao($limite, $venc, $fech, $conta) {
         try {
            
             $limite = str_replace("R$", "", $limite);
             $limite = str_replace(".", "", $limite);
-            $limite = str_replace(",", ".", $limite);         
+            $limite = str_replace(",", ".", $limite);
 
-            if (!empty($indep) &&  $indep=='true') {
-                $new_conta = Conta::create([
-                    'nome' => $nome,
-                    'tipo' => 'O',
-                    'exibir_indicador' => 'N',
-                    'dt_movimento' => date('Ymd'),
-                    'id_usuario' => $user->id
-                ]);                
-
-                $new_cartao = CartaoCredito::create([
-                    'limite' => $limite,
-                    'dt_fechamento' => $fech,
-                    'dt_vencimento' => $venc,
-                    'id_conta' => $new_conta->id,
-                    'cartao_independente' => true
-                ]);
-            } else {
-                $new_cartao = CartaoCredito::create([
-                    'limite' => $limite,
-                    'dt_fechamento' => $fech,
-                    'dt_vencimento' => $venc,
-                    'id_conta' => $conta,
-                    'cartao_independente' => false
-                ]);
-            }          
+            $new_cartao = CartaoCredito::create([
+                'limite' => $limite,
+                'dt_fechamento' => $fech,
+                'dt_vencimento' => $venc,
+                'id_conta' => $conta,
+                'cartao_independente' => false
+            ]);
               
         } catch (Exception $e) {
             throw new Exception("Erro Facade: ".$e->getMessage());
@@ -103,8 +114,8 @@ class CartaoFacade
             $limite = str_replace(",", ".", $limite);
 
             $dia = substr($venc, 0, -8);
-            $mes = substr($venc['vencimento'], 3, -5);
-            $ano = substr($venc['vencimento'], -4);
+            $mes = substr($venc, 3, -5);
+            $ano = substr($venc, -4);
             $vencimento = $ano.$mes.$dia;
 
             $diaF = substr($fech, 0, -8);
@@ -125,5 +136,7 @@ class CartaoFacade
             throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
+
+
 
 }

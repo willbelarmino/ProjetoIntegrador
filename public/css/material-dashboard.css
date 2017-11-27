@@ -40,6 +40,14 @@
    padding: 3px 15px !important;
 }
 
+#file-error{
+  display:inline-block;
+  width:250px;
+  white-space: nowrap;
+  overflow:hidden !important;
+  text-overflow: ellipsis;
+}
+
 
 .title-conta {
   color: #3e3b3b;

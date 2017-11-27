@@ -58,6 +58,11 @@ return [
             'root' => storage_path('app/public/contas'),
         ],
 
+        'local-comprovante' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/comprovantes'),
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

@@ -246,6 +246,7 @@
 <!-- Jquery Mask Money -->
 <script src="../js/jquery.maskMoney.js" type="text/javascript"></script>
 
+@yield('scripts')
 
 <script type="text/javascript">
     function setFormValidation(id) {
@@ -395,6 +396,6 @@
     });
 </script>
 
-@yield('scripts')
+
 
 </html>

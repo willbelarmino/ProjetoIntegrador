@@ -48,7 +48,7 @@ class ContaController extends Controller
             $usuarioLogado = self::getUsuario();
             $periodo = self::getPeriodo();
 
-            $contas = ContaFacade::getContas($usuarioLogado);
+            $contas = ContaFacade::getContas($usuarioLogado, $periodo);
             
             return view('contas/contas',[
                 'menuView'=>'contas',
@@ -94,7 +94,7 @@ class ContaController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  $ex->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -114,7 +114,7 @@ class ContaController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $ex->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -157,7 +157,7 @@ class ContaController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  $ex->getMessage() //'Ops. Erro ao alterar conta. Tente novamente mais tarde.'
+                'message' =>  $e->getMessage() //'Ops. Erro ao alterar conta. Tente novamente mais tarde.'
             ]);
         }
 

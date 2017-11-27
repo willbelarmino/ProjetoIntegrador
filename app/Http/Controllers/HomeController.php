@@ -61,7 +61,7 @@ class HomeController extends Controller
 
             $saldoEstimado =  UtilsController::getSaldoEstimado($usuarioLogado, $periodo);
 
-            $contas = ContaFacade::getContas($usuarioLogado);
+            $contas = ContaFacade::getContasParaExibicao($usuarioLogado, $periodo);
 
             return view('home',
                 ['menuView'=>'dashboard',

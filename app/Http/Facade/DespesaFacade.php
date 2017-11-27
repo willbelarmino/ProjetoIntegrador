@@ -19,6 +19,8 @@ use Barryvdh\Snappy;
 use Session;
 use App\Http\Model\ParcelaPendente;
 use App\Http\Model\ParcelaPaga;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
 
 class DespesaFacade
 {
@@ -329,6 +331,27 @@ class DespesaFacade
                         " . $pendente . ",
                         " . $conta . "
                         )");            
+
+        } catch (Exception $e) {
+            throw new Exception("Erro Facade: ".$e->getMessage());
+        }
+    }
+
+    public static function pagarDespesaComComprovante($pendente, $conta, $file){
+        try {
+
+            DB::select("CALL pagarDespesa(                    
+                        " . $pendente . ",
+                        " . $conta . "
+                        )");
+            $paga = DB::select("SELECT LAST_INSERT_ID() as paga");
+
+            //$image = Image::make($file)->resize(128, 128)->encode('jpg')->stream();
+            $file_image_name = $paga.time().'.pdf';
+            Storage::disk('local-comprovante')->put($file_image_name,$file->__toString());
+
+            //DB::table('parcela_paga')->where('id', $pendente->id)->update(['image' => $file_image_name]);
+
 
         } catch (Exception $e) {
             throw new Exception("Erro Facade: ".$e->getMessage());

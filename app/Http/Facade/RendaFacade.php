@@ -46,18 +46,23 @@ class RendaFacade
 
             $rendasFixa = RendaFixa::with(['conta' => function ($query) use ($user) {
                 $query->where('conta.id_usuario', '=', $user->id);
-            }])->whereBetween('dt_recebimento_inicio', [
-                $periodo->periodoSelecionadoInicio,
-                $periodo->periodoSelecionadoFim
-            ])->get();
+                }])->where([
+                    ['dt_recebimento_inicio', '<', $periodo->periodoSelecionadoFim],
+                    ['dt_cancelamento', '=', null]
+                ])->orWhere([
+                    ['dt_recebimento_inicio', '<', $periodo->periodoSelecionadoFim],
+                    ['dt_cancelamento', '>', $periodo->periodoSelecionadoFim]
+                ])->get();
 
             foreach($rendasFixa as $key2 => $subarray2) {
+
                 $id = $rendasFixa[$key2]->id;
                 $nome = $rendasFixa[$key2]->nome;
-                $data_recebimento = date_format(date_create($rendasFixa[$key2]->dt_recebimento),"d/m/Y");
+                $data_recebimento = date_format(date_create($rendasFixa[$key2]->dt_recebimento_inicio),"d/m/Y");
                 $valor = 'R$ '.number_format($rendasFixa[$key2]->valor, 2, ',', '.');
                 $contaNome = $rendasFixa[$key2]->conta->nome;
                 $contaID = $rendasFixa[$key2]->id_conta;
+                $isFixa = 'true';
 
                 $tabela['data'][] = array (
                     0 => $nome."   <span class='btn btn-warning btn-xs' style='cursor: default !important;'> Fixa </span>",
@@ -65,7 +70,7 @@ class RendaFacade
                     2 => $valor,
                     3 => $contaNome,
                     4 =>
-                        "<button type='button' rel='tooltip' style='margin: 2px;' class='btn btn-info btn-simple'"
+                        "<button type='button' rel='tooltip' style='margin: 2px;' title='visualizar' class='btn btn-info btn-simple'"
                         ."onclick='visualizar(
                                 \"".$nome."\",  
                                 \"".$valor."\", 
@@ -73,28 +78,24 @@ class RendaFacade
                                 \"".$contaNome."\" 
                             )'>"
                         ."<i class='material-icons'>assignment</i>"
-                        ."<div class='ripple-container'></div>"
+
                         ."</button>"
 
-                        ."<button type='button' rel='tooltip' style='margin: 2px;' class='btn btn-success btn-simple'"
-                        ."onclick='alterar(
-                                \"".$id."\",  
-                                \"".$nome."\", 
-                                \"".$valor."\",  
-                                \"".$data_recebimento."\",
-                                \"".$contaID."\",  
-                                \"".$contaNome."\"
-                            )'>"
-                        ."<i class='material-icons'>edit</i>"
-                        ."<div class='ripple-container'></div>"
-                        ."</button>"
-
-                        ."<button type='button' rel='tooltip' style='margin: 2px;' class='btn btn-danger btn-simple'"
-                        ."onclick='deletar(
+                        ."<button type='button' rel='tooltip' style='margin: 2px;' title='Cancelar' class='btn btn-warning btn-simple'"
+                        ."onclick='cancelar(
                                 \"".$id."\" 
                             )'>"
-                        ."<i class='material-icons'>close</i>"
-                        ."<div class='ripple-container'></div>"
+                        ."<i class='material-icons'>cancel</i>"
+
+                        ."</button>"
+
+                        ."<button type='button' rel='tooltip' style='margin: 2px;' title='deletar' class='btn btn-danger btn-simple'"
+                        ."onclick='deletar(
+                                \"".$id."\",
+                                \"".$isFixa."\" 
+                            )'>"
+                        ."<i class='mdi mdi-delete' style='font-size: 17px !important;'></i>"
+
                         ."</button>"
 
 
@@ -117,6 +118,7 @@ class RendaFacade
                 $valor = 'R$ '.number_format($rendas[$key]->valor, 2, ',', '.');
                 $contaNome = $rendas[$key]->conta->nome;
                 $contaID = $rendas[$key]->id_conta;
+                $isFixa = 'false';
 
                 $tabela['data'][] = array (
                     0 => $nome,
@@ -124,7 +126,7 @@ class RendaFacade
                     2 => $valor,
                     3 => $contaNome,
                     4 =>
-                        "<button type='button' rel='tooltip' style='margin: 2px;' class='btn btn-info btn-simple'"
+                        "<button type='button' rel='tooltip' style='margin: 2px;' title='visualizar' class='btn btn-info btn-simple'"
                             ."onclick='visualizar(
                                 \"".$nome."\",  
                                 \"".$valor."\", 
@@ -132,10 +134,10 @@ class RendaFacade
                                 \"".$contaNome."\" 
                             )'>"
                             ."<i class='material-icons'>assignment</i>"
-                            ."<div class='ripple-container'></div>"
+
                         ."</button>"
 
-                        ."<button type='button' rel='tooltip' style='margin: 2px;' class='btn btn-success btn-simple'"
+                        ."<button type='button' rel='tooltip' style='margin: 2px;' title='alterar' class='btn btn-success btn-simple'"
                         ."onclick='alterar(
                                 \"".$id."\",  
                                 \"".$nome."\", 
@@ -148,12 +150,13 @@ class RendaFacade
                         ."<div class='ripple-container'></div>"
                         ."</button>"
 
-                        ."<button type='button' rel='tooltip' style='margin: 2px;' class='btn btn-danger btn-simple'"
+                        ."<button type='button' rel='tooltip' style='margin: 2px;' title='deletar' class='btn btn-danger btn-simple'"
                         ."onclick='deletar(
-                                \"".$id."\" 
+                                \"".$id."\",
+                                \"".$isFixa."\"  
                             )'>"
-                        ."<i class='material-icons'>close</i>"
-                        ."<div class='ripple-container'></div>"
+                        ."<i class='mdi mdi-delete' style='font-size: 17px !important;'></i>"
+
                         ."</button>"
 
 
@@ -171,14 +174,34 @@ class RendaFacade
     public static function getRendasPorConta($conta, $periodo) {
         try {
 
-            $rendas = Renda::with(['conta' => function ($query) use ($conta) {
-                $query->where('conta.id', '=', $conta);
-            }])->whereBetween('dt_recebimento', [
-                $periodo->periodoSelecionadoInicio,
-                $periodo->periodoSelecionadoFim
-            ])->get();
+            $rendas = Renda::with('conta')
+                ->whereBetween('dt_recebimento', [
+                    $periodo->periodoSelecionadoInicio,
+                    $periodo->periodoSelecionadoFim
+                ])->where('id_conta', '=', $conta)
+                ->get();
 
             return $rendas;
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    public static function getRendasFixaPorConta($conta, $periodo) {
+        try {
+
+            $rendasFixa = RendaFixa::with('conta')
+            ->where([
+                ['id_conta', '=', $conta],
+                ['dt_recebimento_inicio', '<', $periodo->periodoSelecionadoFim],
+                ['dt_cancelamento', '=', null]
+            ])->orWhere([
+                ['id_conta', '=', $conta],
+                ['dt_recebimento_inicio', '<', $periodo->periodoSelecionadoFim],
+                ['dt_cancelamento', '>', $periodo->periodoSelecionadoFim]
+            ])->get();
+
+            return $rendasFixa;
         } catch (Exception $e) {
             return null;
         }
@@ -249,6 +272,28 @@ class RendaFacade
               
         } catch (Exception $e) {
             throw new Exception("Erro Facade: ".$e->getMessage());
+        }
+    }
+
+    public static function deletarRendaFixa($renda){
+        try {
+
+            DB::table('renda_fixa')->where('id',$renda)->delete();
+
+        } catch (Exception $e) {
+            throw new Exception("Erro Facade: ".$e->getMessage());
+        }
+    }
+
+    public static function cancelarRendaFixa($renda){
+        try {
+            DB::table('renda_fixa')
+                ->where('id', $renda)
+                ->update([
+                    'dt_cancelamento' => date("Y-m-d")
+                ]);
+        } catch (Exception $e) {
+
         }
     }
 

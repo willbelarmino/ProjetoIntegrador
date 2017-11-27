@@ -16,6 +16,7 @@
                         <h4 class="card-title">{{$page}}</h4>
                         <div class="toolbar">
                             <!--        Here you can write extra buttons/actions for the toolbar              -->
+
                         </div>
                         <div class="material-datatables">
                             <div class="content-table-view">
@@ -65,7 +66,7 @@
                                                 <td> {{ date('d/m/Y', strtotime($conta->dt_movimento)) }} </td>
 
                                                 <td class="td-actions text-right">
-                                                    <button type="button" rel="tooltip" class="btn btn-info"
+                                                    <button type="button" rel="tooltip" class="btn btn-info btn-simple" title="visualizar"
                                                             onclick="visualizar(
                                                                 '{{asset('storage/contas/'.$conta->image)}}',
                                                                 '{{$conta->nome}}',
@@ -76,7 +77,7 @@
                                                             );">
                                                         <i class="material-icons">assignment</i>
                                                     </button>
-                                                    <button type="button" rel="tooltip" class="btn btn-success"
+                                                    <button type="button" rel="tooltip" class="btn btn-success btn-simple" title="alterar"
                                                             onclick="alterar(
                                                                 '{{$conta->id}}',
                                                                 '{{$conta->nome}}',
@@ -86,11 +87,11 @@
                                                             );">
                                                         <i class="material-icons">edit</i>
                                                     </button>
-                                                    <button type="button" rel="tooltip" class="btn btn-danger"
+                                                    <button type="button" rel="tooltip" class="btn btn-danger btn-simple" title="deletar"
                                                             onclick="deletar(
                                                                 {{$conta->id}}
                                                             );">
-                                                        <i class="material-icons">close</i>
+                                                        <i class='mdi mdi-delete' style='font-size: 17px !important;'></i>
                                                     </button>
                                                 </td>
                                             </tr>
@@ -98,9 +99,7 @@
 
                                         </tbody>
                                     </table>
-                                    <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
-                                        <i class="material-icons">add</i> ADICIONAR
-                                    </button>
+
                                 </div>
                             </div>
                         </div>
@@ -454,6 +453,33 @@
 
         $(document).ready(function() {
 
+            $('#datatables').DataTable({
+                "pagingType": "full_numbers",
+                "deferRender": true,
+                "processing": true,
+                "lengthMenu": [
+                    [10, 25, 50, -1],
+                    [10, 25, 50, "All"]
+                ],
+                responsive: true,
+                iDisplayLength: 10,
+                destroy: true,
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Filtrar",
+                    lengthMenu: "Exibindo _MENU_ registros por página",
+                    zeroRecords: "Nenhum registro encontrado",
+                    info: "Visualizando página _PAGE_ de _PAGES_",
+                    infoEmpty: "Nenhum registro encontrado",
+                    infoFiltered: "(filtered from _MAX_ total records)",
+                    paginate: {
+                        "first":      "Primeiro",
+                        "last":       "Último",
+                        "next":       "Próximo",
+                        "previous":   "Anterior"
+                    }
+                },
+            });
 
             /* Limpar formulário */
             $("#modal-panel").on("hide.bs.modal", function () {

@@ -16,6 +16,9 @@
                         <h4 class="card-title">{{$page}}</h4>
                         <div class="toolbar">
                             <!--        Here you can write extra buttons/actions for the toolbar              -->
+                            <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
+                                <i class="material-icons">add</i> ADICIONAR
+                            </button>
                         </div>
                         <div class="material-datatables">
                             <div class="content-table-view">
@@ -43,7 +46,7 @@
                                                 <td> {{ $cartao->dt_vencimento }} </td>
 
                                                 <td class="td-actions text-right">
-                                                    <button type="button" rel="tooltip" class="btn btn-info"
+                                                    <button type="button" rel="tooltip" class="btn btn-info btn-simple" title="visualizar"
                                                             onclick="visualizar(
                                                                 '{{$cartao->conta->nome}}',
                                                                 '{{ 'R$ '.number_format($cartao->limite, 2, ',', '.')}}',
@@ -52,7 +55,7 @@
                                                             );">
                                                         <i class="material-icons">assignment</i>
                                                     </button>
-                                                    <button type="button" rel="tooltip" class="btn btn-success"
+                                                    <button type="button" rel="tooltip" class="btn btn-success btn-simple" title="alterar"
                                                             onclick="alterar(
                                                                     '{{ $cartao->id }}',
                                                                     '{{ 'R$ '.number_format($cartao->limite, 2, ',', '.')}}',
@@ -61,7 +64,7 @@
                                                             );">
                                                         <i class="material-icons">edit</i>
                                                     </button>
-                                                    <button type="button" rel="tooltip" class="btn btn-danger"
+                                                    <button type="button" rel="tooltip" class="btn btn-danger btn-simple" title="deletar"
                                                             onclick="deletar(
                                                                 '{{$cartao->id}}',
                                                                 '{{$cartao->conta->id}}',
@@ -74,9 +77,6 @@
                                         @endforeach
                                         </tbody>
                                     </table>
-                                    <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
-                                        <i class="material-icons">add</i> ADICIONAR
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -386,6 +386,35 @@
 
         $(document).ready(function() {
 
+
+            $('#datatables').DataTable({
+                "pagingType": "full_numbers",
+                "deferRender": true,
+                "processing": true,
+                "lengthMenu": [
+                    [10, 25, 50, -1],
+                    [10, 25, 50, "All"]
+                ],
+                responsive: true,
+                iDisplayLength: 10,
+                destroy: true,
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Filtrar",
+                    lengthMenu: "Exibindo _MENU_ registros por página",
+                    zeroRecords: "Nenhum registro encontrado",
+                    info: "Visualizando página _PAGE_ de _PAGES_",
+                    infoEmpty: "Nenhum registro encontrado",
+                    infoFiltered: "(filtered from _MAX_ total records)",
+                    paginate: {
+                        "first":      "Primeiro",
+                        "last":       "Último",
+                        "next":       "Próximo",
+                        "previous":   "Anterior"
+                    }
+                },
+            });
+
             /* Habilitar input do nome*/
             $( ".toggle" ).click(function() {
                 setTimeout(function(){
@@ -425,6 +454,9 @@
                         this.reset();
                     });
                 });
+                $("#nome-form").css( "display", "none" );
+                $("#conta-form").css( "display", "block" );
+                limpaSelect();
             });
 
             /* Regras de validação do formulário*/

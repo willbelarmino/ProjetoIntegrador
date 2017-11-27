@@ -66,57 +66,56 @@
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="card">
-                        <div class="card-header card-header-icon" data-background-color="grey" style="cursor:pointer;" data-toggle="collapse" data-target="#panel-contas">
-                            <i class="mdi mdi-account-card-details"></i>
-                        </div>
+                @if ($contas!= null)
 
-                        <div class="card-content">
-                            <h4 class="card-title">
-                                Contas
-                                <i class="mdi mdi-settings" title="Configurações" style="cursor: pointer; float: right" onclick="alert('Config')"></i>
-                            </h4>
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-header card-header-icon" data-background-color="grey" style="cursor:pointer;" data-toggle="collapse" data-target="#panel-contas">
+                                <i class="mdi mdi-account-card-details"></i>
+                            </div>
 
-                            @if ($contas!= null)
+                            <div class="card-content">
+                                <h4 class="card-title">
+                                    Contas
+                                    <i class="mdi mdi-settings" title="Configurações" style="cursor: pointer; float: right" onclick="alert('Config')"></i>
+                                </h4>
+                                    <div id="panel-contas" class="collapse-conta in">
 
-                                <div id="panel-contas" class="collapse-conta in">
+                                        @foreach ($contas as $conta)
 
-                                    @foreach ($contas as $conta)
-
-                                        <div class="col-lg-3 col-md-6 col-sm-6">
-                                            <div class="card card-stats">
-                                                <div class="card-header-conta" data-background-color="transparent">
-                                                    <div class="header-conta">
-                                                        <div class="title-conta-default">
-                                                            <img  style="width: 30px; height: 25px; margin-right: 25px;"
-                                                                  src="{{ asset('storage/contas/'.$conta->image) }}" alt="...">
-                                                            <span class="title-conta">{{ $conta->nome }}</span>
+                                            <div class="col-lg-3 col-md-6 col-sm-6">
+                                                <div class="card card-stats">
+                                                    <div class="card-header-conta" data-background-color="transparent">
+                                                        <div class="header-conta">
+                                                            <div class="title-conta-default">
+                                                                <img  style="width: 30px; height: 25px; margin-right: 25px;"
+                                                                      src="{{ asset('storage/contas/'.$conta->image) }}" alt="...">
+                                                                <span class="title-conta">{{ $conta->nome }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-content">
+                                                        <div class="card-content-conta">
+                                                            <h3 class="card-title-saldo">Saldo: {{ 'R$ '.number_format($conta->saldo, 2, ',', '.') }}</h3>
+                                                            <h3 class="card-title-movimenta">Última movimentação: {{ date('d/m/Y', strtotime($conta->dt_movimento)) }}</h3>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-footer">
+                                                        <div class="stats" onclick="verExtrato({{$conta->id}});" style="cursor: pointer;" title="Visualizar extrato">
+                                                            <i class="material-icons">list</i> Ver extrato
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="card-content">
-                                                    <div class="card-content-conta">
-                                                        <h3 class="card-title-saldo">Saldo: {{ 'R$ '.number_format($conta->saldo, 2, ',', '.') }}</h3>
-                                                        <h3 class="card-title-movimenta">Última movimentação: {{ date('d/m/Y', strtotime($conta->dt_movimento)) }}</h3>
-                                                    </div>
-                                                </div>
-                                                <div class="card-footer">
-                                                    <div class="stats" onclick="verExtrato({{$conta->id}});" style="cursor: pointer;" title="Visualizar extrato">
-                                                        <i class="material-icons">list</i> Ver extrato
-                                                    </div>
-                                                </div>
                                             </div>
-                                        </div>
 
-                                    @endforeach
+                                        @endforeach
 
-                                </div>
-
-                            @endif
+                                    </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+
+                @endif
 
                 <div class="row">
                     <div class="col-md-5">

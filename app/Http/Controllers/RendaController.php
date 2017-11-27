@@ -51,7 +51,7 @@ class RendaController extends Controller
             if ($periodo == null || $usuarioLogado == null) {
                 throw new Exception();
             }
-            $contas = ContaFacade::getContas($usuarioLogado);
+            $contas = ContaFacade::getContas($usuarioLogado, $periodo);
 
             return view('rendas/rendas',
                 ['menuView'=>'rendas',
@@ -96,7 +96,8 @@ class RendaController extends Controller
                 RendaFacade::criarRenda($param['nome'], $param['valor'], $param['recebimento'], $param['conta']);
             } else {
                 RendaFacade::criarRendaFixa($param['nome'], $param['valor'], $param['recebimento'], $param['conta']);
-            }            
+            }
+            ContaFacade::atualizaDataMovimento($param['conta']);
 
             return response()->json([
                 'status' => 'success',
@@ -116,8 +117,12 @@ class RendaController extends Controller
         try {
            
             $param = $request->all();
-            
-            RendaFacade::deletarRenda($param['id']);  
+
+            if ($param['isFixa'] == "false") {
+                RendaFacade::deletarRenda($param['id']);
+            } else {
+                RendaFacade::deletarRendaFixa($param['id']);
+            }
 
             return response()->json([
                 'status' => 'success',
@@ -132,13 +137,35 @@ class RendaController extends Controller
         }
     }
 
+    protected function cancel(Request $request) {
+        try {
+
+            $param = $request->all();
+
+            RendaFacade::cancelarRendaFixa($param['id-cancel']);
+
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Renda cancelada com sucesso.'
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+            ]);
+        }
+    }
+
     protected function edit(Request $request){
         try {
 
             $param = $request->all();           
 
-            RendaFacade::editarRenda($param['id'], $param['nome'], $param['valor'], $param['recebimento'], $param['conta']); 
-               
+            RendaFacade::editarRenda($param['id'], $param['nome'], $param['valor'], $param['recebimento'], $param['conta']);
+
+            ContaFacade::atualizaDataMovimento($param['conta']);
+
             return response()->json([
                 'status' => 'success',
                 'message' =>  'Renda alterada com sucesso.'

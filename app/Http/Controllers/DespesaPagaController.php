@@ -55,7 +55,7 @@ class DespesaPagaController extends Controller
 
             $categorias = CategoriaFacade::getCategorias($usuarioLogado);
 
-            $contas = ContaFacade::getContas($usuarioLogado);
+            $contas = ContaFacade::getContas($usuarioLogado, $periodo);
 
             $cartoes = CartaoFacade::getCartoes($usuarioLogado);
 

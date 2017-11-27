@@ -54,7 +54,7 @@ class CartaoController extends Controller
 
             $cartoes = CartaoFacade::getCartoes($usuarioLogado);
 
-            $contas = ContaFacade::getContas($usuarioLogado);
+            $contas = ContaFacade::getContas($usuarioLogado, $periodo);
          
             return view('cartoes/cartoes',[
                 'menuView'=>'cartoes',
@@ -74,17 +74,25 @@ class CartaoController extends Controller
     protected function create(Request $request){
         try {
             $usuarioLogado = self::getUsuario();
-            $param = $request->all();          
+            $param = $request->all();
 
-            CartaoFacade::criarCartao(
-                $param['limite'], 
-                $param['vencimento'], 
-                $param['fechamento'], 
-                $param['independente'], 
-                $param['nome'], 
-                $param['conta'], 
-                $usuarioLogado
-            );
+            if ($param['independente'] == "true") {
+
+                CartaoFacade::criarCartaoIndependente(
+                    $param['limite'],
+                    $param['vencimento'],
+                    $param['fechamento'],
+                    $param['nome'],
+                    $usuarioLogado
+                );
+            } else {
+                CartaoFacade::criarCartao(
+                    $param['limite'],
+                    $param['vencimento'],
+                    $param['fechamento'],
+                    $param['conta']
+                );
+            }
 
             return response()->json([
                 'status' => 'success',

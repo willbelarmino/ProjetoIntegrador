@@ -26,13 +26,79 @@ use Illuminate\Support\Facades\Storage;
 class ContaFacade
 {
 
-    public static function getContas($user) {
+    public static function atualizaDataMovimento($conta) {
+        try {
+            DB::table('conta')
+                ->where('id', $conta)
+                ->update([
+                    'dt_movimento' => date("Y-m-d H:i:s")
+                ]);
+        } catch (Exception $e) {
+
+        }
+    }
+
+    public static function getContas($user, $periodo) {
         try {
 
-        	$contas = DB::table('conta')->where('id_usuario', $user->id)->get();	
+        	$contas = DB::table('conta')->where([['id_usuario', $user->id],['tipo','<>','I']])->get();
         	foreach($contas as $key => $subarray) {
-            	$contas[$key]->saldo=100.0;
+        	    $saldo = 0.0;
+
+        	    // Rendas
+                $rendas = RendaFacade::getRendasPorConta($contas[$key]->id,$periodo);
+                foreach($rendas as $keyR => $subarrayR) {
+                    $saldo = $saldo + $rendas[$keyR]->valor;
+                }
+
+                // Rendas Fixa
+                $rendasFixa = RendaFacade::getRendasFixaPorConta($contas[$key]->id,$periodo);
+                foreach($rendasFixa as $keyRF => $subarrayRF) {
+                    $saldo = $saldo + $rendasFixa[$keyRF]->valor;
+                }
+
+                // Despesas
+                $despesas = DespesaFacade::getParcelasPagasPorConta($contas[$key]->id,$periodo);
+                foreach($despesas as $keyD => $subarrayD) {
+                    $saldo = $saldo - $despesas[$keyD]->valor;
+                }
+
+                $contas[$key]->saldo = $saldo;
       		}
+            return  $contas;
+
+        } catch (Exception $ex) {
+            return null;
+        }
+    }
+
+    public static function getContasParaExibicao($user, $periodo) {
+        try {
+
+            $contas = DB::table('conta')->where([['id_usuario', $user->id],['exibir_indicador','S']])->get();
+            foreach($contas as $key => $subarray) {
+                $saldo = 0.0;
+
+                // Rendas
+                $rendas = RendaFacade::getRendasPorConta($contas[$key]->id,$periodo);
+                foreach($rendas as $keyR => $subarrayR) {
+                    $saldo = $saldo + $rendas[$keyR]->valor;
+                }
+
+                // Rendas Fixa
+                $rendasFixa = RendaFacade::getRendasFixaPorConta($contas[$key]->id,$periodo);
+                foreach($rendasFixa as $keyRF => $subarrayRF) {
+                    $saldo = $saldo + $rendasFixa[$keyRF]->valor;
+                }
+
+                // Despesas
+                $despesas = DespesaFacade::getParcelasPagasPorConta($contas[$key]->id,$periodo);
+                foreach($despesas as $keyD => $subarrayD) {
+                    $saldo = $saldo - $despesas[$keyD]->valor;
+                }
+
+                $contas[$key]->saldo = $saldo;
+            }
             return  $contas;
 
         } catch (Exception $ex) {
@@ -133,6 +199,7 @@ class ContaFacade
         try {
            
             $rendas = RendaFacade::getRendasPorConta($conta, $periodo);
+            $rendasFixa = RendaFacade::getRendasFixaPorConta($conta, $periodo);
             $parcelasPagas = DespesaFacade::getParcelasPagasPorConta($conta, $periodo);
             $extrato['data'] = [];
 
@@ -143,7 +210,15 @@ class ContaFacade
                       1 => $rendas[$key]->nome, 
                       2 => 'R$ '.number_format($rendas[$key]->valor, 2, ',', '.')
                 );                 
-            }           
+            }
+
+            foreach($rendasFixa as $key3 => $subarray3) {
+                $extrato['data'][] = array (
+                    0 => date_format(date_create($rendasFixa[$key3]->dt_recebimento_inicio),"d/m/Y"),
+                    1 => $rendasFixa[$key3]->nome,
+                    2 => 'R$ '.number_format($rendasFixa[$key3]->valor, 2, ',', '.')
+                );
+            }
             
             foreach($parcelasPagas as $key2 => $subarray2) {
                 $extrato['data'][] = array (

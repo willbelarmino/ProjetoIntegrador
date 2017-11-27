@@ -55,7 +55,7 @@ class DespesaPendenteController extends Controller
 
             $categorias = CategoriaFacade::getCategorias($usuarioLogado);
 
-            $contas = ContaFacade::getContas($usuarioLogado);
+            $contas = ContaFacade::getContas($usuarioLogado,$periodo);
 
             $cartoes = CartaoFacade::getCartoes($usuarioLogado);
 
@@ -168,7 +168,7 @@ class DespesaPendenteController extends Controller
             $usuarioLogado = self::getUsuario();
             $periodo = self::getPeriodo();
             $parcelasPendentes = DespesaFacade::getParcelasPendentes($usuarioLogado, $periodo);
-            $pdf = PDF::loadView('despesas/relatorios/pendente-rel', ['link'=>$parcelasPendentes, 'title'=>'Despesas Pendentes']);
+            $pdf = PDF::loadView('despesas/relatorios/pendente-rel');
             return $pdf->stream();
 
         } catch (Exception $e) {
@@ -180,9 +180,13 @@ class DespesaPendenteController extends Controller
     protected function pagar(Request $request){
 
         try {
-            $param = $request->all();          
-          
-            DespesaFacade::pagarDespesa($param['id'], $param['conta']);
+            $param = $request->all();
+            $file = $request->file('comprovante');
+            if (!empty($file)) {
+                DespesaFacade::pagarDespesaComComprovante($param['id'], $param['conta'], $file);
+            } else {
+                DespesaFacade::pagarDespesa($param['id'], $param['conta']);
+            }
                
             return response()->json([
                 'status' => 'success',
