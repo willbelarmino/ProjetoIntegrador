@@ -122,7 +122,7 @@
                 @endif
 
                 <div class="row" id="panel-chart" style="display: none;">
-                    <div class="col-md-5">
+                    <div class="col-md-8 col-md-offset-2">
                                 <div class="card">
                                     <div class="card-header card-header-icon" data-background-color="red">
                                         <i class="material-icons">pie_chart</i>
@@ -140,6 +140,7 @@
                                 </div>
                     </div>
 
+                    <!--
                     <div class="col-md-7">
                         <div class="card">
                             <div class="card-header card-header-icon" data-background-color="rose">
@@ -153,7 +154,7 @@
                             <div id="multipleBarsChart" style="height: 320px;" class="ct-chart"></div>
                         </div>
                     </div>
-
+                    -->
 
                 </div>
 
@@ -221,7 +222,8 @@
                                     <tr>
                                         <th class="disabled-sorting">Data</th>
                                         <th class="disabled-sorting">Lançamento</th>
-                                        <th class="disabled-sorting">Valor</th>                                           
+                                        <th class="disabled-sorting">Valor</th>
+                                        <th class="disabled-sorting">Status</th>                                           
                                     </tr>
                                 </thead>                                    
                             </table>
@@ -350,7 +352,9 @@
                         cache: false,                       
                         success: function (json) {                            
                             if (json.categoria!='error') {
-                                //console.log(json.categoria);
+                                console.log("SSS");
+                                console.log(json);
+                                console.log(json);
                                 if (json.categoria!=null && json.categoria.length!=0) {
 
                                     // CHART PIE //
@@ -380,50 +384,56 @@
                                     };
 
                                     Chartist.Pie('#chartPreferences', dataPreferences, optionsPreferences);
+                                    $("#panel-chart").css("display", "block");
 
                                     // CHART BAR //
 
-                                    var dataMultipleBarsChart = {
-                                        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-                                        series: [
-                                            [3500, 443, 320, 780, 553, 453, 326, 434, 568, 610, 756, 895],
-                                            [2300, 243, 280, 580, 453, 353, 300, 364, 368, 410, 636, 695]
-                                        ]
-                                    };
+                                    /*
+                                    if (json.bars!=null && json.bars.length!=0) {
 
-                                    var optionsMultipleBarsChart = {
-                                        seriesBarDistance: 10,
-                                        axisX: {
-                                            showGrid: false,
-                                        },
-                                        axisY: {
-                                            offset: 80,
-                                            labelInterpolationFnc: function(value) {
-                                                return 'R$ ' +value
-                                            },
-                                            scaleMinSpace: 15
-                                        },
-                                        height: '300px'
-                                    };
+                                        var dataMultipleBarsChart = {
+                                            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                                            series: [
+                                                [3500.45, 443, 320, 780, 553, 453, 326, 434, 568, 610, 756, 895],
+                                                [2300, 243, 280, 580, 453, 353, 300, 364, 368, 410, 636, 695]
+                                            ]
+                                        };
 
-                                    var responsiveOptionsMultipleBarsChart = [
-                                        ['screen and (max-width: 640px)', {
-                                            seriesBarDistance: 5,
+                                        var optionsMultipleBarsChart = {
+                                            seriesBarDistance: 10,
                                             axisX: {
+                                                showGrid: false,
+                                            },
+                                            axisY: {
+                                                offset: 80,
                                                 labelInterpolationFnc: function(value) {
-                                                    return value[0];
+                                                    return 'R$ ' +value
+                                                },
+                                                scaleMinSpace: 15
+                                            },
+                                            height: '300px'
+                                        };
+
+                                        var responsiveOptionsMultipleBarsChart = [
+                                            ['screen and (max-width: 640px)', {
+                                                seriesBarDistance: 5,
+                                                axisX: {
+                                                    labelInterpolationFnc: function(value) {
+                                                        return value[0];
+                                                    }
                                                 }
-                                            }
-                                        }]
-                                    ];
+                                            }]
+                                        ];
 
-                                    var multipleBarsChart = Chartist.Bar('#multipleBarsChart', dataMultipleBarsChart, optionsMultipleBarsChart, responsiveOptionsMultipleBarsChart);
+                                        var multipleBarsChart = Chartist.Bar('#multipleBarsChart', dataMultipleBarsChart, optionsMultipleBarsChart, responsiveOptionsMultipleBarsChart);
 
-                                    //start animation for the Emails Subscription Chart
-                                    md.startAnimationForBarChart(multipleBarsChart);
+                                        //start animation for the Emails Subscription Chart
+                                        md.startAnimationForBarChart(multipleBarsChart);
 
-                                    //console.log(json.categoria.length);
-                                    $("#panel-chart").css("display", "block");
+                                        //console.log(json.categoria.length);
+                                        $("#panel-chart").css("display", "block");
+                                    }
+                                    */
                                 }
                             } else {
                                 console.log("ERRO");

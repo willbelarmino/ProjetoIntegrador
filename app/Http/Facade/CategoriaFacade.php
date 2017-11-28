@@ -43,7 +43,14 @@ class CategoriaFacade
             $new_categoria = Categoria::create([
                 'nome' => $nome,
                 'id_usuario' => $user->id
-            ]);            
+            ]);
+
+            try {
+                $msg = "Usuário >".$user->email."< inseriu categoria: ".$new_categoria->nome;
+                LogFacade::registrarLog($user,$msg);
+            } catch (Exception $ex) {
+
+            }
               
         } catch (Exception $e) {
             throw new Exception("Erro Facade: ".$e->getMessage());
@@ -78,20 +85,15 @@ class CategoriaFacade
         }
     }
 
-    public static function editarCategoria($categoria, $limite, $nome) {
-        try {
-           
-            if ($limite!=null) {
-                $limite = str_replace("R$", "", $limite);
-                $limite = str_replace(".", "", $limite);
-                $limite = str_replace(",", ".", $limite);
-            }
+    public static function editarCategoriaSemLimite($categoria, $nome) {
+        try {           
+            
 
             DB::table('categoria')
                 ->where('id', $categoria)
                 ->update([
-                    'nome' => $nome,
-                    'limite' => $limite
+                    'nome' => $nome
+                   
             ]);
               
         } catch (Exception $e) {
@@ -105,7 +107,7 @@ class CategoriaFacade
             $parcelasPagas = DespesaFacade::getParcelasPagasPorCategoria($categoria, $periodo);  
             $parcelasPendentes = DespesaFacade::getParcelasPendentesPorCategoria($categoria, $periodo);  
 
-            $extrato = [];
+            $extrato['data'] = [];
 
             foreach($parcelasPagas as $key2 => $subarray2) {
                 $extrato['data'][] = array (
@@ -118,9 +120,9 @@ class CategoriaFacade
 
             foreach($parcelasPendentes as $key => $subarray) {
                 $extrato['data'][] = array (
-                      0 => date_format(date_create($parcelasPagas[$key]->dt_pagamento),"d/m/Y"), 
-                      1 => $parcelasPagas[$key]->parcelaPendente->despesa->nome, 
-                      2 => 'R$ '.number_format($parcelasPagas[$key]->valor, 2, ',', '.'),
+                      0 => date_format(date_create($parcelasPendentes[$key]->dt_vencimento),"d/m/Y"), 
+                      1 => $parcelasPendentes[$key]->despesa->nome, 
+                      2 => 'R$ '.number_format($parcelasPendentes[$key]->valor, 2, ',', '.'),
                       3 => 'Pendente'
                 ); 
             } 
@@ -146,27 +148,61 @@ class CategoriaFacade
             $grafico['categoria'] = [];
             $grafico['bars'] = [];
 
-            foreach($categorias as $key => $subarray) {
+            $count = 0;
+
+            foreach($categorias as $key => $subarray) {              
                $totalCategoria = 0.0;
                foreach($parcelasPagas as $key2 => $subarray2) {
                   if ($parcelasPagas[$key2]->parcelaPendente->despesa->id_categoria==$categorias[$key]->id) {
                       $totalCategoria = $totalCategoria + $parcelasPagas[$key2]->valor;
-                  }
+                      $count = 1;
+                  } 
                }  
 
-               $porcentagem = round((($totalCategoria * 100) / $valorTotalPagas));
-
-                $grafico['categoria'][] = array (
-                  'nome' => $categorias[$key]->nome, 
-                  'porcentagem' => $porcentagem                    
-               ); 
+               if ($count==1) {
+                  $porcentagem = round((($totalCategoria * 100) / $valorTotalPagas));
+                  $grafico['categoria'][] = array (
+                    'nome' => $categorias[$key]->nome, 
+                    'porcentagem' => $porcentagem                    
+                 );
+               } 
+               $count=0;                
 
             }
-          for ($i = 1; $i <= 10; $i++) {
+            
+          //Session::put('periodoInicioGrafico', date("Y0101",  strtotime($periodo->periodoSelecionadoInicio)));
+          //Session::put('periodoFinalGrafico', date("Y01t",  strtotime($periodo->periodoSelecionadoFim))); 
+          
+          /*    
+          $periodoGraficoArray = [
+              'periodoSelecionadoInicio' => date("Y0101",  strtotime($periodo->periodoSelecionadoInicio)), 
+              'periodoSelecionadoFim' => date("Y01t",  strtotime($periodo->periodoSelecionadoFim))
+          ];
+          $periodoJson = json_encode($periodoGraficoArray);       
 
+
+          for ($i = 1; $i <= 12; $i++) {              
+
+              $valorTotalPagasMes =  DespesaFacade::getTotalDespesaPagaPeriodo($user, $periodoJson);
+              $valorTotalRendasMes =  RendaFacade::getTotalRendasPeriodo($user, $periodoJson);
+              
+              $grafico['bars'][] = array (
+                    'entrada' => $valorTotalRendasMes, 
+                    'retirada' => $valorTotalPagasMes                    
+              );
+
+              $novoPeriodo = date('Ymd', strtotime("+1 month", strtotime($periodoJson->periodoSelecionadoInicio)));
+
+              $periodoGraficoArray = [
+                'periodoSelecionadoInicio' => date("Ym01",  strtotime($novoPeriodo)), 
+                'periodoSelecionadoFim' => date("Ymt",  strtotime($novoPeriodo))
+              ];    
+
+              $periodoJson = json_encode($periodoGraficoArray);          
+              ;
           }
-          //$dataInicioBar = substr($periodoSelecionadoInicio, -8, -4).;
-
+          */
+        
            return $grafico;
 
       } catch (Exception $ex) {

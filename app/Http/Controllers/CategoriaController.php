@@ -76,12 +76,16 @@ class CategoriaController extends Controller
             
             $nome =  $param['nome'];
 
+            CategoriaFacade::criarCategoriaSemLimite($nome, $usuarioLogado);
+
+            /*
             if ($param['hasLimite']=="false" || $param['limite']=="R$ 0,00") {
                     CategoriaFacade::criarCategoriaSemLimite($nome, $usuarioLogado);
             } else {
                 $limite = $param['limite'];
                 CategoriaFacade::criarCategoriaComLimite($nome, $limite, $usuarioLogado);
             }
+            */
 
             return response()->json([
                 'status' => 'success',
@@ -91,7 +95,7 @@ class CategoriaController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -110,7 +114,7 @@ class CategoriaController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -119,12 +123,15 @@ class CategoriaController extends Controller
         try {
             $param = $request->all();
 
+            CategoriaFacade::editarCategoriaSemLimite($param['id'], $param['nome']);
            
+           /*
             if ($param['hasLimite']=="false" || $param['limite']=="R$ 0,00") {
                 CategoriaFacade::editarCategoria($param['id'], null, $param['nome']);
             } else {
                 CategoriaFacade::editarCategoria($param['id'], $param['limite'], $param['nome']);
             }
+            */
 
             return response()->json([
                 'status' => 'success',
@@ -134,7 +141,7 @@ class CategoriaController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }

@@ -24,8 +24,7 @@
                                     <table id="datatables" class="table table-striped table-no-bordered table-hover" cellspacing="0" width="100%" style="width:100%">
                                         <thead>
                                         <tr>
-                                            <th>Nome</th>
-                                            <th>Limite</th>
+                                            <th>Nome</th>                                           
                                             <th class="disabled-sorting text-right"></th>
                                         </tr>
                                         </thead>
@@ -33,28 +32,21 @@
 
                                         @foreach ($categorias as $categoria)
                                             <tr>
-                                                <td>{{ $categoria->nome }}</td>
-
-                                                @if (empty($categoria->limite))
-                                                    <td> -//- </td>
-                                                @else
-                                                    <td>{{ 'R$ '.number_format($categoria->limite, 2, ',', '.') }}</td>
-                                                @endif
+                                                <td>{{ $categoria->nome }}</td>                                               
 
                                                 <td class="td-actions text-right">
                                                     <button type="button" rel="tooltip" class="btn btn-info btn-simple" title="visualizar"
                                                             onclick="visualizar(
                                                                 '{{$categoria->id}}',
-                                                                '{{$categoria->nome}}',
-                                                                '{{ 'R$ '.number_format($categoria->limite, 2, ',', '.')}}'
+                                                                '{{$categoria->nome}}'                                                               
                                                             );">
                                                         <i class="material-icons">assignment</i>
                                                     </button>
                                                     <button type="button" rel="tooltip" class="btn btn-success btn-simple" title="alterar"
                                                             onclick="alterar(
                                                                 '{{$categoria->id}}',
-                                                                '{{$categoria->nome}}',
-                                                                '{{ 'R$ '.number_format($categoria->limite, 2, ',', '.')}}'
+                                                                '{{$categoria->nome}}'
+                                                               
                                                             );">
                                                         <i class="material-icons">edit</i>
                                                     </button>
@@ -111,20 +103,7 @@
                                 </label>
                                 <input class="form-control" id="nome" name="nome" type="text" required="true" />
                             </div>
-
-                            <div class="checkbox">
-                                <label class="label-check">
-                                    <input type="checkbox" id="habilitar-limite" name="optionsCheckboxes">
-                                    <a style="font-size:12px" class="label-check"  >Inserir limite</a>.
-                                </label>
-                            </div>
-
-
-
-                            <div class="form-group label-floating" id="input-limite" style="display:none;">
-                                <label class="control-label">Limite</label>
-                                <input class="form-control money-format" disabled id="limite" name="limite" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
-                            </div>
+                            
                             <div class="category form-category">
                                 <star>*</star> Campos obrigatórios
                             </div>
@@ -150,17 +129,6 @@
                                 <input class="form-control" id="nome-edit" name="nome" type="text" required="true" />
                             </div>
 
-                            <div class="checkbox">
-                                <label class="label-check">
-                                    <input type="checkbox" id="habilitar-limite-edit" name="optionsCheckboxes">
-                                    <a style="font-size:12px" class="label-check"  >Inserir limite</a>.
-                                </label>
-                            </div>
-
-                            <div class="form-group label-floating" id="input-limite-edit" style="display:none;">
-                                <label class="control-label">Limite</label>
-                                <input class="form-control money-format" disabled id="limite-edit" name="limite" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
-                            </div>
                             <div class="category form-category">
                                 <star>*</star> Campos obrigatórios
                             </div>
@@ -188,13 +156,7 @@
                         <i class="material-icons">assignment</i>
                     </div>
                     <div class="card-content">
-                        <h4 class="card-title" id="view-categoria-nome"></h4>
-                        <div class="toolbar">
-                            <!--        Here you can write extra buttons/actions for the toolbar              -->
-                            <span class="btn btn-primary btn-xs">
-                                <p class="form-control-static" id="view-categoria-limite">Limite: R$ 187,45</p>
-                            </span>
-                        </div>
+                        <h4 class="card-title" id="view-categoria-nome"></h4>                       
                         <div class="table-responsive">                            
                             <table id="extratoCategoriatables" class="table table-striped table-no-bordered table-hover" cellspacing="0" width="100%" style="width:100%">
                                 <thead class="text-primary">
@@ -223,9 +185,8 @@
 @section('scripts')
     <script type="text/javascript">
 
-        function visualizar(id,nome,limite) {
-            $("#view-categoria-nome").html(nome);
-            $("#view-categoria-limite").html("Limite: "+limite); 
+        function visualizar(id,nome) {
+            $("#view-categoria-nome").html(nome);            
             gerarModalView(id);           
         }
 
@@ -245,6 +206,7 @@
                             setTimeout(function(){ $("#modal-panel-view").modal("toggle"); }, 2500);
                             return json.data;
                         } else {
+                            console.log(json.data);
                             setTimeout(function(){ showErrorNotification('Erro ao visualizar categoria. Tente novamente mais tarde.'); }, 2500);
                         }
                     },
@@ -307,7 +269,7 @@
         }
 
 
-        function alterar(id,nome,limite) {
+        function alterar(id,nome) {
             $("#formCategoria-edit").css("display","block");
             $("#formCategoria").css("display","none");
             $("#id-edit").val(id);
@@ -316,17 +278,7 @@
             var inputNome = $("#nome-edit").parent()[0];
             $(inputNome).removeClass('is-empty');
             $(inputNome).addClass('label-floating');
-
-            if (limite!="R$ 0,00") {
-                $("#limite-edit").val(limite);
-                var inputLimite = $("#limite-edit").parent()[0];
-                $(inputLimite).removeClass('is-empty');
-                $(inputLimite).addClass('label-floating');
-
-                $("#habilitar-limite-edit").prop("checked", true);
-                $("#limite-edit").removeAttr('disabled');
-                $("#input-limite-edit").css("display", "block");
-            }
+            
 
             $("#modal-panel").modal("toggle");
         }
@@ -393,39 +345,11 @@
                 },
             });
 
-            /* Habilitar input do limite*/
-            $( ".check, .checkbox-material, .check, .label-check" ).click(function() {
-
-                setTimeout(function(){
-                    if ($("#habilitar-limite").is(':checked')==true) {
-                        $("#limite").removeAttr('disabled');
-                        $("#input-limite").css( "display", "block" );
-
-                    }else {
-                        $("#limite").attr('disabled','disabled');
-                        $("#input-limite").css( "display", "none" );
-                    }
-
-                    if ($("#habilitar-limite-edit").is(':checked')==true) {
-                        $("#limite-edit").removeAttr('disabled');
-                        $("#input-limite-edit").css( "display", "block" );
-
-                    }else {
-                        $("#limite-edit").attr('disabled','disabled');
-                        $("#input-limite-edit").css( "display", "none" );
-                    }
-                }, 300);
-
-            });
 
             /* Limpar formulário */
             $("#modal-panel").on("hide.bs.modal", function () {
                 $("#formCategoria-edit").css("display","none");
-                $("#formCategoria").css("display","block");
-                $("#limite").attr('disabled','disabled');
-                $("#input-limite").css("display", "none");
-                $("#limite-edit").attr('disabled','disabled');
-                $("#input-limite-edit").css("display", "none");
+                $("#formCategoria").css("display","block");                
                 var form = $("#modal-panel").find("form")
                 $(form).each (function(){
                     var formID = $(this).attr("id");
@@ -442,9 +366,6 @@
                     messages: {
                         nome: {
                             required: "Campo de preenchimento obrigatório."
-                        },
-                        limite: {
-                            required: "Campo de preenchimento obrigatório."
                         }
                     },
                     errorPlacement: function(error, element) {
@@ -457,12 +378,7 @@
             /* Submita o formualário via Ajax*/
             $( "#formCategoria" ).submit(function( e ) {
                 if ($("#formCategoria" ).valid()) {
-                    var formData = new FormData($("#formCategoria")[0]);
-                    if ($("#habilitar-limite").is(':checked')==false) {
-                        formData.append("hasLimite","false");
-                    }  else {
-                        formData.append("hasLimite","true");
-                    }
+                    var formData = new FormData($("#formCategoria")[0]);                    
 
                     $.ajax({
                         type: "POST",
@@ -499,11 +415,7 @@
             $( "#formCategoria-edit" ).submit(function( e ) {
                 if ($("#formCategoria-edit" ).valid()) {
                     var formData = new FormData($("#formCategoria-edit")[0]);
-                    if ($("#habilitar-limite-edit").is(':checked')==false) {
-                        formData.append("hasLimite",false);
-                    }  else {
-                        formData.append("hasLimite",true);
-                    }
+                    
                     $.ajax({
                         type: "POST",
                         url: '{{route('alterar.categoria')}}',

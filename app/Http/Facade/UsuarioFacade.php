@@ -71,5 +71,15 @@ class UsuarioFacade
         }
     }
 
+    public static function encerrarCadastro($user) {
+        try {
+           
+            //DB::table('parcela')->where('id',$categoria)->delete();         
+                          
+        } catch (Exception $e) {
+            throw new Exception("Erro Facade: ".$e->getMessage());
+        }
+    }
+
 
 }

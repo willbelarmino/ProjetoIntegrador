@@ -70,7 +70,7 @@ class RendaFacade
                 $isFixa = 'true';
 
                 $tabela['data'][] = array (
-                    0 => $nome."   <span class='btn btn-warning btn-xs' style='cursor: default !important;'> Fixa </span>",
+                    0 => $nome."   <span class='btn btn-warning btn-xs' style='cursor: default !important;padding: 0px 10px !important;'> Fixa </span>",
                     1 => $data_recebimento,
                     2 => $valor,
                     3 => $contaNome,

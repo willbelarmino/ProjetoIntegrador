@@ -59,9 +59,11 @@
                             <li class="@if ($menuView == 'minhaconta') active @endif">
                                 <a href="{{route('minha.conta')}}">Minha conta</a>
                             </li>
+                            <!--
                             <li class="@if ($menuView == 'config') active @endif">
                                 <a href="#">Configurações</a>
                             </li>
+                            -->
                         </ul>
                     </div>
                 </div>

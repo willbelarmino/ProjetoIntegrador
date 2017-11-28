@@ -102,7 +102,7 @@ class CartaoController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -121,7 +121,7 @@ class CartaoController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -141,31 +141,51 @@ class CartaoController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
 
-    protected function buscarFaturas(Request $request){
+    protected function visualizarFaturas(Request $request) {
         try {
+
             $param = $request->all();
+
             $periodo = self::getPeriodo();
-            
-            CartaoFacade::buscarFaturas($param['id'], $periodo);
-                                       
+
+            $fatura = CartaoFacade::getFaturas($param['id'], $periodo);
+
+            return response()->json($fatura);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'data' => 'error'
+            ]);
+        }
+    }
+
+     protected function pagarFatura(Request $request) {
+        try {
+
+            $param = $request->all();
+
+            $periodo = self::getPeriodo();
+
+            $cartao = CartaoFacade::buscarCartao($param['id-cartao']);
+
+            CartaoFacade::pagarFatura($cartao, $periodo);
 
             return response()->json([
                 'status' => 'success',
-                'message' =>  'Cartão alterada com sucesso.',
-            ]);         
-        
+                'message' =>  'Fatura paga com sucesso.',
+            ]); 
+
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  $e->getMessage() //'Ops. Erro ao alterar conta. Tente novamente mais tarde.'
+                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
-
     }
 
 }

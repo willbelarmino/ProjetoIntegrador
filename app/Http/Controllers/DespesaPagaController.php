@@ -81,26 +81,72 @@ class DespesaPagaController extends Controller
     }    
 
     protected function create(Request $request){
+
         try {
 
             $usuarioLogado = self::getUsuario();
             $param = $request->all();
+            $file = $request->file('comprovante'); 
+                   
+            
+                if ($param['hasCredito']=="false") {
+                    
+                    if (!empty($file)) {
+                        DespesaFacade::criarDespesaPagaSemCreditoFile(
+                            $param['nome'], 
+                            $param['valor'], 
+                            $param['pagamento'],
+                            $param['parcela'], 
+                            $param['categoria'],
+                            $param['conta'],
+                            $file
+                        );
+                    } else {
+                         DespesaFacade::criarDespesaPagaSemCredito(
+                            $param['nome'], 
+                            $param['valor'], 
+                            $param['pagamento'],
+                            $param['parcela'], 
+                            $param['categoria'],
+                            $param['conta']
+                        );
+                    }
+                } else { 
+                    $cartao = CartaoFacade::buscarCartao($param['credito']);
+                    $conta = $cartao->id_conta;                       
 
-            try {
+                    if (!empty($file)) {                        
+                        DespesaFacade::criarDespesaPagaComCreditoFile(
+                            $param['nome'], 
+                            $param['valor'],
+                            $param['pagamento'],
+                            $param['parcela'],
+                            $param['categoria'], 
+                            $param['credito'], 
+                            $conta,
+                            $file
+                        );
+                    } else {                       
+                        DespesaFacade::criarDespesaPagaComCredito(
+                            $param['nome'], 
+                            $param['valor'],
+                            $param['pagamento'],
+                            $param['parcela'],
+                            $param['categoria'], 
+                            $param['credito'], 
+                            $conta
+                        );
+                    }
+                }
 
-                DespesaFacade::criarDespesaPaga($param['nome'], $param['valor'], $param['pagamento'], $param['parcela'], $param['categoria'], $param['credito'], $param['conta']);
+                
 
                 return response()->json([
                     'status' => 'success',
                     'message' =>  'Despesa cadastrada com sucesso.'
                 ]);
 
-            } catch (CustomException $ex) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' =>  'Ops. Erro ao cadastrar despesa. Tente novamente mais tarde.'
-                ]);
-            }
+            
         
         } catch (Exception $e) {
             return response()->json([

@@ -88,7 +88,8 @@ Route::group(['prefix'=>'cartao','where'=>['id'=>'[0-9]+']], function() {
     Route::post('criarCartao', ['as'=>'criar.cartao', 'uses'=>'CartaoController@create']);
     Route::post('alterarCartao', ['as'=>'alterar.cartao', 'uses'=>'CartaoController@edit']);
     Route::post('deletarCartao', ['as'=>'deletar.cartao', 'uses'=>'CartaoController@delete']);
-    Route::post('buscarFaturas', ['as'=>'buscar.faturas', 'uses'=>'CartaoController@buscarFaturas']);
+    Route::get('buscarFaturas', ['as'=>'buscar.faturas', 'uses'=>'CartaoController@visualizarFaturas']);
+    Route::post('pagarFaturas', ['as'=>'pagar.fatura', 'uses'=>'CartaoController@pagarFatura']);
 });
 
 Route::group(['prefix'=>'renda','where'=>['id'=>'[0-9]+']], function() {

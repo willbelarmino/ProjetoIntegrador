@@ -208,7 +208,8 @@ class ContaFacade
                 $extrato['data'][] = array (
                       0 => date_format(date_create($rendas[$key]->dt_recebimento),"d/m/Y"),
                       1 => $rendas[$key]->nome, 
-                      2 => 'R$ '.number_format($rendas[$key]->valor, 2, ',', '.')
+                      2 => 'R$ '.number_format($rendas[$key]->valor, 2, ',', '.'),
+                      3 => "<span class='btn btn-success btn-xs' style='cursor: default !important;padding: 0px 10px !important;'> Entrada </span>"
                 );                 
             }
 
@@ -216,7 +217,8 @@ class ContaFacade
                 $extrato['data'][] = array (
                     0 => date_format(date_create($rendasFixa[$key3]->dt_recebimento_inicio),"d/m/Y"),
                     1 => $rendasFixa[$key3]->nome,
-                    2 => 'R$ '.number_format($rendasFixa[$key3]->valor, 2, ',', '.')
+                    2 => 'R$ '.number_format($rendasFixa[$key3]->valor, 2, ',', '.'),
+                    3 => "<span class='btn btn-success btn-xs' style='cursor: default !important;padding: 0px 10px !important;'> Entrada </span>"
                 );
             }
             
@@ -224,7 +226,8 @@ class ContaFacade
                 $extrato['data'][] = array (
                       0 => date_format(date_create($parcelasPagas[$key2]->dt_pagamento),"d/m/Y"), 
                       1 => $parcelasPagas[$key2]->parcelaPendente->despesa->nome, 
-                      2 => 'R$ '.number_format($parcelasPagas[$key2]->valor, 2, ',', '.')
+                      2 => 'R$ '.number_format($parcelasPagas[$key2]->valor, 2, ',', '.'),
+                      3 => "<span class='btn btn-danger btn-xs' style='cursor: default !important;padding: 0px 10px !important;'> Retirada </span>"
                 ); 
             } 
              
@@ -234,6 +237,8 @@ class ContaFacade
             throw new Exception("Erro Facade: ".$e->getMessage());
         }
     }
+
+    
 
 
 

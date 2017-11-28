@@ -116,7 +116,7 @@ class DespesaPendenteController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -137,7 +137,7 @@ class DespesaPendenteController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -145,9 +145,14 @@ class DespesaPendenteController extends Controller
     protected function edit(Request $request){
         try {
 
-            $param = $request->all();           
+            $param = $request->all();  
+            if ($param['isCredito']=='false') {
+                DespesaFacade::editarDespesaPendenteSemCredito($param['id'], $param['nome'], $param['valor'], $param['vencimento'], $param['categoria']); 
+            } else {
+                DespesaFacade::editarDespesaPendenteComCredito($param['id'], $param['nome'], $param['valor'], $param['vencimento'], $param['categoria'], $param['credito']); 
+            }         
 
-            DespesaFacade::editarDespesaPendente($param['id'], $param['nome'], $param['valor'], $param['vencimento'], $param['categoria'], $param['credito']); 
+            
                
             return response()->json([
                 'status' => 'success',
@@ -157,7 +162,7 @@ class DespesaPendenteController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -168,7 +173,7 @@ class DespesaPendenteController extends Controller
             $usuarioLogado = self::getUsuario();
             $periodo = self::getPeriodo();
             $parcelasPendentes = DespesaFacade::getParcelasPendentes($usuarioLogado, $periodo);
-            $pdf = PDF::loadView('despesas/relatorios/pendente-rel');
+            $pdf = PDF::loadView('despesas/relatorios/pendente-rel', ['link'=>'Teste', 'title'=>'Despesas Pendentes']);
             return $pdf->stream();
 
         } catch (Exception $e) {
@@ -196,7 +201,7 @@ class DespesaPendenteController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }

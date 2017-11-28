@@ -39,28 +39,40 @@
                                                 @php ($credito = $parcela->despesa->cartao->conta->nome)
                                             @endif
                                             <tr>
-                                                <td>{{ $parcela->despesa->nome }}</td>
+                                                <td>
+                                                    {{ $parcela->despesa->nome }}
+                                                    @if (!empty($parcela->despesa->id_cartao_credito))
+                                                        <span class='btn btn-warning btn-xs' style='cursor: default !important;padding: 0px 10px !important;'> Cartão </span>
+                                                    @endif
+
+                                                </td>
 
                                                 <td>{{ date('d/m/Y', strtotime($parcela->dt_vencimento)) }}</td>
 
                                                 <td>{{ 'R$ '.number_format($parcela->valor, 2, ',', '.') }}</td>
 
-                                                <td>{{ $parcela->despesa->categoria->nome }}</td>
+                                                <td>
+                                                    {{ $parcela->despesa->categoria->nome }}
+                                                    
+                                                </td>
 
                                                 <td class="td-actions text-right">
-                                                    <button type="button" rel="tooltip" class="btn btn-primary btn-simple" title="Pagar"
-                                                            onclick="pagar(
-                                                                    '{{$parcela->id}}'
-                                                                    )">
-                                                        <i class="material-icons">attach_money</i>
-                                                    </button>
+                                                    @if (empty($parcela->despesa->id_cartao_credito))
+                                                        <button type="button" rel="tooltip" class="btn btn-primary btn-simple" title="Pagar"
+                                                                onclick="pagar(
+                                                                        '{{$parcela->id}}'
+                                                                        )">
+                                                            <i class="material-icons">attach_money</i>
+                                                        </button>
+                                                    @endif
                                                     <button type="button" rel="tooltip" class="btn btn-info btn-simple"
                                                             onclick="visualizar(
                                                                     '{{$parcela->despesa->nome}}',
                                                                     '{{ 'R$ '.number_format($parcela->valor, 2, ',', '.')}}',
                                                                     '{{$parcela->despesa->categoria->nome}}',
                                                                     '{{$parcela->referencia}}',
-                                                                    '{{$credito}}'
+                                                                    '{{$credito}}',
+                                                                    '{{ date('d/m/Y', strtotime($parcela->dt_vencimento)) }}',
                                                             )">
                                                         <i class="material-icons">assignment</i>
                                                     </button>
@@ -134,7 +146,9 @@
                             <input id="id-pagamento" name="id" type="hidden"/>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Conta</label>
+                                <label class="control-label">Conta
+                                    <star>*</star>
+                                </label>
                                 <select id="conta" name="conta"  class="selectpicker" data-style="select-with-transition" title="Selecionar" data-size="7">
                                     @foreach ($contas as $conta)
                                         <option value="{{$conta->id}}">{{$conta->nome}}</option>
@@ -152,6 +166,9 @@
                                  <div id="file-error"></div>
                             </div>
 
+                             <div class="category form-category">
+                                <star>*</star> Campos obrigatórios
+                            </div>
                             <div class="text-center" style="margin-top: 20px;">
                                 <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Pagar</button>
                             </div>
@@ -179,28 +196,38 @@
                             <h4 class="card-title">Despesa Pendente</h4>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Nome</label>
+                                <label class="control-label">Nome
+                                    <star>*</star>
+                                </label>
                                 <input class="form-control" id="nome" name="nome" type="text" required="true" />
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Data de vencimento</label>
+                                <label class="control-label">Data de vencimento
+                                    <star>*</star>
+                                </label>
                                 <input class="form-control datepicker" id="vencimento" name="vencimento" value="{{date('d/m/Y')}}" required="true" />
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Valor</label>
+                                <label class="control-label">Valor
+                                    <star>*</star>
+                                </label>
                                 <input class="form-control money-format" id="valor" name="valor" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Parcelas</label>
+                                <label class="control-label">Parcelas
+                                    <star>*</star>
+                                </label>
                                 <input class="form-control" id="parcela" name="parcela" required="true" type="number" min="1" max="320" step="1" value ="1"/>
                             </div>
 
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Categoria</label>
+                                <label class="control-label">Categoria
+                                    <star>*</star>
+                                </label>
                                 <select id="categoria" name="categoria"  class="selectpicker" data-style="select-with-transition" title="Selecionar" data-size="7">
                                     @foreach ($categorias as $categoria)
                                         <option value="{{$categoria->id}}">{{$categoria->nome}}</option>
@@ -215,6 +242,9 @@
                             </div>
 
                             <div class="form-group label-floating" id="input-credito" style="display:none;">
+                                <label class="control-label">Cartão de crédito
+                                    <star>*</star>
+                                </label>    
                                 <select id="credito" name="credito" class="selectpicker" data-style="select-with-transition" title="Selecione cartão" data-size="7">
                                     @foreach ($cartoes as $cartao)
                                         <option value="{{$cartao->id}}">{{$cartao->conta->nome}}</option>
@@ -239,7 +269,9 @@
                             <h4 class="card-title">Despesa Pendente</h4>
                             <input id="id-edit" name="id" type="hidden"/>
                             <div class="form-group label-floating">
-                                <label class="control-label">Nome</label>
+                                <label class="control-label">Nome
+                                    <star>*</star>
+                                </label>
                                 <input class="form-control" id="nome-edit" name="nome" type="text" required="true" />
                             </div>
 
@@ -251,18 +283,24 @@
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Valor</label>
+                                <label class="control-label">Valor
+                                    <star>*</star>
+                                </label>
                                 <input class="form-control money-format" id="valor-edit" name="valor" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Parcelas</label>
+                                <label class="control-label">Parcelas
+                                    <star>*</star>
+                                </label>
                                 <input class="form-control" disabled id="parcela-edit" type="number" min="1" max="320" step="1" value ="1"/>
                             </div>
 
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Categoria</label>
+                                <label class="control-label">Categoria
+                                    <star>*</star>
+                                </label>
                                 <select id="categoria-edit" name="categoria" class="selectpicker" title="Selecionar" data-style="select-with-transition" data-size="7">
                                     @foreach ($categorias as $categoria)
                                         <option value="{{$categoria->id}}">{{$categoria->nome}}</option>
@@ -277,8 +315,10 @@
                             </div>
 
                             <div class="form-group label-floating" id="input-credito-edit" style="display:none;">
-                                <label class="control-label">Cartão de crédito</label>
-                                <select id="credito-edit" name="credito" class="selectpicker" disabled data-style="select-with-transition" title="Selecione" data-size="7">
+                                 <label class="control-label">Cartão de crédito
+                                    <star>*</star>
+                                </label> 
+                                <select id="credito-edit" name="credito" class="selectpicker" data-style="select-with-transition" title="Selecione" data-size="7">
                                     @foreach ($cartoes as $cartao)
                                         <option value="{{$cartao->id}}">{{$cartao->conta->nome}}</option>
                                     @endforeach
@@ -401,8 +441,34 @@
             var messages = new Array();
             if ($("#categoria").val()=="" || $("#categoria").val()=="Selecione") {
                 messages.push("Favor, informar categoria");
-            } else if ($("#check-credito").is(':checked')==true && ($("#credito").val()=="" || $("#credito").val()=="Selecione")) {
+            } 
+            if ($("#check-credito").is(':checked')==true && ($("#credito").val()=="" || $("#credito").val()=="Selecione")) {
                 messages.push("Favor, informar cartão de credito");
+            }
+            if ($("#valor").val()=="" || $("#valor").val()=="R$ 0,00") {
+                messages.push("Favor, informar valor");
+            }
+            if ($(messages).length > 0) {
+                console.log("erros: "+$(messages).length);
+                for(i = 0; i < $(messages).length; i++) {
+                    showErrorNotification($( messages )[i]);
+                }
+                messages = [];
+                return false;
+            }
+            return true;
+        }
+
+        function validacaoExtraFormEdit() {
+            var messages = new Array();
+            if ($("#categoria-edit").val()=="" || $("#categoria-edit").val()=="Selecione") {
+                messages.push("Favor, informar categoria");
+            } 
+            if ($("#check-credito-edit").is(':checked')==true && ($("#credito-edit").val()=="" || $("#credito-edit").val()=="Selecione")) {
+                messages.push("Favor, informar cartão de credito");
+            }
+            if ($("#valor-edit").val()=="" || $("#valor-edit").val()=="R$ 0,00") {
+                messages.push("Favor, informar valor");
             }
             if ($(messages).length > 0) {
                 console.log("erros: "+$(messages).length);
@@ -423,7 +489,8 @@
             }      
         }
 
-        function visualizar(nome,valor,categoria,parcela,credito) {
+        function visualizar(nome,valor,categoria,parcela,credito,vencimento) {
+            $("#view-despesa-vencimento").html(vencimento);
             $("#view-despesa-nome").html(nome);
             $("#view-despesa-valor").html(valor);
             $("#view-despesa-categoria").html(categoria);
@@ -489,8 +556,7 @@
                 $(inputValor).addClass('label-floating');
 
                 if (credito==null || credito=="") {
-                    $("#check-credito-edit").prop("checked", false);
-                    $("#credito-edit").attr('disabled','disabled');
+                    $("#check-credito-edit").prop("checked", false);                  
                     $("#input-credito-edit").css("display", "none");
                     var selectCreditoEdit = $(".btn.dropdown-toggle.select-with-transition")[4];
                     $(selectCreditoEdit).addClass("bs-placeholder");
@@ -498,7 +564,7 @@
                     var textSelect = $('.filter-option.pull-left')[4];
                     $(textSelect).text('Selecione');
                 } else {
-                    $("#check-credito-edit").prop("checked", true);
+                    $("#check-credito-edit").prop("checked", true);                    
                     $("#credito-edit").removeAttr('disabled');
                     $("#input-credito-edit").removeAttr('disabled');
                     $("#credito-edit").val(credito);
@@ -582,7 +648,7 @@
                 },
             });
 
-            /* Habilitar input do limite*/
+            /* Habilitar input do credito*/
             $( "#check-credito" ).click(function() {
                 setInterval(function(){
                     if ($("#check-credito").is(':checked')==true) {                        
@@ -626,13 +692,18 @@
             });
 
             $("#modal-panel").on("hide.bs.modal", function () {
+                $("#check-credito-edit").removeAttr('disabled');               
+                 
+                $("#select-credito").css("display", "none");
+                
+                $("#select-credito-edit").css("display", "none");
+
+
                 $("#formDespesa-edit").css("display","none");
                 $("#formDespesa").css("display","block");
-                $("#credito").attr('disabled','disabled');
+                
                 $("#categoria").val($("#categoria option:first").val());
-                $("#select-credito").css("display", "none");
-                $("#credito-edit").attr('disabled','disabled');
-                $("#select-credito-edit").css("display", "none");
+                
                 var selects = $(".btn.dropdown-toggle.select-with-transition");
                 $(selects).each (function(){
                    $(this).addClass("bs-placeholder");
@@ -771,40 +842,42 @@
 
             $( "#formDespesa-edit" ).submit(function( e ) {
                 if ($("#formDespesa-edit" ).valid()) {
-                    var formData = new FormData($("#formDespesa-edit")[0]);
-                    if ($("#check-credito-edit").is(':checked')==false) {
-                        formData.append("isCredito","false");
-                    }  else {
-                        formData.append("isCredito","true");
-                    } 
-                    $.ajax({
-                        type: "POST",
-                        url: '{{route('alterar.pendente')}}',
-                        data: formData,
-                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                        dataType: 'json',
-                        processData: false,
-                        contentType: false,
-                        cache: false,
-                        beforeSend: function () {
-                            $("#modal-panel").modal('toggle');
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
+                    if (validacaoExtraFormEdit()) {
+                        var formData = new FormData($("#formDespesa-edit")[0]);
+                        if ($("#check-credito-edit").is(':checked')==false) {
+                            formData.append("isCredito","false");
+                        }  else {
+                            formData.append("isCredito","true");
+                        } 
+                        $.ajax({
+                            type: "POST",
+                            url: '{{route('alterar.pendente')}}',
+                            data: formData,
+                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                            dataType: 'json',
+                            processData: false,
+                            contentType: false,
+                            cache: false,
+                            beforeSend: function () {
+                                $("#modal-panel").modal('toggle');
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
 
-                        },
-                        success: function (data) {
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                            if (data.status == "success") {
-                                setTimeout(function(){ loadTable(); }, 2000);
-                                setTimeout(function(){ showSucessNotification(data.message); }, 2500);
-                            } else {
-                                setTimeout(function(){ showErrorNotification(data.message); }, 2500);
+                            },
+                            success: function (data) {
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                if (data.status == "success") {
+                                    setTimeout(function(){ loadTable(); }, 2000);
+                                    setTimeout(function(){ showSucessNotification(data.message); }, 2500);
+                                } else {
+                                    setTimeout(function(){ showErrorNotification(data.message); }, 2500);
+                                }
+                            },
+                            error: function (request, status, error) {
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                setTimeout(function(){ showErrorNotification(error); }, 2500);
                             }
-                        },
-                        error: function (request, status, error) {
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                            setTimeout(function(){ showErrorNotification(error); }, 2500);
-                        }
-                    });
+                        });
+                    }
                 }
                 e.preventDefault(); // avoid to execute the actual submit of the form.
             });

@@ -45,7 +45,7 @@
 
                                                 <td class="td-actions text-right">
                                                     <button type="button" rel="tooltip" class="btn btn-info btn-simple" title="pagar fatura"
-                                                            onclick="buscarFaturas(
+                                                            onclick="verFaturas(
                                                                 '{{$cartao->id}}'
                                                             );">
                                                         <i class="material-icons">monetization_on</i>
@@ -128,12 +128,16 @@
                             </div>
 
                             <div class="form-group label-floating" id="nome-form" style="display:none;">
-                                <label class="control-label">Nome</label>
+                                <label class="control-label">Nome
+                                    <star>*</star>
+                                </label>
                                 <input class="form-control" id="nome" name="nome" type="text" required="true" />
                             </div>
 
                             <div class="form-group label-floating" id="conta-form">
-                                <label class="control-label">Conta</label>
+                                <label class="control-label">Conta
+                                    <star>*</star>
+                                </label>
                                 <select id="conta" name="conta"  class="selectpicker" data-style="select-with-transition" title="Selecionar" data-size="7">
                                     @foreach ($contas as $conta)
                                         <option value="{{$conta->id}}">{{$conta->nome}}</option>
@@ -142,21 +146,29 @@
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Dia de fechamento</label>
+                                <label class="control-label">Dia de fechamento
+                                    <star>*</star>
+                                </label>
                                 <input type="number" min="1" max="30" class="form-control" id="fechamento" name="fechamento" value="8" required="true" />
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Dia de vencimento</label>
+                                <label class="control-label">Dia de vencimento
+                                    <star>*</star>
+                                </label>
                                 <input type="number" min="1" max="30" class="form-control" id="vencimento" name="vencimento" value="15" required="true" />
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Limite</label>
+                                <label class="control-label">Limite
+                                    <star>*</star>
+                                </label>
                                 <input class="form-control money-format" id="limite" name="limite" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
                             </div>
 
-
+                            <div class="category form-category">
+                                <star>*</star> Campos obrigatórios
+                            </div>
                             <div class="text-center">
                                 <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Salvar</button>
                             </div>
@@ -174,20 +186,29 @@
                             <input id="id-edit" name="id" type="hidden"/>
                             
                             <div class="form-group label-floating">
-                                <label class="control-label">Dia de fechamento</label>
+                                <label class="control-label">Dia de fechamento
+                                    <star>*</star>
+                                </label>
                                 <input type="number" min="1" max="30" class="form-control" id="fechamento-edit" name="fechamento" value="8" required="true" />
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Dia de vencimento</label>
+                                <label class="control-label">Dia de vencimento
+                                    <star>*</star>
+                                </label>
                                 <input type="number" min="1" max="30" class="form-control" id="vencimento-edit" name="vencimento" value="15" required="true" />
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Limite</label>
+                                <label class="control-label">Limite
+                                    <star>*</star>
+                                </label>
                                 <input class="form-control money-format" id="limite-edit" name="limite" required="true" data-thousands="." data-decimal="," data-prefix="R$ " />
                             </div>
 
+                            <div class="category form-category">
+                                <star>*</star> Campos obrigatórios
+                            </div>
 
                             <div class="text-center">
                                 <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Salvar</button>
@@ -259,39 +280,145 @@
         </div>
     </div>
     <!-- /MODAL -->
+
+
+    <!-- MODAL FATURAS -->
+    <div class="modal fade" id="modal-fatura" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="left: 16% !important;">
+                <div class="card">
+                    <div class="card-header card-header-icon" data-background-color="purple">
+                        <i class="material-icons">assignment</i>
+                    </div>
+                    <div class="card-content">
+                        <h4 class="card-title">Fatura</h4>
+                        <div class="toolbar">
+                            <!--        Here you can write extra buttons/actions for the toolbar              -->
+
+                        </div>
+                        <div class="table-responsive">                            
+                            <table id="faturaTable" class="table table-striped table-no-bordered table-hover" cellspacing="0" width="100%" style="width:100%">
+                                <thead class="text-primary">
+                                    <tr>
+                                        <th class="disabled-sorting">Data</th>
+                                        <th class="disabled-sorting">Lançamento</th>
+                                        <th class="disabled-sorting">Valor</th>                                            
+                                    </tr>
+                                </thead>                                    
+                            </table>
+                        </div>
+                        <form id="formPagarFatura">
+                            <input type="hidden" name="id-cartao" id="id-cartao" >
+                            <div class="text-center">
+                                <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">PAGAR</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- end content-->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /MODAL FATURAS -->
+
 @endsection
 
 @section('scripts')
     <script type="text/javascript">
 
-        function buscarFaturas(id) {
-            $.ajax({
-                        type: "POST",
-                        url: '{{route('buscar.faturas')}}',
-                        data: {id : id},
-                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                        dataType: 'json',
-                        processData: false,
-                        contentType: false,
-                        cache: false,
-                        beforeSend: function () {
-                            $("#modal-panel").modal('toggle');
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
+        function validacaoExtraForm() {
+            var messages = new Array();
+            if ( $("#check-tipo").is(':checked')==false) {
+                if ($("#conta").val()=="" || $("#conta").val()=="Selecione") {
+                    messages.push("Favor, informar o tipo da conta");
+                } 
+            }
+            if ($("#limite").val()=="" || $("#limite").val()=="R$ 0,00") {
+                messages.push("Favor, informar o limite");
+            }
+            if ($(messages).length > 0) {
+                console.log("erros: "+$(messages).length);
+                for(i = 0; i < $(messages).length; i++) {
+                    showErrorNotification($( messages )[i]);
+                }
+                messages = [];
+                return false;
+            }
+            return true;
+        }
 
-                        },
-                        success: function (data) {
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                            if (data.status == "success") {                               
-                                setTimeout(function(){ showSucessNotification(data.message); }, 2500);
+        function validacaoExtraFormEdit() {
+            var messages = new Array();            
+            if ($("#limite").val()=="" || $("#limite").val()=="R$ 0,00") {
+                messages.push("Favor, informar o limite");
+            }
+            if ($(messages).length > 0) {
+                console.log("erros: "+$(messages).length);
+                for(i = 0; i < $(messages).length; i++) {
+                    showErrorNotification($( messages )[i]);
+                }
+                messages = [];
+                return false;
+            }
+            return true;
+        }
+
+        function verFaturas(id) {           
+
+            $('#faturaTable').DataTable({
+                ajax: {
+                    url: '{{ route('buscar.faturas') }}',
+                    data: { id : id },
+                    cache: false,
+                    beforeSend: function () {
+                        setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
+                    },
+                    dataSrc: function ( json ) {
+                        setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                        if (json.data!='error') {
+                            //console.log(json.data.length);
+                            if (json.data.length>0) {
+                                $("#id-cartao").val(id);
+                                setTimeout(function(){ $("#modal-fatura").modal('toggle'); }, 2500);
+                                return json.data;
                             } else {
-                                setTimeout(function(){ showErrorNotification(data.message); }, 2500);
+                                setTimeout(function(){ showSucessNotification('Não há faturas.'); }, 2500);
                             }
-                        },
-                        error: function (request, status, error) {
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                            setTimeout(function(){ showErrorNotification(error); }, 2500);
+                            
+                            
+                        } else {
+                            setTimeout(function(){ showErrorNotification('Erro ao gerar extrato. Tente novamente mais tarde.'); }, 2500);
                         }
-            });
+                    },
+                    error: function (request, status, error) {
+                        setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                        setTimeout(function(){ showErrorNotification(error); }, 2500);
+                    },
+                },                              
+                bPaginate: true,
+                bLengthChange: false,
+                bFilter: false,
+                bInfo: true,   
+                destroy: true,            
+                iDisplayLength: 10, 
+                searching: false,           
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Filtrar",
+                    lengthMenu: "Exibindo _MENU_ registros por página",
+                    zeroRecords: "Nenhum registro encontrado",
+                    info: "Visualizando página _PAGE_ de _PAGES_",
+                    infoEmpty: "Nenhum registro encontrado",
+                    infoFiltered: "(filtered from _MAX_ total records)",
+                    paginate: {
+                        "first":      "Primeiro",
+                        "last":       "Último",
+                        "next":       "Próximo",
+                        "previous":   "Anterior"
+                    }
+                }              
+            });          
+              
 
         }
 
@@ -473,8 +600,8 @@
             
             /* Limpar formulário */
             $("#modal-panel").on("hide.bs.modal", function () {
-                $("#formConta-edit").css("display","none");
-                $("#formConta").css("display","block");
+                $("#formCartao-edit").css("display","none");
+                $("#formCartao").css("display","block");
                 $("#remove-image").click();
                 var selects = $(".btn.dropdown-toggle.select-with-transition");
                 $(selects).each (function(){
@@ -514,77 +641,120 @@
             });
 
             /* Submita o formualário via Ajax*/
+
+            $( "#formPagarFatura" ).submit(function( e ) {
+               
+                        var formData = new FormData($("#formPagarFatura")[0]);
+
+                        $.ajax({
+                            type: "POST",
+                            url: '{{route('pagar.fatura')}}',
+                            data: formData,
+                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                            dataType: 'json',
+                            processData: false,
+                            contentType: false,
+                            cache: false,
+                            beforeSend: function () {
+                                $("#modal-fatura").modal('toggle');
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
+
+                            },
+                            success: function (data) {
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                if (data.status == "success") {
+                                    setTimeout(function(){ loadTable(); }, 2000);
+                                    setTimeout(function(){ showSucessNotification(data.message); }, 2500);
+                                } else {
+                                    setTimeout(function(){ showErrorNotification(data.message); }, 2500);
+                                }
+                            },
+                            error: function (request, status, error) {
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                setTimeout(function(){ showErrorNotification(error); }, 2500);
+                            }
+                        });
+
+                 e.preventDefault(); // avoid to execute the actual submit of the form.
+            });
+
             $( "#formCartao" ).submit(function( e ) {
                 if ($("#formCartao" ).valid()) {
-                    var formData = new FormData($("#formCartao")[0]);
-                    if ($("#check-tipo").is(':checked')==true) {
-                        formData.append("independente", "true");
-                    } else {
-                        formData.append("independente", "false");
-                    }
-                    $.ajax({
-                        type: "POST",
-                        url: '{{route('criar.cartao')}}',
-                        data: formData,
-                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                        dataType: 'json',
-                        processData: false,
-                        contentType: false,
-                        cache: false,
-                        beforeSend: function () {
-                            $("#modal-panel").modal('toggle');
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
-
-                        },
-                        success: function (data) {
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                            if (data.status == "success") {
-                                setTimeout(function(){ loadTable(); }, 2000);
-                                setTimeout(function(){ showSucessNotification(data.message); }, 2500);
-                            } else {
-                                setTimeout(function(){ showErrorNotification(data.message); }, 2500);
-                            }
-                        },
-                        error: function (request, status, error) {
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                            setTimeout(function(){ showErrorNotification(error); }, 2500);
+                    if (validacaoExtraForm()) {
+                        var formData = new FormData($("#formCartao")[0]);
+                        if ($("#check-tipo").is(':checked')==true) {
+                            formData.append("independente", "true");
+                        } else {
+                            formData.append("independente", "false");
                         }
-                    });
+                        $.ajax({
+                            type: "POST",
+                            url: '{{route('criar.cartao')}}',
+                            data: formData,
+                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                            dataType: 'json',
+                            processData: false,
+                            contentType: false,
+                            cache: false,
+                            beforeSend: function () {
+                                $("#modal-panel").modal('toggle');
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
+
+                            },
+                            success: function (data) {
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                if (data.status == "success") {
+                                    setTimeout(function(){ loadTable(); }, 2000);
+                                    setTimeout(function(){ showSucessNotification(data.message); }, 2500);
+                                } else {
+                                    setTimeout(function(){ showErrorNotification(data.message); }, 2500);
+                                }
+                            },
+                            error: function (request, status, error) {
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                setTimeout(function(){ showErrorNotification(error); }, 2500);
+                            }
+                        });
+                    }
                 }
+                
                 e.preventDefault(); // avoid to execute the actual submit of the form.
             });
 
             $( "#formCartao-edit" ).submit(function( e ) {
                 if ($("#formCartao-edit" ).valid()) {
-                    var formData = new FormData($("#formCartao-edit")[0]);
-                    $.ajax({
-                        type: "POST",
-                        url: '{{route('alterar.cartao')}}',
-                        data: formData,
-                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                        dataType: 'json',
-                        processData: false,
-                        contentType: false,
-                        cache: false,
-                        beforeSend: function () {
-                            $("#modal-panel").modal('toggle');
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
 
-                        },
-                        success: function (data) {
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                            if (data.status == "success") {
-                                setTimeout(function(){ loadTable(); }, 2000);
-                                setTimeout(function(){ showSucessNotification(data.message); }, 2500);
-                            } else {
-                                setTimeout(function(){ showErrorNotification(data.message); }, 2500);
+                    if (validacaoExtraFormEdit()) {
+                        var formData = new FormData($("#formCartao-edit")[0]);
+                        $.ajax({
+                            type: "POST",
+                            url: '{{route('alterar.cartao')}}',
+                            data: formData,
+                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                            dataType: 'json',
+                            processData: false,
+                            contentType: false,
+                            cache: false,
+                            beforeSend: function () {
+                                $("#modal-panel").modal('toggle');
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
+
+                            },
+                            success: function (data) {
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                if (data.status == "success") {
+                                    setTimeout(function(){ loadTable(); }, 2000);
+                                    setTimeout(function(){ showSucessNotification(data.message); }, 2500);
+                                } else {
+                                    setTimeout(function(){ showErrorNotification(data.message); }, 2500);
+                                }
+                            },
+                            error: function (request, status, error) {
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                setTimeout(function(){ showErrorNotification(error); }, 2500);
                             }
-                        },
-                        error: function (request, status, error) {
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                            setTimeout(function(){ showErrorNotification(error); }, 2500);
-                        }
-                    });
+                        });
+                    }
                 }
                 e.preventDefault(); // avoid to execute the actual submit of the form.
             });

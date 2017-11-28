@@ -110,8 +110,13 @@
                             if (data.status == "success") {
                                 window.location.href = "{{route('home')}}";
                             } else {
+
                                 setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                                setTimeout(function(){ showErrorNotification(data.message); }, 2500);
+                                setTimeout(function(){
+                                    showErrorNotification(data.message);
+                                    $("#email").val("");
+                                    $("#senha").val("");
+                                }, 2500);
                             }
                         },
                         error: function (request, status, error) {

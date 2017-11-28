@@ -10,6 +10,7 @@ use App\Exceptions\CustomException;
 use PDF;
 use App;
 use Auth;
+use Illuminate\Support\Facades\DB;
 
 
 class UsuarioController extends Controller
@@ -69,10 +70,11 @@ class UsuarioController extends Controller
     protected function delete(Request $request){
         try {
             $param = $request->all();
+            $usuarioLogado = self::getUsuario();
             
             try {
 
-                
+                UsuarioFacade::encerrarCadastro($usuarioLogado);     
 
                 return response()->json([
                     'status' => 'success',

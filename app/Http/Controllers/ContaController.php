@@ -94,7 +94,7 @@ class ContaController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' =>  'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -114,7 +114,7 @@ class ContaController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage() //'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
+                'message' => 'Ops. Ocorreu um erro inesperado. Tente novamente mais tarde.'
             ]);
         }
     }
@@ -157,11 +157,13 @@ class ContaController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' =>  $e->getMessage() //'Ops. Erro ao alterar conta. Tente novamente mais tarde.'
+                'message' =>  'Ops. Erro ao alterar conta. Tente novamente mais tarde.'
             ]);
         }
 
     }
+
+    
 
     
 

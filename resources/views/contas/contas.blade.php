@@ -59,14 +59,15 @@
                                                 <td>{{ $conta->nome }}</td>
 
                                                 @if (empty($conta->saldo))
-                                                    <td> -//- </td>
+                                                    <td> R$ 0,00 </td>
                                                 @else
                                                     <td>{{ 'R$ '.number_format($conta->saldo, 2, ',', '.') }}</td>
                                                 @endif
 
                                                 <td> {{ date('d/m/Y', strtotime($conta->dt_movimento)) }} </td>
 
-                                                <td class="td-actions text-right">                  
+                                                <td class="td-actions text-right">   
+                                                                
                                                     <button type="button" rel="tooltip" class="btn btn-info btn-simple" title="visualizar"
                                                             onclick="visualizar(
                                                                 '{{asset('storage/contas/'.$conta->image)}}',
@@ -159,12 +160,16 @@
                             </div>
 
                             <div class="form-group label-floating" style="margin: -20px 0 0 0;">
-                                <label class="control-label">Nome</label>
+                                <label class="control-label">Nome
+                                    <star>*</star>
+                                </label>
                                 <input class="form-control" id="nome" name="nome" type="text" required="true" />
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Tipo de conta</label>
+                                <label class="control-label">Tipo de conta
+                                    <star>*</star>
+                                </label>
                                 <select id="tipo" name="tipo"  class="selectpicker" data-style="select-with-transition" title="Selecionar" data-size="7">
                                     <option value="C">Corrente</option>
                                     <option value="P">Poupança</option>
@@ -178,7 +183,9 @@
                                 </label>
                             </div>
 
-
+                             <div class="category form-category">
+                                <star>*</star> Campos obrigatórios
+                            </div>
                             <div class="text-center">
                                 <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Salvar</button>
                             </div>
@@ -218,12 +225,16 @@
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Nome</label>
+                                <label class="control-label">Nome
+                                    <star>*</star>
+                                </label>
                                 <input class="form-control" id="nome-edit" name="nome" type="text" required="true" />
                             </div>
 
                             <div class="form-group label-floating">
-                                <label class="control-label">Tipo de conta</label>
+                                <label class="control-label">Tipo de conta
+                                    <star>*</star>
+                                </label>
                                 <select id="tipo-edit" name="tipo"  class="selectpicker" data-style="select-with-transition" title="Selecionar" data-size="7">
                                     <option value="C">Corrente</option>
                                     <option value="P">Poupança</option>
@@ -238,6 +249,9 @@
                             </div>
 
 
+                             <div class="category form-category">
+                                <star>*</star> Campos obrigatórios
+                            </div>
                             <div class="text-center">
                                 <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Alterar</button>
                             </div>
@@ -316,11 +330,47 @@
         </div>
     </div>
     <!-- /MODAL -->
+
+
+    
 @endsection
 
 @section('scripts')
     <script type="text/javascript">
 
+        
+
+        function validacaoExtraForm() {
+            var messages = new Array();
+            if ($("#tipo").val()=="" || $("#tipo").val()=="Selecione") {
+                messages.push("Favor, informar o tipo da conta");
+            } 
+            if ($(messages).length > 0) {
+                console.log("erros: "+$(messages).length);
+                for(i = 0; i < $(messages).length; i++) {
+                    showErrorNotification($( messages )[i]);
+                }
+                messages = [];
+                return false;
+            }
+            return true;
+        }
+
+        function validacaoExtraFormEdit() {
+            var messages = new Array();
+            if ($("#tipo-edit").val()=="" || $("#tipo-edit").val()=="Selecione") {
+                messages.push("Favor, informar o tipo da conta");
+            } 
+            if ($(messages).length > 0) {
+                console.log("erros: "+$(messages).length);
+                for(i = 0; i < $(messages).length; i++) {
+                    showErrorNotification($( messages )[i]);
+                }
+                messages = [];
+                return false;
+            }
+            return true;
+        }
             
 
         function validationFile(form, input) {
@@ -529,80 +579,84 @@
             /* Submita o formualário via Ajax*/
             $( "#formConta" ).submit(function( e ) {
                 if ($("#formConta" ).valid()) {
-                    var formData = new FormData($("#formConta")[0]);
-                    if ($("#check-indicador").is(':checked')==false) {
-                        formData.append("exibir","false");
-                    }  else {
-                        formData.append("exibir","true");
-                    }
-                    $.ajax({
-                        type: "POST",
-                        url: '{{route('criar.conta')}}',
-                        data: formData,
-                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                        dataType: 'json',
-                        processData: false,
-                        contentType: false,
-                        cache: false,
-                        beforeSend: function () {
-                            $("#modal-panel").modal('toggle');
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
-
-                        },
-                        success: function (data) {
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                            if (data.status == "success") {
-                                setTimeout(function(){ loadTable(); }, 2000);
-                                setTimeout(function(){ showSucessNotification(data.message); }, 2500);
-                            } else {
-                                setTimeout(function(){ showErrorNotification(data.message); }, 2500);
-                            }
-                        },
-                        error: function (request, status, error) {
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                            setTimeout(function(){ showErrorNotification(error); }, 2500);
+                    if (validacaoExtraForm()) {
+                        var formData = new FormData($("#formConta")[0]);
+                        if ($("#check-indicador").is(':checked')==false) {
+                            formData.append("exibir","false");
+                        }  else {
+                            formData.append("exibir","true");
                         }
-                    });
+                        $.ajax({
+                            type: "POST",
+                            url: '{{route('criar.conta')}}',
+                            data: formData,
+                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                            dataType: 'json',
+                            processData: false,
+                            contentType: false,
+                            cache: false,
+                            beforeSend: function () {
+                                $("#modal-panel").modal('toggle');
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
+
+                            },
+                            success: function (data) {
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                if (data.status == "success") {
+                                    setTimeout(function(){ loadTable(); }, 2000);
+                                    setTimeout(function(){ showSucessNotification(data.message); }, 2500);
+                                } else {
+                                    setTimeout(function(){ showErrorNotification(data.message); }, 2500);
+                                }
+                            },
+                            error: function (request, status, error) {
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                setTimeout(function(){ showErrorNotification(error); }, 2500);
+                            }
+                        });
+                    }
                 }
                 e.preventDefault(); // avoid to execute the actual submit of the form.
             });
 
             $( "#formConta-edit" ).submit(function( e ) {
                 if ($("#formConta-edit" ).valid()) {
-                    var formData = new FormData($("#formConta-edit")[0]);
-                    if ($("#check-indicador-edit").is(':checked')==false) {
-                        formData.append("exibir","false");
-                    }  else {
-                        formData.append("exibir","true");
-                    }
-                    $.ajax({
-                        type: "POST",
-                        url: '{{route('alterar.conta')}}',
-                        data: formData,
-                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                        dataType: 'json',
-                        processData: false,
-                        contentType: false,
-                        cache: false,
-                        beforeSend: function () {
-                            $("#modal-panel").modal('toggle');
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
-
-                        },
-                        success: function (data) {
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                            if (data.status == "success") {
-                                setTimeout(function(){ loadTable(); }, 2000);
-                                setTimeout(function(){ showSucessNotification(data.message); }, 2500);
-                            } else {
-                                setTimeout(function(){ showErrorNotification(data.message); }, 2500);
-                            }
-                        },
-                        error: function (request, status, error) {
-                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
-                            setTimeout(function(){ showErrorNotification(error); }, 2500);
+                    if (validacaoExtraFormEdit()) {
+                        var formData = new FormData($("#formConta-edit")[0]);
+                        if ($("#check-indicador-edit").is(':checked')==false) {
+                            formData.append("exibir","false");
+                        }  else {
+                            formData.append("exibir","true");
                         }
-                    });
+                        $.ajax({
+                            type: "POST",
+                            url: '{{route('alterar.conta')}}',
+                            data: formData,
+                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                            dataType: 'json',
+                            processData: false,
+                            contentType: false,
+                            cache: false,
+                            beforeSend: function () {
+                                $("#modal-panel").modal('toggle');
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
+
+                            },
+                            success: function (data) {
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                if (data.status == "success") {
+                                    setTimeout(function(){ loadTable(); }, 2000);
+                                    setTimeout(function(){ showSucessNotification(data.message); }, 2500);
+                                } else {
+                                    setTimeout(function(){ showErrorNotification(data.message); }, 2500);
+                                }
+                            },
+                            error: function (request, status, error) {
+                                setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                                setTimeout(function(){ showErrorNotification(error); }, 2500);
+                            }
+                        });
+                    }
                 }
                 e.preventDefault(); // avoid to execute the actual submit of the form.
             });

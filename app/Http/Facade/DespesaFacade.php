@@ -70,41 +70,6 @@ class DespesaFacade
         }
     }
 
-
-    public static function getParcelasPendentesPorCartao($cartao, $periodo) {
-        try {
-
-            $dia = $cartao->dt_fechamento;
-            $mes = substr($periodo->periodoSelecionadoFim, -4, -2);
-            $ano = substr($periodo->periodoSelecionadoFim, -8, -4);
-            $periodoFechamentoFatura = $ano.$mes.$dia;
-
-            $parcelasPendentes = ParcelaPendente::with('despesa')
-                ->whereHas('despesa', function($query) use ($cartao) {
-                    $query->where('despesa.id_cartao_credito', '=', $cartao->id);
-                })->whereBetween('dt_vencimento', [
-                    $periodo->periodoSelecionadoInicio,
-                    $periodoFechamentoFatura
-                ])->get();
-
-            foreach($parcelasPendentes as $key => $subarray) {
-                // Remove parcelas pagas e Remove parcelas de outro cartao
-                $parcelaPaga =  ParcelaPaga::from('parcela_paga')
-                    ->where("id_pendente",$parcelasPendentes[$key]->id)
-                    ->get();
-
-                if ($parcelaPaga!='[]' || $parcelasPendentes[$key]->despesa->id_cartao_credito!=$cartao->id) {
-                    unset($parcelasPendentes[$key]);
-                }
-                
-            }
-
-            return $parcelasPendentes;
-        } catch (Exception $e) {
-            return null;
-        }
-    }
-
     public static function getParcelasPendentesPorCategoria($categoria, $periodo) {
         try {
 
@@ -178,6 +143,33 @@ class DespesaFacade
                 ])->get();
 
             return $parcelasPagas;
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    public static function getParcelasPendentesPorCartao($cartao, $periodo) {
+        try {
+
+                $parcelasPendentes = ParcelaPendente::with('despesa')
+                ->whereHas('despesa', function($query) use ($cartao) {
+                    $query->where('despesa.id_cartao_credito', '=', $cartao);
+                })->whereBetween('dt_vencimento', [
+                    $periodo->periodoSelecionadoInicio,
+                    $periodo->periodoSelecionadoFim
+                ])->get();
+
+                foreach($parcelasPendentes as $key => $subarray) {
+                    $parcelaPaga =  ParcelaPaga::from('parcela_paga')
+                        ->where("id_pendente",$parcelasPendentes[$key]->id)
+                        ->get();
+
+                    if ($parcelaPaga!='[]') {
+                        unset($parcelasPendentes[$key]);
+                    } 
+                }
+
+            return $parcelasPendentes;
         } catch (Exception $e) {
             return null;
         }
@@ -263,7 +255,7 @@ class DespesaFacade
         }
     }
 
-    public static function criarDespesaPaga($nome, $valor, $pag, $parcela, $cat, $cred, $cont){
+    public static function criarDespesaPagaComCredito($nome, $valor, $pag, $parcela, $cat, $cred, $cont){
         try {
            
            if (!empty($valor) && $valor!="R$ 0,00") {
@@ -276,26 +268,16 @@ class DespesaFacade
                 $ano = substr($pag, -4);
                 $pagamento = $ano.$mes.$dia;
 
-                if (!empty($cred)) {
-                    DB::select("CALL criarDespesaPaga(
+                DB::select("CALL criarDespesaPaga(
                     '".$nome."', 
                     ".$valor.", 
                     ".$parcela." ,
                     '".$pagamento."',
                     ".$cat.",
                     ".$cont.",
-                    ".$cred.")");
-                } else {
-                    DB::select("CALL criarDespesaPaga(
-                    '".$nome."', 
-                    ".$valor.", 
-                    ".$parcela." ,
-                    '".$pagamento."',
-                    ".$cat.",
-                    ".$cont.",
-                    null)");
-
-                }
+                    ".$cred.",
+                     @new_paga
+                )");
 
             } else {
                 throw new Exception("Favor, selecione um valor valido.");
@@ -306,7 +288,126 @@ class DespesaFacade
         }
     }
 
-    public static function editarDespesaPendente($despesa, $nome, $valor, $venc, $cat, $cred){
+    public static function criarDespesaPagaComCreditoFile($nome, $valor, $pag, $parcela, $cat, $cred, $cont, $file){
+        try {
+           
+           if (!empty($valor) && $valor!="R$ 0,00") {
+                $valor = str_replace("R$", "", $valor);
+                $valor = str_replace(".", "", $valor);
+                $valor = str_replace(",", ".", $valor);
+
+                $dia = substr($pag, 0, -8);
+                $mes = substr($pag, 3, -5);
+                $ano = substr($pag, -4);
+                $pagamento = $ano.$mes.$dia;
+
+                DB::select("CALL criarDespesaPaga(
+                    '".$nome."', 
+                    ".$valor.", 
+                    ".$parcela." ,
+                    '".$pagamento."',
+                    ".$cat.",
+                    ".$cont.",
+                    ".$cred.",
+                    @new_paga
+                )");
+
+                $paga = DB::select("SELECT @new_paga as paga");
+                $paga = json_decode(json_encode($paga), true);
+                $paga = $paga[0]['paga'];
+
+                $file_image_name = $paga.time().'.pdf';
+                $content = File::get($file);
+                Storage::disk('local-comprovante')->put($file_image_name,$content);
+                DB::table('parcela_paga')->where('id', $paga)->update(['comprovante' => $file_image_name]);
+
+            } else {
+                throw new Exception("Favor, selecione um valor valido.");
+            }
+              
+        } catch (Exception $e) {
+            throw new Exception("Erro Facade: ".$e->getMessage());
+        }
+    }
+
+    public static function criarDespesaPagaSemCreditoFile($nome, $valor, $pag, $parcela, $cat, $cont, $file){
+        try {
+           
+           if (!empty($valor) && $valor!="R$ 0,00") {
+                $valor = str_replace("R$", "", $valor);
+                $valor = str_replace(".", "", $valor);
+                $valor = str_replace(",", ".", $valor);
+
+                $dia = substr($pag, 0, -8);
+                $mes = substr($pag, 3, -5);
+                $ano = substr($pag, -4);
+                $pagamento = $ano.$mes.$dia;
+
+                DB::select("CALL criarDespesaPaga(
+                    '".$nome."', 
+                    ".$valor.", 
+                    ".$parcela." ,
+                    '".$pagamento."',
+                    ".$cat.",
+                    ".$cont.",
+                    null,
+                    @new_paga
+                )");
+
+                $paga = DB::select("SELECT @new_paga as paga");
+                $paga = json_decode(json_encode($paga), true);
+                $paga = $paga[0]['paga'];
+
+                $file_image_name = $paga.time().'.pdf';
+                $content = File::get($file);
+                Storage::disk('local-comprovante')->put($file_image_name,$content);
+                DB::table('parcela_paga')->where('id', $paga)->update(['comprovante' => $file_image_name]);
+
+            } else {
+                throw new Exception("Favor, selecione um valor valido.");
+            }
+              
+        } catch (Exception $e) {
+            throw new Exception("Erro Facade: ".$e->getMessage());
+        }
+    }
+
+
+    public static function criarDespesaPagaSemCredito($nome, $valor, $pag, $parcela, $cat, $cont){
+        try {
+           
+           if (!empty($valor) && $valor!="R$ 0,00") {
+                $valor = str_replace("R$", "", $valor);
+                $valor = str_replace(".", "", $valor);
+                $valor = str_replace(",", ".", $valor);
+
+                $dia = substr($pag, 0, -8);
+                $mes = substr($pag, 3, -5);
+                $ano = substr($pag, -4);
+                $pagamento = $ano.$mes.$dia;
+
+                DB::select("CALL criarDespesaPaga(
+                    '".$nome."', 
+                    ".$valor.", 
+                    ".$parcela." ,
+                    '".$pagamento."',
+                    ".$cat.",
+                    ".$cont.",
+                    null,
+                    @new_paga
+                )");
+
+            } else {
+                throw new Exception("Favor, selecione um valor valido.");
+            }
+              
+        } catch (Exception $e) {
+            throw new Exception("Erro Facade: ".$e->getMessage());
+        }
+    }
+
+
+    public static function editarDespesaPendenteSemCredito($despesa, $nome, $valor, $venc, $cat){
         try {
            
             $valor = str_replace("R$", "", $valor);
@@ -318,23 +419,38 @@ class DespesaFacade
             $ano = substr($venc, -4);
             $vencimento = $ano.$mes.$dia;
 
-            if (!empty($cred)) {
-                DB::select("CALL alterarDespesaPendente(                    
-                    ".$despesa.",
-                    '".$nome."',
-                    ".$valor.",
-                    '".$vencimento."',
-                    ".$cat.",
-                    ".$cred.")");
-            } else {
-                DB::select("CALL alterarDespesaPendente(                    
+            DB::select("CALL alterarDespesaPendente(                    
                     ".$despesa.",
                     '".$nome."',
                     ".$valor.",
                     '".$vencimento."',
                     ".$cat.",
                     null)");
-            }
+              
+        } catch (Exception $e) {
+            throw new Exception("Erro Facade: ".$e->getMessage());
+        }
+    }
+
+    public static function editarDespesaPendenteComCredito($despesa, $nome, $valor, $venc, $cat, $cred){
+        try {
+           
+            $valor = str_replace("R$", "", $valor);
+            $valor = str_replace(".", "", $valor);
+            $valor = str_replace(",", ".", $valor);
+
+            $dia = substr($venc, 0, -8);
+            $mes = substr($venc, 3, -5);
+            $ano = substr($venc, -4);
+            $vencimento = $ano.$mes.$dia;
+
+             DB::select("CALL alterarDespesaPendente(                    
+                    ".$despesa.",
+                    '".$nome."',
+                    ".$valor.",
+                    '".$vencimento."',
+                    ".$cat.",
+                    ".$cred.")");
               
         } catch (Exception $e) {
             throw new Exception("Erro Facade: ".$e->getMessage());
@@ -355,13 +471,9 @@ class DespesaFacade
         }
     }
 
-    public static function deletarDespesaPaga($despesa, $periodo){
+    public static function deletarDespesaPaga($id){
         try {
-           
-           DB::select("CALL excluirDespesaPaga(                    
-                    ".$despesa.",
-                    '".$periodo->periodoSelecionadoInicio."',
-                    '".$periodo->periodoSelecionadoFim."')");          
+           DB::table('parcela_paga')->where('id',$id)->delete();  
               
         } catch (Exception $e) {
             throw new Exception("Erro Facade: ".$e->getMessage());
