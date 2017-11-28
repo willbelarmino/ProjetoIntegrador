@@ -49,7 +49,11 @@ class LoginController extends Controller
 
     protected function doLogin(Request $request)
     {
+                
         try {
+
+            //throw new Exception('Sucesso!');
+            
             $param = $request->all();
 
 
@@ -72,6 +76,7 @@ class LoginController extends Controller
                     'message' =>  'Usuário Autenticado!'
                 ]);
             }
+            
         }catch (CustomException $ex) {
             return response()->json([
                 'status' => 'error',

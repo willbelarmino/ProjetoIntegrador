@@ -132,6 +132,48 @@ class CategoriaFacade
         }
     }
 
+    public static function gerarGraficosCategorias($user, $periodo) {
+      try {
+
+            $parcelasPagas =  DespesaFacade::getParcelasPagas($user, $periodo);  
+
+            $valorTotalPagas =  DespesaFacade::getTotalDespesaPagaPeriodo($user, $periodo);
+
+            $valorTotalRendas =  RendaFacade::getTotalRendasPeriodo($user, $periodo);
+
+            $categorias = self::getCategorias($user);
+
+            $grafico['categoria'] = [];
+            $grafico['bars'] = [];
+
+            foreach($categorias as $key => $subarray) {
+               $totalCategoria = 0.0;
+               foreach($parcelasPagas as $key2 => $subarray2) {
+                  if ($parcelasPagas[$key2]->parcelaPendente->despesa->id_categoria==$categorias[$key]->id) {
+                      $totalCategoria = $totalCategoria + $parcelasPagas[$key2]->valor;
+                  }
+               }  
+
+               $porcentagem = round((($totalCategoria * 100) / $valorTotalPagas));
+
+                $grafico['categoria'][] = array (
+                  'nome' => $categorias[$key]->nome, 
+                  'porcentagem' => $porcentagem                    
+               ); 
+
+            }
+          for ($i = 1; $i <= 10; $i++) {
+
+          }
+          //$dataInicioBar = substr($periodoSelecionadoInicio, -8, -4).;
+
+           return $grafico;
+
+      } catch (Exception $ex) {
+          return null;
+      }
+   }
+
 
 
 }

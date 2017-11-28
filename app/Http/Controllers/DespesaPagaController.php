@@ -9,6 +9,7 @@ use App\Http\Facade\CartaoFacade;
 use Illuminate\Http\Request;
 use Exception;
 use App\Exceptions\CustomException;
+use Illuminate\Support\Facades\Response;
 use PDF;
 use App;
 
@@ -158,8 +159,20 @@ class DespesaPagaController extends Controller
         }
     }
 
-    protected function viewComprovante(Request $request){
+    protected function viewComprovante($filename){
+        try {
 
+            $file= storage_path("app/public/comprovantes/".$filename);
+
+            $headers = array(
+                'Content-Type: application/pdf',
+            );
+
+            return Response::download($file, $filename, $headers);
+
+        } catch (Exception $e) {
+
+        }
     }
 
 

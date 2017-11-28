@@ -63,7 +63,7 @@ class RendaController extends Controller
                 ]);
 
         } catch (Exception $ex) {
-            return view ('rendas/error');
+            return view ('error');
         }
 
     }
@@ -81,7 +81,10 @@ class RendaController extends Controller
             return response()->json($tabela);
 
         } catch (Exception $ex) {
-            return view ('rendas/error');
+            return response()->json([
+                'data' => 'error',
+                'message' => $ex->getMessage()
+            ]);
         }
     }
 
@@ -187,6 +190,7 @@ class RendaController extends Controller
             $rendas = RendaFacade::getRendas($usuarioLogado, $periodo);  
             $pdf = PDF::loadView('rendas/relatorios/renda-rel', ['link'=>$rendas, 'title'=>'Rendas']);
             return $pdf->stream();
+
 
         } catch (Exception $e) {
             

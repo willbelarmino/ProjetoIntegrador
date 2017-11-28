@@ -4,6 +4,10 @@
     <title>Home - MoneyCash</title>
 @endsection
 
+@section('style')
+
+@endsection
+
 @section('content')
 
     <div class="content-table-view">
@@ -66,7 +70,7 @@
                         </div>
                     </div>
                 </div>
-                @if ($contas!= null)
+                @if (!empty($contas) && $contas!='[]')
 
                     <div class="row">
                         <div class="card">
@@ -77,11 +81,11 @@
                             <div class="card-content">
                                 <h4 class="card-title">
                                     Contas
-                                    <i class="mdi mdi-settings" title="Configurações" style="cursor: pointer; float: right" onclick="alert('Config')"></i>
+                                    <i class="mdi mdi-settings" title="Configurações" style="cursor: pointer; float: right" data-toggle="modal" data-target="#modal-config"></i>
                                 </h4>
                                     <div id="panel-contas" class="collapse-conta in">
 
-                                        @foreach ($contas as $conta)
+                                        @foreach ($contas->slice(0, 4) as $conta)
 
                                             <div class="col-lg-3 col-md-6 col-sm-6">
                                                 <div class="card card-stats">
@@ -117,7 +121,7 @@
 
                 @endif
 
-                <div class="row">
+                <div class="row" id="panel-chart" style="display: none;">
                     <div class="col-md-5">
                                 <div class="card">
                                     <div class="card-header card-header-icon" data-background-color="red">
@@ -126,15 +130,31 @@
                                     <div class="card-content">
                                         <h4 class="card-title">Despesas / Categoria</h4>
                                     </div>
-                                    <div id="chartPreferences" class="ct-chart"></div>
+                                    <div id="chartPreferences" class="ct-chart" ></div>
                                     <div class="card-footer">
                                         <h6>Legenda</h6>
-                                        <i class="fa fa-circle text-info"></i> Apple
-                                        <i class="fa fa-circle text-warning"></i> Samsung
-                                        <i class="fa fa-circle text-danger"></i> Windows Phone
+                                        <div id="legenda-label">
+
+                                        </div>
                                     </div>
                                 </div>
                     </div>
+
+                    <div class="col-md-7">
+                        <div class="card">
+                            <div class="card-header card-header-icon" data-background-color="rose">
+                                <i class="material-icons">insert_chart</i>
+                            </div>
+                            <div class="card-content">
+                                <h4 class="card-title">Rendas / Despesas
+                                    <small>- Anual</small>
+                                </h4>
+                            </div>
+                            <div id="multipleBarsChart" style="height: 320px;" class="ct-chart"></div>
+                        </div>
+                    </div>
+
+
                 </div>
 
             </div>
@@ -144,6 +164,42 @@
 
 
 @section('modal')
+
+    <!-- MODAL CONFIG -->
+    <div class="modal fade" id="modal-config" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content" style="left: 16% !important;">
+                <div class="card">
+                    <form id="formCconfig">
+                        <div class="card-header card-header-icon" data-background-color="purple">
+                            <i class="mdi mdi-account-card-details"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="card-title">Selecionar contas</h4>
+
+
+                            <select class="selectpicker" data-style="select-with-transition" multiple title="Selecione" data-size="4">
+                                <option disabled> Selecione</option>
+                                @foreach ($contas->slice(0, 4) as $conta)
+
+                                    <option value="{{$conta->id}}">{{$conta->nome}} </option>
+
+                                @endforeach
+                            </select>
+
+                            <div class="text-center">
+                                <button type="submit" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal">Salvar</button>
+                            </div>
+                            <div class="text-center">
+                                <button type="button" style="margin: 3px 1px;" class="btn btn-primary btn-fill btn-sm button-modal" data-dismiss="modal">Cancelar</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /MODAL CONFIG -->
 
     <!-- MODAL EXTRATO CONTA -->
     <div class="modal fade" id="modal-extrato-conta" role="dialog" tabindex="-1">
@@ -157,9 +213,7 @@
                         <h4 class="card-title">Extrato</h4>
                         <div class="toolbar">
                             <!--        Here you can write extra buttons/actions for the toolbar              -->
-                            <button type="button"  class="btn btn-danger btn-xs" onclick="window.open('{{ route('relatorio.conta') }}','_blank');">
-                                <i class="material-icons">print</i> IMPRIMIR
-                            </button>
+
                         </div>
                         <div class="table-responsive">                            
                             <table id="extratotables" class="table table-striped table-no-bordered table-hover" cellspacing="0" width="100%" style="width:100%">
@@ -281,20 +335,103 @@
 
        $(document).ready(function() {
 
-            /*  **************** Public Preferences - Pie Chart ******************** */
 
-            var dataPreferences = {
-                labels: ['62%','22%','10%','6%'],
-                series: [62, 22, 10, 6]
-            };
 
-            var optionsPreferences = {
-                height: '230px'
-            };
 
-            Chartist.Pie('#chartPreferences', dataPreferences, optionsPreferences);
+            /*  **************** Graficos despesas por categoria ******************** */
 
+            $.ajax({
+                        type: "GET",
+                        url: '{{route('gerar.grafico')}}',                        
+                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                        dataType: 'json',
+                        processData: false,
+                        contentType: false,
+                        cache: false,                       
+                        success: function (json) {                            
+                            if (json.categoria!='error') {
+                                //console.log(json.categoria);
+                                if (json.categoria!=null && json.categoria.length!=0) {
+
+                                    // CHART PIE //
+
+                                    var labels = [];
+                                    var series = [];
+                                    var colors = ['text-info','text-danger','text-warning','text-primary','text-success','text-gray'];
+                                    var legenda_contend = "";
+                                    for (var i = 0; i < json.categoria.length; i++) {
+                                        labels.push(json.categoria[i].porcentagem + "%");
+                                        series.push(json.categoria[i].porcentagem);
+                                        legenda_contend = legenda_contend + "<i class='fa fa-circle "+colors[i]+"'></i>"+json.categoria[i].nome;
+                                        $("#legenda-label").html(legenda_contend);
+                                        //console.log(legenda_contend);
+
+                                    }
+
+                                    var dataPreferences = {
+                                        labels: labels,
+                                        series: series
+                                    };
+
+                                    var optionsPreferences = {
+                                        height: '230px',
+                                        donut: true,
+                                        labelDirection: 'explode'
+                                    };
+
+                                    Chartist.Pie('#chartPreferences', dataPreferences, optionsPreferences);
+
+                                    // CHART BAR //
+
+                                    var dataMultipleBarsChart = {
+                                        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                                        series: [
+                                            [3500, 443, 320, 780, 553, 453, 326, 434, 568, 610, 756, 895],
+                                            [2300, 243, 280, 580, 453, 353, 300, 364, 368, 410, 636, 695]
+                                        ]
+                                    };
+
+                                    var optionsMultipleBarsChart = {
+                                        seriesBarDistance: 10,
+                                        axisX: {
+                                            showGrid: false,
+                                        },
+                                        axisY: {
+                                            offset: 80,
+                                            labelInterpolationFnc: function(value) {
+                                                return 'R$ ' +value
+                                            },
+                                            scaleMinSpace: 15
+                                        },
+                                        height: '300px'
+                                    };
+
+                                    var responsiveOptionsMultipleBarsChart = [
+                                        ['screen and (max-width: 640px)', {
+                                            seriesBarDistance: 5,
+                                            axisX: {
+                                                labelInterpolationFnc: function(value) {
+                                                    return value[0];
+                                                }
+                                            }
+                                        }]
+                                    ];
+
+                                    var multipleBarsChart = Chartist.Bar('#multipleBarsChart', dataMultipleBarsChart, optionsMultipleBarsChart, responsiveOptionsMultipleBarsChart);
+
+                                    //start animation for the Emails Subscription Chart
+                                    md.startAnimationForBarChart(multipleBarsChart);
+
+                                    //console.log(json.categoria.length);
+                                    $("#panel-chart").css("display", "block");
+                                }
+                            } else {
+                                console.log("ERRO");
+                            }
+                        }
+                        
             });
-
+            
+        });
     </script>
 @endsection

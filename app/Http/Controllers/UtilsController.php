@@ -47,6 +47,8 @@ class UtilsController extends Controller
 
             $mesInicio = substr($periodoSelecionadoInicio, -4, -2);
             $mesFim = substr($periodoSelecionadoFim, -4, -2);
+            
+            // Periodo Mensal
             if ($mesInicio == $mesFim) {
                 $mes = array('', 'Janeiro', 'Fevereiro',
                     'Março', 'Abril', 'Maio', 'Junho', 'Julho',
@@ -63,6 +65,8 @@ class UtilsController extends Controller
                     'periodoSelecionadoInicio' => $periodoSelecionadoInicio,
                     'periodoSelecionadoFim' => $periodoSelecionadoFim
                 ]);
+
+            // Periodo Por Data
             } else {
                 return response()->json([
                     'mes' => date('d/m/Y', strtotime($periodoSelecionadoInicio)) . " - " . date('d/m/Y', strtotime($periodoSelecionadoFim)),

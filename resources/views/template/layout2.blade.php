@@ -21,7 +21,9 @@
     <link href="../css/demo.css" rel="stylesheet" />
     <!--     Fonts and icons     -->
     <link href="../css/font-awesome.min.css" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="../css/css.css" />
+    <link rel="stylesheet" type="text/css" href="../css/css.css" />    
+
+    @yield('style')
 </head>
 <?php flush(); ?>
 <body>
@@ -225,6 +227,7 @@
 <script src="../js/moment.min.js"></script>
 <!--  Charts Plugin -->
 <script src="../js/chartist.min.js"></script>
+<script src="../js/chartist-plugin-legend.js"></script>
 <!--  Notifications Plugin    -->
 <script src="../js/bootstrap-notify.js"></script>
 <!-- DateTimePicker Plugin JS -->

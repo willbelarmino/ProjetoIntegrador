@@ -29,12 +29,15 @@ class DespesaFacade
 
     public static function getParcelasPendentes($user, $periodo) {
         try {
-            $parcelasPendentes = ParcelaPendente::with(['despesa.categoria' => function ($query) use ($user) {
-                $query->where('categoria.id_usuario', '=', $user->id);
-            }])->whereBetween('dt_vencimento', [
-                $periodo->periodoSelecionadoInicio,
-                $periodo->periodoSelecionadoFim
-            ])->get();
+
+            $parcelasPendentes = ParcelaPendente::with('despesa.categoria')
+                ->whereHas('despesa.categoria', function($query) use ($user) {
+                    $query->where('categoria.id_usuario', '=', $user->id);
+                })->whereBetween('dt_vencimento', [
+                    $periodo->periodoSelecionadoInicio,
+                    $periodo->periodoSelecionadoFim
+                ])->get();
+
 
             foreach($parcelasPendentes as $key => $subarray) {
                 $parcelaPaga =  ParcelaPaga::from('parcela_paga')
@@ -67,15 +70,52 @@ class DespesaFacade
         }
     }
 
+
+    public static function getParcelasPendentesPorCartao($cartao, $periodo) {
+        try {
+
+            $dia = $cartao->dt_fechamento;
+            $mes = substr($periodo->periodoSelecionadoFim, -4, -2);
+            $ano = substr($periodo->periodoSelecionadoFim, -8, -4);
+            $periodoFechamentoFatura = $ano.$mes.$dia;
+
+            $parcelasPendentes = ParcelaPendente::with('despesa')
+                ->whereHas('despesa', function($query) use ($cartao) {
+                    $query->where('despesa.id_cartao_credito', '=', $cartao->id);
+                })->whereBetween('dt_vencimento', [
+                    $periodo->periodoSelecionadoInicio,
+                    $periodoFechamentoFatura
+                ])->get();
+
+            foreach($parcelasPendentes as $key => $subarray) {
+                // Remove parcelas pagas e Remove parcelas de outro cartao
+                $parcelaPaga =  ParcelaPaga::from('parcela_paga')
+                    ->where("id_pendente",$parcelasPendentes[$key]->id)
+                    ->get();
+
+                if ($parcelaPaga!='[]' || $parcelasPendentes[$key]->despesa->id_cartao_credito!=$cartao->id) {
+                    unset($parcelasPendentes[$key]);
+                }
+                
+            }
+
+            return $parcelasPendentes;
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
     public static function getParcelasPendentesPorCategoria($categoria, $periodo) {
         try {
 
-            $parcelasPendentes = ParcelaPendente::with(['despesa' => function ($query) use ($categoria) {
-                $query->where('despesa.id_categoria', '=', $categoria);
-            }])->whereBetween('dt_vencimento', [
-                $periodo->periodoSelecionadoInicio,
-                $periodo->periodoSelecionadoFim
-            ])->get();  
+            $parcelasPendentes = ParcelaPendente::with('despesa')
+                ->whereHas('despesa', function($query) use ($categoria) {
+                    $query->where('despesa.id_categoria', '=', $categoria);
+                })->whereBetween('dt_vencimento', [
+                    $periodo->periodoSelecionadoInicio,
+                    $periodo->periodoSelecionadoFim
+                ])->get();
+
 
             foreach($parcelasPendentes as $key => $subarray) {
                 $parcelaPaga =  ParcelaPaga::from('parcela_paga')
@@ -111,12 +151,13 @@ class DespesaFacade
     public static function getParcelasPagas($user, $periodo) {
         try {
 
-            $parcelasPagas = ParcelaPaga::with(['parcelaPendente.despesa.categoria' => function ($query) use ($user) {
-                $query->where('categoria.id_usuario', '=', $user->id);
-            }])->whereBetween('dt_pagamento', [
-                $periodo->periodoSelecionadoInicio,
-                $periodo->periodoSelecionadoFim
-            ])->get();
+            $parcelasPagas = ParcelaPaga::with('parcelaPendente.despesa.categoria')
+                ->whereHas('parcelaPendente.despesa.categoria', function($query) use ($user) {
+                    $query->where('categoria.id_usuario', '=', $user->id);
+                })->whereBetween('dt_pagamento', [
+                    $periodo->periodoSelecionadoInicio,
+                    $periodo->periodoSelecionadoFim
+                ])->get();
 
             return $parcelasPagas;
         } catch (Exception $e) {
@@ -145,12 +186,13 @@ class DespesaFacade
     public static function getParcelasPagasPorCategoria($categoria, $periodo) {
         try {
 
-            $parcelasPagas = ParcelaPaga::with(['parcelaPendente.despesa' => function ($query) use ($categoria) {
-                $query->where('despesa.id_categoria', '=', $categoria);
-            }])->whereBetween('dt_pagamento', [
-                $periodo->periodoSelecionadoInicio,
-                $periodo->periodoSelecionadoFim
-            ])->get();           
+            $parcelasPagas = ParcelaPaga::with('parcelaPendente.despesa')
+                ->whereHas('parcelaPendente.despesa', function($query) use ($categoria) {
+                    $query->where('despesa.id_categoria', '=', $categoria);
+                })->whereBetween('dt_pagamento', [
+                    $periodo->periodoSelecionadoInicio,
+                    $periodo->periodoSelecionadoFim
+                ])->get();
 
             return $parcelasPagas;
         } catch (Exception $e) {
@@ -397,7 +439,10 @@ class DespesaFacade
         } catch (Exception $e) {
             return null;
         }
-    } 
+    }
+
+
+
 
 
 

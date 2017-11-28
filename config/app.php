@@ -163,6 +163,8 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
 
+        niklasravnsborg\LaravelPdf\PdfServiceProvider::class,
+
         /*
          * Image Framework
          */
@@ -244,7 +246,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'Image' => Intervention\Image\Facades\Image::class,
-        'PDF' => Barryvdh\Snappy\Facades\SnappyPdf::class,
+        'PDF' => niklasravnsborg\LaravelPdf\Facades\Pdf::class,
         'SnappyImage' => Barryvdh\Snappy\Facades\SnappyImage::class,
 
     ],

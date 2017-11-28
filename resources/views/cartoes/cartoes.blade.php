@@ -16,9 +16,7 @@
                         <h4 class="card-title">{{$page}}</h4>
                         <div class="toolbar">
                             <!--        Here you can write extra buttons/actions for the toolbar              -->
-                            <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
-                                <i class="material-icons">add</i> ADICIONAR
-                            </button>
+
                         </div>
                         <div class="material-datatables">
                             <div class="content-table-view">
@@ -46,6 +44,12 @@
                                                 <td> {{ $cartao->dt_vencimento }} </td>
 
                                                 <td class="td-actions text-right">
+                                                    <button type="button" rel="tooltip" class="btn btn-info btn-simple" title="pagar fatura"
+                                                            onclick="buscarFaturas(
+                                                                '{{$cartao->id}}'
+                                                            );">
+                                                        <i class="material-icons">monetization_on</i>
+                                                    </button>
                                                     <button type="button" rel="tooltip" class="btn btn-info btn-simple" title="visualizar"
                                                             onclick="visualizar(
                                                                 '{{$cartao->conta->nome}}',
@@ -77,6 +81,9 @@
                                         @endforeach
                                         </tbody>
                                     </table>
+                                    <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
+                                        <i class="material-icons">add</i> ADICIONAR
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -257,6 +264,37 @@
 @section('scripts')
     <script type="text/javascript">
 
+        function buscarFaturas(id) {
+            $.ajax({
+                        type: "POST",
+                        url: '{{route('buscar.faturas')}}',
+                        data: {id : id},
+                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                        dataType: 'json',
+                        processData: false,
+                        contentType: false,
+                        cache: false,
+                        beforeSend: function () {
+                            $("#modal-panel").modal('toggle');
+                            setTimeout(function(){ $("#loading").modal('toggle'); }, 500);
+
+                        },
+                        success: function (data) {
+                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                            if (data.status == "success") {                               
+                                setTimeout(function(){ showSucessNotification(data.message); }, 2500);
+                            } else {
+                                setTimeout(function(){ showErrorNotification(data.message); }, 2500);
+                            }
+                        },
+                        error: function (request, status, error) {
+                            setTimeout(function(){ $("#loading").modal('toggle'); }, 2000);
+                            setTimeout(function(){ showErrorNotification(error); }, 2500);
+                        }
+            });
+
+        }
+
         function limpaSelect() {
             var selects = $(".btn.dropdown-toggle.select-with-transition");
             $(selects).each (function(){
@@ -380,7 +418,7 @@
                         }
                     }
                 });
-                $(".pagination").prepend('<li class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel">Adicionar</li>');
+
             });
         }
 

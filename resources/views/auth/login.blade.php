@@ -23,6 +23,7 @@
                                 <div class="card-header text-center" data-background-color="purple">
                                     <h4 class="card-title"> <img style="width:150px;height:80px;" src="../img/login.png"/></h4>
                                 </div>
+                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                 <div class="card-content">
                                     <div class="input-group">
                                             <span class="input-group-addon">
@@ -91,10 +92,12 @@
             $( "#loginForm" ).submit(function( e ) {
                 if ($("#loginForm" ).valid()) {
                     var formData = new FormData($("#loginForm")[0]);
+                    var _token = $('input[name="_token"]').val();
+                    formData.append("_token",_token);
                     $.ajax({
                         type: "POST",
                         url: '{{url('autenticar.usuario')}}',
-                        data: formData,
+                        data: formData,                                     
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                         dataType: 'json',
                         processData: false,

@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 use App\Http\Facade\RendaFacade;
 use App\Http\Facade\DespesaFacade;
 use App\Http\Facade\ContaFacade;
+use App\Http\Facade\CategoriaFacade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Exception;
@@ -119,6 +120,23 @@ class HomeController extends Controller
 
         } catch (Exception $e) {
 
+        }
+    }
+
+    protected function gerarGraficos(Request $request){
+        try {
+
+            $usuarioLogado = self::getUsuario();
+            $periodo = self::getPeriodo();
+
+            $grafico = CategoriaFacade::gerarGraficosCategorias($usuarioLogado, $periodo);
+
+            return response()->json($grafico);
+           
+        } catch (Exception $e) {
+            return response()->json([
+                'categoria' => 'error'                
+            ]);
         }
     }
 

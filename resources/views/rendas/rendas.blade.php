@@ -16,12 +16,7 @@
                         <h4 class="card-title">{{$page}}</h4>
                         <div class="toolbar">
                             <!--        Here you can write extra buttons/actions for the toolbar              -->
-                            <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
-                                <i class="material-icons">add</i> ADICIONAR
-                            </button>
-                            <button type="button"  class="btn btn-danger btn-xs" onclick="window.open('{{ route('generate.relRenda.pdf') }}','_blank');"  style="float:right">
-                                <i class="material-icons">print</i> IMPRIMIR
-                            </button>
+
                         </div>
                         <div class="material-datatables">
                             <div class="content-table-view">
@@ -38,6 +33,13 @@
                                         </thead>
 
                                     </table>
+
+                                    <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
+                                        <i class="material-icons">add</i> ADICIONAR
+                                    </button>
+                                    <button type="button"  class="btn btn-danger btn-xs" onclick="window.open('{{ route('generate.relRenda.pdf') }}','_blank');"  style="float:right">
+                                        <i class="material-icons">print</i> IMPRIMIR
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -387,7 +389,8 @@
                         if (json.data!='error') {
                             return json.data;
                         } else {
-                            window.location.href = "{{url('page.error')}}";
+                            console.log("ERRO: "+json.message);
+                            //window.location.href = "{{url('page.error')}}";
                         }
                     },
                 },

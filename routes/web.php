@@ -38,6 +38,7 @@ Route::group(['prefix'=>'periodo','where'=>['id'=>'[0-9]+']], function() {
 
 Route::group(['prefix'=>'dashboard','where'=>['id'=>'[0-9]+']], function() {
     Route::get('home', ['as'=>'home', 'uses'=>'HomeController@index']);
+    Route::get('graficos', ['as'=>'gerar.grafico', 'uses'=>'HomeController@gerarGraficos']);
     Route::post('home', ['as'=>'home', 'uses'=>'HomeController@index']);
 });
 
@@ -63,7 +64,7 @@ Route::group(['prefix'=>'conta','where'=>['id'=>'[0-9]+']], function() {
     Route::post('deletarConta', ['as'=>'deletar.conta', 'uses'=>'ContaController@delete']);
     Route::post('verExtrato', ['as'=>'extrato-conta', 'uses'=>'HomeController@visualizarExtratoConta']);
     Route::get('verExtrato', ['as'=>'extrato-conta', 'uses'=>'HomeController@visualizarExtratoConta']);
-    Route::get('pdfViewExtrato', ['as'=>'relatorio.conta', 'uses'=>'HomeController@toPDF']);
+    Route::get('pdfViewExtrato', ['as'=>'relatorio.conta', 'uses'=>'HomeController@toPDF']);    
 });
 
 Route::group(['prefix'=>'despesa','where'=>['id'=>'[0-9]+']], function() {
@@ -79,7 +80,7 @@ Route::group(['prefix'=>'despesa','where'=>['id'=>'[0-9]+']], function() {
     Route::post('criarPaga', ['as'=>'criar.paga', 'uses'=>'DespesaPagaController@create']);
     Route::post('alterarPaga', ['as'=>'alterar.paga', 'uses'=>'DespesaPagaController@edit']);
     Route::post('deletarPaga', ['as'=>'deletar.paga', 'uses'=>'DespesaPagaController@delete']);
-    Route::get('viewComprovante', ['as'=>'view.comprovante', 'uses'=>'DespesaPagaController@viewComprovante']);
+    Route::get('viewComprovante/{filename}', ['as'=>'view.comprovante', 'uses'=>'DespesaPagaController@viewComprovante']);
 });
 
 Route::group(['prefix'=>'cartao','where'=>['id'=>'[0-9]+']], function() {
@@ -87,6 +88,7 @@ Route::group(['prefix'=>'cartao','where'=>['id'=>'[0-9]+']], function() {
     Route::post('criarCartao', ['as'=>'criar.cartao', 'uses'=>'CartaoController@create']);
     Route::post('alterarCartao', ['as'=>'alterar.cartao', 'uses'=>'CartaoController@edit']);
     Route::post('deletarCartao', ['as'=>'deletar.cartao', 'uses'=>'CartaoController@delete']);
+    Route::post('buscarFaturas', ['as'=>'buscar.faturas', 'uses'=>'CartaoController@buscarFaturas']);
 });
 
 Route::group(['prefix'=>'renda','where'=>['id'=>'[0-9]+']], function() {

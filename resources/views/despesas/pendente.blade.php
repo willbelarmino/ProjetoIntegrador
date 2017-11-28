@@ -16,9 +16,7 @@
                         <h4 class="card-title">{{$page}}</h4>
                         <div class="toolbar">
                             <!--        Here you can write extra buttons/actions for the toolbar              -->
-                            <button type="button" rel="tooltip" class="btn btn-primary" title="Pagar">                                   
-                                    <i class="material-icons">attach_money</i> Pagar Fatura
-                            </button>
+                            
                         </div>
                         <div class="material-datatables">
                             <div class="content-table-view">

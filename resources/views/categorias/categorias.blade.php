@@ -16,9 +16,7 @@
                         <h4 class="card-title">{{$page}}</h4>
                         <div class="toolbar">
                             <!--        Here you can write extra buttons/actions for the toolbar              -->
-                            <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
-                                <i class="material-icons">add</i> ADICIONAR
-                            </button>
+
                         </div>
                         <div class="material-datatables">
                             <div class="content-table-view">
@@ -68,6 +66,9 @@
                                         @endforeach
                                         </tbody>
                                     </table>
+                                    <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
+                                        <i class="material-icons">add</i> ADICIONAR
+                                    </button>
                                 </div>
                             </div>
                         </div>

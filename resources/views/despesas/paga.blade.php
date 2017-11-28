@@ -27,7 +27,7 @@
                                             <th>Data de vencimento </th>
                                             <th>Data de pagamento </th>
                                             <th>Valor </th>
-                                            <th>Conta </th>
+                                            <th>Conta/Cartão </th>
                                             <th class="disabled-sorting text-right"></th>
                                         </tr>
                                         </thead>
@@ -49,15 +49,13 @@
                                                 <td class="td-actions text-right">
 
                                                     @if(!empty($parcela->comprovante))
-                                                        <button type="button" rel="tooltip" class="btn"
-                                                                onclick="verComprovante(
-                                                                    '{{$parcela->comprovante}}'
-                                                                 );">
+                                                        <button type="button" rel="tooltip" class="btn btn-simple"
+                                                                onclick="window.open(' {{ route('view.comprovante',$parcela->comprovante) }}');">
                                                             <i class="material-icons">attach_file</i>
                                                         </button>
                                                     @endif
 
-                                                    <button type="button" rel="tooltip" class="btn btn-info"
+                                                    <button type="button" rel="tooltip" class="btn btn-info btn-simple"
                                                             onclick="visualizar(
                                                                     '{{$parcela->parcelaPendente->despesa->nome}}',
                                                                     '{{ 'R$ '.number_format($parcela->valor, 2, ',', '.')}}',
@@ -67,7 +65,7 @@
                                                             )">
                                                         <i class="material-icons">assignment</i>
                                                     </button>
-                                                    <button type="button" rel="tooltip" class="btn btn-success"
+                                                    <button type="button" rel="tooltip" class="btn btn-success btn-simple"
                                                             onclick="alterar(
                                                                     '{{$parcela->id}}',
                                                                     '{{$parcela->parcelaPendente->despesa->nome}}',
@@ -77,7 +75,7 @@
                                                             );">
                                                         <i class="material-icons">edit</i>
                                                     </button>
-                                                    <button type="button" rel="tooltip" class="btn btn-danger" onclick="deletar({{$parcela->parcelaPendente->despesa->id}});">
+                                                    <button type="button" rel="tooltip" class="btn btn-danger btn-simple" onclick="deletar({{$parcela->parcelaPendente->despesa->id}});">
                                                         <i class="material-icons">close</i>
                                                     </button>
                                                 </td>
@@ -324,8 +322,9 @@
 
 @section('scripts')
     <script type="text/javascript">
-        var messages = new Array();
+
         function validacaoExtraForm() {
+            var messages = new Array();
             if ($("#categoria").val()=="" || $("#categoria").val()=="Selecione") {
                 messages.push("Favor, informar categoria");
             } else if ($("#check-credito").is(':checked')==true && ($("#credito").val()=="" || $("#credito").val()=="Selecione")) {
@@ -356,9 +355,6 @@
             $("#modal-panel-view").modal("toggle");
         }
 
-        function verComprovante(filename) {
-            window.open('{{ route('view.comprovante') }}','_blank');
-        }
 
         function deletar(id) {
             $.ajax({
@@ -470,6 +466,30 @@
         }
 
         $(document).ready(function() {
+
+            $('#datatables').DataTable({
+                "pagingType": "full_numbers",
+                "lengthMenu": [
+                    [10, 25, 50, -1],
+                    [10, 25, 50, "All"]
+                ],
+                responsive: true,
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Filtrar",
+                    lengthMenu: "Exibindo _MENU_ registros por página",
+                    zeroRecords: "Nenhum registro encontrado",
+                    info: "Visualizando página _PAGE_ de _PAGES_",
+                    infoEmpty: "Nenhum registro encontrado",
+                    infoFiltered: "(filtered from _MAX_ total records)",
+                    paginate: {
+                        "first":      "Primeiro",
+                        "last":       "Último",
+                        "next":       "Próximo",
+                        "previous":   "Anterior"
+                    }
+                }
+            });
 
             /* Habilitar input do limite*/
             $( "#check-credito" ).click(function() {

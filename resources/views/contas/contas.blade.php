@@ -17,6 +17,7 @@
                         <div class="toolbar">
                             <!--        Here you can write extra buttons/actions for the toolbar              -->
 
+
                         </div>
                         <div class="material-datatables">
                             <div class="content-table-view">
@@ -65,7 +66,7 @@
 
                                                 <td> {{ date('d/m/Y', strtotime($conta->dt_movimento)) }} </td>
 
-                                                <td class="td-actions text-right">
+                                                <td class="td-actions text-right">                  
                                                     <button type="button" rel="tooltip" class="btn btn-info btn-simple" title="visualizar"
                                                             onclick="visualizar(
                                                                 '{{asset('storage/contas/'.$conta->image)}}',
@@ -99,7 +100,9 @@
 
                                         </tbody>
                                     </table>
-
+                                    <button type="button"  class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modal-panel"  style="float:right">
+                                        <i class="material-icons">add</i> ADICIONAR
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -317,6 +320,8 @@
 
 @section('scripts')
     <script type="text/javascript">
+
+            
 
         function validationFile(form, input) {
             file = $(input).val();

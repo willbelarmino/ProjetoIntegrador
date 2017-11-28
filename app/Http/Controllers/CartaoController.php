@@ -146,4 +146,26 @@ class CartaoController extends Controller
         }
     }
 
+    protected function buscarFaturas(Request $request){
+        try {
+            $param = $request->all();
+            $periodo = self::getPeriodo();
+            
+            CartaoFacade::buscarFaturas($param['id'], $periodo);
+                                       
+
+            return response()->json([
+                'status' => 'success',
+                'message' =>  'Cartão alterada com sucesso.',
+            ]);         
+        
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' =>  $e->getMessage() //'Ops. Erro ao alterar conta. Tente novamente mais tarde.'
+            ]);
+        }
+
+    }
+
 }

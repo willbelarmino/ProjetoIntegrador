@@ -43,19 +43,7 @@
                                         <th>Conta </th>
                                     </tr>
                                     </thead>
-                                    <tbody>
-                                        @foreach ($link as $renda)
-                                            <tr>
-                                                <td>{{ $renda->nome }}</td>
 
-                                                <td>{{ date('d/m/Y', strtotime($renda->dt_recebimento)) }}</td>
-
-                                                <td>{{ 'R$ '.number_format($renda->valor, 2, ',', '.') }}</td>
-
-                                                <td>{{ $renda->conta->nome }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
                                 </table>
                             </div>
                         </div>

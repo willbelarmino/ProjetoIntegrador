@@ -28,13 +28,29 @@ class CartaoFacade
     public static function getCartoes($user) {
         try {
 
-            $cartoes = CartaoCredito::from('cartao_credito AS cc')
-                ->join('conta AS c','cc.id_conta','=','c.id')
-                ->where("c.id_usuario",$user->id)
-                ->select('cc.*')
+            $cartoes = CartaoCredito::with('conta')
+                ->whereHas('conta', function($query) use ($user) {
+                    $query->where('conta.id_usuario', '=', $user->id);
+                })
                 ->get();
 
             return $cartoes;
+
+        } catch (Exception $ex) {
+            return null;
+        }
+    }
+
+    public static function getCartao($id) {
+        try {
+
+            $cartao = CartaoCredito::from('cartao_credito AS cc')
+                ->join('conta AS c','cc.id_conta','=','c.id')
+                ->where("cc.id", $id)
+                ->select('cc.*')
+                ->get();
+
+            return $cartao;
 
         } catch (Exception $ex) {
             return null;
@@ -135,6 +151,21 @@ class CartaoFacade
         } catch (Exception $e) {
             throw new Exception("Erro Facade: ".$e->getMessage());
         }
+    }
+
+   
+
+    public static function buscarFaturas($id, $periodo) {
+        try {
+
+            $cartao = self::getCartao($id);
+            $parcelas = DespesaFacade::getParcelasPendentesPorCartao($cartao, $periodo);
+
+
+        } catch (Exception $e) {
+
+        }
+        
     }
 
 

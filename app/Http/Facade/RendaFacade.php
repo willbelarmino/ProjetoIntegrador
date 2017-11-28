@@ -24,12 +24,15 @@ class RendaFacade
 	public static function getRendas($user, $periodo) {
         try {
 
-            $rendas = Renda::with(['conta' => function ($query) use ($user) {
-                $query->where('conta.id_usuario', '=', $user->id);
-            }])->whereBetween('dt_recebimento', [
-                $periodo->periodoSelecionadoInicio,
-                $periodo->periodoSelecionadoFim
-            ])->get();
+            $rendas = Renda::with('conta')
+                ->whereHas('conta', function($query) use ($user) {
+                    $query->where('conta.id_usuario', '=', $user->id);
+                })
+                ->whereBetween('dt_recebimento', [
+                    $periodo->periodoSelecionadoInicio,
+                    $periodo->periodoSelecionadoFim
+                ])->get();
+
 
             return $rendas;
         } catch (Exception $e) {
@@ -40,13 +43,15 @@ class RendaFacade
     public static function populaRendas($user, $periodo) {
         try {
 
-            $tabela['data'] = [];
+            $tabela['data'] = [];             
 
             // Rendas Fixas
 
-            $rendasFixa = RendaFixa::with(['conta' => function ($query) use ($user) {
-                $query->where('conta.id_usuario', '=', $user->id);
-                }])->where([
+            $rendasFixa = RendaFixa::with('conta')
+                ->whereHas('conta', function($query) use ($user) {
+                    $query->where('conta.id_usuario', '=', $user->id);
+                })
+                ->where([
                     ['dt_recebimento_inicio', '<', $periodo->periodoSelecionadoFim],
                     ['dt_cancelamento', '=', null]
                 ])->orWhere([
@@ -101,15 +106,20 @@ class RendaFacade
 
                 );
             }
-
+            
             // Rendas Normais
 
-            $rendas = Renda::with(['conta' => function ($query) use ($user) {
-                $query->where('conta.id_usuario', '=', $user->id);
-            }])->whereBetween('dt_recebimento', [
-                $periodo->periodoSelecionadoInicio,
-                $periodo->periodoSelecionadoFim
-            ])->get();
+
+            $rendas = Renda::with('conta')
+                ->whereHas('conta', function($query) use ($user) {
+                    $query->where('conta.id_usuario', '=', $user->id);
+                })
+                ->whereBetween('dt_recebimento', [
+                    $periodo->periodoSelecionadoInicio,
+                    $periodo->periodoSelecionadoFim
+                ])->get();
+
+
 
             foreach($rendas as $key => $subarray) {
                 $id = $rendas[$key]->id;
@@ -167,7 +177,7 @@ class RendaFacade
             return $tabela;
 
         } catch (Exception $e) {
-            throw new Exception("Erro Facade: ".$e->getMessage());
+            throw new Exception("Erro Facade: ".$e->getMessage()." : ".$rendasFixa);
         }
     }
 
